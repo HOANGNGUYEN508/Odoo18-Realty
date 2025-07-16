@@ -1,0 +1,10 @@
+<odoo>
+    <menuitem 
+        id="menu_tag_root" 
+        name="Tag"
+        parent="menu_more_root" 
+        action="action_tag"
+        sequence="10"/>
+</odoo>
+
+

@@ -1,0 +1,7 @@
+<odoo>
+    <menuitem 
+			id="menu_land_tittle_root" 
+			name="Land Tittle" 
+			parent="menu_product_root" 
+			action="action_land_tittle"/>
+</odoo>

@@ -1,0 +1,8 @@
+<odoo>
+	<menuitem 
+		id="menu_product_template_root" 
+		name="Ware House" 
+		parent="menu_product_root" 
+		action="action_product_template"
+		sequence="10"/>
+</odoo>

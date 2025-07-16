@@ -1,0 +1,8 @@
+<odoo>
+    <menuitem 
+        id="menu_policy_list_root"
+        name="Policy" 
+        parent="menu_more_root"
+        action="action_policy"
+        sequence="10"/>
+</odoo>

@@ -1,0 +1,11 @@
+<odoo>
+    <menuitem 
+        id="menu_home_direction_root" 
+        name="Home direction" 
+        parent="menu_product_root"
+        action="action_home_direction"
+        sequence="10"/>
+
+</odoo>
+
+

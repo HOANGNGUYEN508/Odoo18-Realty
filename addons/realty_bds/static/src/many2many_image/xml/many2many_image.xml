@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+  <t t-name="realty_bds.Many2ManyImageField">
+    <div t-attf-class="oe_fileupload {{props.className || ''}}" aria-atomic="true">
+      <!-- Add button -->
+      <div t-if="!props.readonly &amp;&amp; (!props.numberOfFiles || files.length &lt; props.numberOfFiles)" 
+           class="oe_add d-flex align-items-center">
+        <ValidatedFileInput
+					onMounted="(api) =&gt; fileInputAPI.processFiles = api.processFiles"
+          acceptedFileExtensions="props.acceptedFileExtensions" 
+          multiUpload="true" 
+          onUpload.bind="onFileUploaded" 
+          resModel="props.record.resModel" 
+          resId="props.record.resId || 0" 
+          maxFiles="state.maxFiles" 
+          maxFileSize="props.fileSize" 
+          onValidationError.bind="handleValidationErrors"
+        >
+          <button class="btn btn-secondary o_attach" data-tooltip="Attach">
+            <span class="fa fa-paperclip" aria-label="Attach"/>
+            Add Photos
+          </button>
+        </ValidatedFileInput>
+        <t t-if="files.length === 0">
+          <span t-esc="msm" class="ml-2 text-muted"/>
+        </t>
+      </div>
+
+      <!-- Photo Grid with Drag Events -->
+      <div 
+				class="o_attachments photo-grid"
+        t-att-class="state.isDragOver ? 'o_attachments photo-grid drag-over' : 'o_attachments photo-grid'"
+        t-attf-style="
+          gap: {{props.gutter}}px;
+          margin-top: {{props.gutter}}px;
+        "
+        t-on-dragover.prevent="onDragOver"
+        t-on-dragleave.prevent="onDragLeave"
+        t-on-drop.prevent="onDrop"
+			>
+        
+        <t t-if="files.length &gt; 0">
+          <t t-foreach="files" t-as="file" t-key="file.id">
+            <div 
+							t-att-class="'photo-tile ' + (file.id === state.presentationId ? 'presentation-outline' : '')" 
+              draggable="false"
+              t-on-dragstart.stop=""
+              role="button" 
+              aria-label="View full image" 
+              t-on-click="() =&gt; openLightbox(file.id)" 
+              t-attf-style="
+                height: {{props.rowHeight}}px;
+                flex: 0 1 auto;
+								min-width: {{9/16 * props.rowHeight}}px;
+              "
+						>
+              <div class="photo-tile-icons">
+								<div class="left-icons">
+									<i 
+										t-att-class="'fa ' + (file.id === state.presentationId ? 'fa-star' : 'fa-star-o')"
+										t-on-click.stop="() =&gt; setPresentation(file.id)"
+										data-tooltip="Set as presentation" 
+									/>
+								</div>
+								<div class="right-icons">
+									<a 
+										class="download-btn" 
+										t-att-href="getUrl(file.id)" 
+										t-att-download="file.name" 
+										data-tooltip="Download image" 
+										target="_blank"
+										t-on-click.stop=""
+									>
+										<i class="fa fa-download"/>
+									</a>               
+									<i 
+										t-if="!props.readonly" 
+										class="fa fa-trash trash-icon" 
+										t-on-click.stop="() =&gt; onFileRemove(file.id, true)"
+										data-tooltip="Delete Image"
+									/>
+								</div>
+              </div>
+              <img 
+								t-att-src="getUrl(file.id)" 
+								t-att-alt="file.name" 
+                t-attf-style="height: 100%; width: auto; object-fit: cover;"
+								draggable="false"
+							/>
+            </div>
+          </t>
+        </t>
+        
+        <t t-else="">
+          <img 
+						t-attf-style="
+							height: {{props.rowHeight}}px; 
+							flex: 0 1 auto;
+						"
+            src="/web/static/img/placeholder.png" 
+            alt="Drop images here"
+						draggable="false"
+					/>
+        </t>
+      </div>
+
+      <!-- Lightbox -->
+      <t t-if="state.lightboxIndex !== -1">
+        <PhotoLightbox 
+					files="files"
+          index="state.lightboxIndex"
+          presentationId="state.presentationId"
+          onClose="closeLightbox"
+          onDelete="onFileRemove"
+          onNavigate="navigateLightbox"
+          onSetPresentation="setPresentation"
+				/>
+      </t>
+    </div>
+  </t>
+</templates>

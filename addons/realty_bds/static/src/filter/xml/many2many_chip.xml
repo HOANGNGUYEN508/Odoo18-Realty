@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+  <t t-name="realty_bds.Many2ManyChip" owl="1">
+    <div t-ref="root" class="m2m-chip-wrapper">
+      <t t-if="!props.readonly">
+        <!-- Clicking this wrapper will focus + open -->
+				<t t-if="tooltipInfo">
+						<div 
+							class="chip-input-container form-control d-flex flex-wrap align-items-center gap-1" 
+							t-on-click="() =&gt; { 
+								this.searchRef.el.focus(); 
+								this.onInputFocus(); 
+							}"
+							data-tooltip-template="realty_bds.Many2ManyChipTooltip"
+							t-att-data-tooltip-info="tooltipInfo"
+							data-tooltip-delay="150">
+						<!-- visible chips -->
+						<t t-foreach="visibleChips" t-as="chip" t-key="chip.id">
+							<span class="badge bg-secondary d-flex align-items-center gap-1">
+								<t t-esc="chip.name"/>
+								<i class="fa fa-times cursor-pointer" t-on-click="() =&gt; this.removeChip(chip.id)" role="button" aria-label="Remove"/>
+							</span>
+						</t>
+
+						<!-- “+N” chip INSIDE input -->
+						<t t-if="hiddenCount">
+							<span class="badge bg-light text-muted">
+								+              <t t-esc="hiddenCount"/>
+							</span>
+						</t>
+
+						<!-- the actual text input -->
+						<input t-ref="searchInput" type="text" class="chip-search-input flex-grow-1 border-0 p-0" placeholder="Type to search…" t-model="state.search" t-on-keydown="onSearchKeydown" t-on-focus="onInputFocus" t-on-click="() => this.onInputFocus()" />
+					</div>
+				</t>
+				<t t-else="">
+					<div 
+						class="chip-input-container form-control d-flex flex-wrap align-items-center gap-1" 
+						t-on-click="() =&gt; { 
+							this.searchRef.el.focus(); 
+							this.onInputFocus(); 
+						}">
+						<!-- visible chips -->
+						<t t-foreach="visibleChips" t-as="chip" t-key="chip.id">
+							<span class="badge bg-secondary d-flex align-items-center gap-1">
+								<t t-esc="chip.name"/>
+								<i class="fa fa-times cursor-pointer" t-on-click="() =&gt; this.removeChip(chip.id)" role="button" aria-label="Remove"/>
+							</span>
+						</t>
+
+						<!-- “+N” chip INSIDE input -->
+						<t t-if="hiddenCount">
+							<span class="badge bg-light text-muted">
+								+              <t t-esc="hiddenCount"/>
+							</span>
+						</t>
+
+						<!-- the actual text input -->
+						<input t-ref="searchInput" type="text" class="chip-search-input flex-grow-1 border-0 p-0" placeholder="Type to search…" t-model="state.search" t-on-keydown="onSearchKeydown" t-on-focus="onInputFocus" t-on-click="() => this.onInputFocus()" />
+					</div>
+				</t>       
+        <!-- dropdown: now iterating filteredWithIndex -->
+        <ul class="list-group m2m-chip-dropdown" t-if="state.dropdownOpen &amp;&amp; filteredWithIndex.length">
+          <t t-foreach="filteredWithIndex" t-as="item" t-key="item.opt.id">
+            <li 
+							class="list-group-item list-group-item-action" 
+							t-att-class="{
+                'focused': item.i === state.activeIndex,
+                'active':  state.selectedIds.has(item.opt.id)
+              }" 
+							t-on-click="() =&gt; this.toggleOption(item.opt.id)">
+              <span>
+                <t t-esc="item.opt.name"/>
+              </span>
+              <i t-if="state.selectedIds.has(item.opt.id)" class="fa fa-check text-success ms-auto"/>
+            </li>
+          </t>
+        </ul>
+      </t>
+			<t t-else="">
+				<div 
+					class="d-flex flex-wrap align-items-center gap-1"
+					data-tooltip-template="realty_bds.Many2ManyChipTooltip"
+					t-att-data-tooltip-info="tooltipInfo"
+					data-tooltip-delay="150">
+					<!-- visible chips -->
+          <t t-foreach="visibleChips" t-as="chip" t-key="chip.id">
+            <span class="badge bg-secondary d-flex align-items-center gap-1">
+              <t t-esc="chip.name"/>
+            </span>
+          </t>
+
+          <!-- “+N” chip INSIDE input -->
+          <t t-if="hiddenCount">
+            <span class="badge bg-light text-muted">
+              +<t t-esc="hiddenCount"/>…
+            </span>
+          </t>
+				</div>			
+			</t>
+    </div>
+  </t>
+</templates>

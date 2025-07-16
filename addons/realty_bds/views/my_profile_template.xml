@@ -1,0 +1,76 @@
+<odoo>
+    <template id="wrap_custom" inherit_id="portal.portal_layout">
+        <xpath expr="//div[@t-attf-class='o_portal_content col-12 col-lg-8 mb-5']" position="replace">
+        </xpath>
+
+        <xpath expr="//h3[@class='my-3']" position="replace">
+            <img t-att-src="'/realty_bds/static/src/my_profile/img/bg.png'" alt="Banner"
+              style="max-width: 100%; height: auto; object-fit: cover; z-index: 1;" />
+        </xpath>
+
+        <xpath expr="//div[@class='row justify-content-between']" position="attributes">
+            <attribute name="class"></attribute>
+        </xpath>
+
+        <xpath expr="//div[@class='d-none d-lg-flex justify-content-end col-lg-4']" position="attributes">
+            <attribute name="class"></attribute>
+        </xpath>
+
+        <xpath expr="//div[@class='container pt-3 pb-5']" position="attributes">
+            <attribute name="style">z-index: 1; position: relative; </attribute>
+        </xpath>
+
+        <xpath expr="//div[@class='container pt-3 pb-5']" position="before">
+            <t t-if="changed == True">
+                <div class="my_notify_marker" data-notify="true"></div>
+            </t>
+        </xpath>
+
+    </template>
+
+    <template id="side_content_custom" inherit_id="portal.side_content">
+        <xpath expr="//div[@class='o_portal_my_details']" position="replace">
+        </xpath>
+
+        <xpath expr="//img[@class='o_portal_contact_img rounded o_object_fit_cover']" position="attributes">
+            <attribute name="style">border-radius: 25px; width: 80px; height: 80px; top: -50px; position: relative; width: 120px; height: 120px; </attribute>
+            <attribute name="class">rounded-lg</attribute>
+        </xpath>
+
+        <xpath expr="//div[@class='d-flex justify-content-start align-items-start gap-3 mb-4']" position="attributes">
+            <attribute name="class">gap-3 mb-4 border-style panel</attribute>
+            <attribute name="style">height: 160px</attribute>
+        </xpath>
+
+        <xpath expr="//div[@class='d-flex flex-column justify-content-center']" position="replace">
+            <div style="align-items: center">
+                <!-- <p t-esc="user.name"></p> -->
+                <h5 class="mb-0">Mitchell Admin</h5>
+                <p class="mb-0">Trungtamngoaingu</p>
+
+                <div class="font-style">
+                    <span>Chuyên viên</span> <!-- Sau này sẽ là chức vụ (vd: partner.job_position) -->
+                    <span>· Nhà phố 18</span> <!-- Sau này sẽ là tên công ty/nơi làm việc (vd: partner.job_company) -->
+                    <!-- <p>facebook link</p> -->
+                </div>
+
+                <div class="font-style">
+                    <div>Chi nhánh Hồ Chí Minh</div>
+                </div>
+            </div>
+
+            <div class="button-panel">
+                <button type="button" class="button btn btn-primary" onClick="window.location.href='/my/account'">Chỉnh sửa hồ sơ</button>
+                <button type="button" class="button btn btn-primary" onclick="window.location.href='/my/security'">Đổi mật khẩu</button>
+            </div>
+        </xpath>
+
+        <xpath expr="//div[@name='portal_contact']" position="attributes">
+            <attribute name="class">col-lg-4 grid-cols-2 border-style</attribute>
+        </xpath>
+
+        <xpath expr="//a[@role='button']" position="replace">
+        </xpath>
+
+    </template>
+</odoo>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- List View Inherit -->
+    <record id="view_users_tree_inherit_job_title" model="ir.ui.view">
+        <field name="name">res.users.list.inherit.job.title</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_tree"/>
+        <field name="arch" type="xml">
+            <field name="login" position="after">
+                <field name="hr_job_id" string="Job Title"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Simple Form View Inherit -->
+    <record id="view_users_simple_form_inherit_job_title" model="ir.ui.view">
+        <field name="name">res.users.simple.form.inherit.job.title</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_simple_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//h2/field[@name='login']" position="after">
+                <group>
+                    <field name="partner_id" string="Related Partner" readonly="1" required="0"/>
+										<field name="company_id" string="Default Company" groups="realty_bds.access_group_realty_users"/>
+                    <field name="citizen_id" string="Citizen ID"/>
+                    <field name="hr_job_id" string="Job Title" options="{'no_create': True}"/>
+                </group>
+            </xpath>
+
+            <xpath expr="//group[@name='phone_numbers']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath> 
+        </field>
+    </record>
+
+    <!-- Form View Inherit  -->
+    <record id="view_users_form_inherit_job_title" model="ir.ui.view">
+        <field name="name">res.users.form.inherit.job.title</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <group>
+                    <field name="partner_id" string="Related Partner" readonly="1"/>
+                    <field name="hr_job_id" string="Job Title" options="{'no_create': True}"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_res_users_with_job_title" model="ir.actions.act_window">
+        <field name="name">User</field>
+        <field name="res_model">res.users</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

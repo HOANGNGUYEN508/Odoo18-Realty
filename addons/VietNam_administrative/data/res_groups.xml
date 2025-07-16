@@ -1,0 +1,16 @@
+<odoo>
+    <data>
+        <!-- Toàn Quyền Address -->
+        <record id="access_group_full_address" model="res.groups">
+            <field name="name">Right to read, write, create and unlink the address</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+				<!-- seen Address -->
+				<record id="access_group_seen_address" model="res.groups">
+            <field name="name">Right to read the address</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,78 @@
+<odoo>
+	<template id="auth_signup_fields" inherit_id="auth_signup.fields">
+		<xpath expr="//div[@class='mb-3 field-confirm_password']" position="after">
+			<div class="signup-container">
+
+				<!-- CCCD -->
+				<div class="mb-3">
+					<label for="citizen_id" class="form-label">Citizen ID</label>
+					<input id="citizen_id" type="text" name="citizen_id" required="1" class="form-control"/>
+				</div>
+
+				<!-- Phone -->
+				<div class="mb-3">
+					<label for="phone" class="form-label">Phone</label>
+					<input id="phone" type="text" name="phone" required="1" class="form-control"/>
+				</div>
+
+				<!-- Hometown -->
+				<div class="hometown">
+					<h4>Hometown</h4>
+					<div class="mb-3">
+						<label for="province_id" class="form-label">Province</label>
+						<select id="province_id" name="province_id" class="form-control" required="1">
+							<t t-foreach="request.env['res.country.state'].sudo().search([('country_id.code', '=', 'VN')])" t-as="prov">
+								<option t-att-value="prov.id">
+									<t t-esc="prov.name"/>
+								</option>
+							</t>
+						</select>
+					</div>
+
+					<div class="mb-3">
+						<label for="district_id" class="form-label">District</label>
+						<select id="district_id" name="district_id" class="form-control" required="1">
+							<option value="">Select District</option>
+						</select>
+					</div>
+
+					<div class="mb-3">
+						<label for="commune_id" class="form-label">Commune</label>
+						<select id="commune_id" name="commune_id" class="form-control" required="1">
+							<option value="">Select Commune</option>
+						</select>
+					</div>
+				</div>
+
+				<!-- Permanent Address -->
+				<div class="permanent_address">
+					<h4>Permanent Address</h4>
+					<div class="mb-3">
+						<label for="province_resident_id" class="form-label">Province</label>
+						<select id="province_resident_id" name="province_resident_id" class="form-control" required="1">
+							<t t-foreach="request.env['res.country.state'].sudo().search([('country_id.code', '=', 'VN')])" t-as="prov">
+								<option t-att-value="prov.id">
+									<t t-esc="prov.name"/>
+								</option>
+							</t>
+						</select>
+					</div>
+
+					<div class="mb-3">
+						<label for="district_resident_id" class="form-label">District</label>
+						<select id="district_resident_id" name="district_resident_id" class="form-control" required="1">
+							<option value="">Select District</option>
+						</select>
+					</div>
+
+					<div class="mb-3">
+						<label for="commune_resident_id" class="form-label">Commune</label>
+						<select id="commune_resident_id" name="commune_resident_id" class="form-control" required="1">
+							<option value="">Select Commune</option>
+						</select>
+					</div>
+				</div>
+			</div>
+		</xpath>
+	</template>
+</odoo>

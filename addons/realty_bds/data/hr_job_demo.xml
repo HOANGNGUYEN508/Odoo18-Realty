@@ -1,0 +1,91 @@
+<odoo>
+		<data>
+				<!-- Ứng viên -->
+				<record id="realty_candidate" model="hr.job">
+					<field name="company_id" ref="base.main_company"/>
+					<field name="name">Ứng viên</field>
+					<field name="implied_ids" eval="
+						[
+							(4, ref('base.group_user')),
+							(4, ref('mail.group_mail_notification_type_inbox')),
+						]
+					"/>
+				</record>
+
+				<!-- Chuyên viên -->
+				<record id="realty_specialist" model="hr.job">
+					<field name="company_id" ref="base.main_company"/>
+					<field name="name">Chuyên viên</field>
+					<field name="implied_ids" eval="
+						[
+							(4, ref('base.group_user')),
+							(4, ref('realty_bds.access_group_seen_product')),
+							(4, ref('realty_bds.access_group_seen_create_tag')),
+							(4, ref('mail.group_mail_notification_type_inbox')),
+							(4, ref('base.group_partner_manager')),
+							(4, ref('realty_bds.access_group_seen_attributes')),
+						]
+					"/>
+				</record>
+
+				<!-- Đầu Chủ -->
+				<record id="realty_investor" model="hr.job">
+					<field name="company_id" ref="base.main_company"/>
+					<field name="name">Đầu Chủ</field>
+					<field name="implied_ids" eval="
+						[
+							(4, ref('base.group_user')),
+							(4, ref('realty_bds.access_group_full_product')),
+							(4, ref('product.group_product_manager')),
+							(4, ref('product.group_product_pricelist')),
+							(4, ref('product.group_product_variant')),
+							(4, ref('realty_bds.access_group_seen_create_tag')),
+							(4, ref('mail.group_mail_notification_type_inbox')),
+							(4, ref('base.group_partner_manager')),
+							(4, ref('realty_bds.access_group_seen_attributes')),
+						]
+					"/>
+				</record>
+
+				<!-- Trưởng phòng -->
+				<record id="realty_manager" model="hr.job">
+					<field name="company_id" ref="base.main_company"/>
+					<field name="name">Trưởng phòng</field>
+					<field name="implied_ids" eval="
+						[
+							(4, ref('base.group_user')),
+							(4, ref('realty_bds.access_group_full_product')),
+							(4, ref('product.group_product_manager')),
+							(4, ref('product.group_product_pricelist')),
+							(4, ref('product.group_product_variant')),
+							(4, ref('realty_bds.access_group_seen_create_tag')),
+							(4, ref('mail.group_mail_notification_type_inbox')),
+							(4, ref('hr.group_hr_manager')),
+							(4, ref('base.group_partner_manager')),
+							(4, ref('realty_bds.access_group_full_users')),
+							(4, ref('realty_bds.access_group_seen_attributes')),			
+						]
+					"/>
+				</record>
+
+				<!-- Trợ lý -->
+				<record id="realty_assistant" model="hr.job">
+					<field name="company_id" ref="base.main_company"/>
+					<field name="name">Trợ lý</field>
+					<field name="implied_ids" eval="
+						[
+							(4, ref('base.group_user')),
+							(4, ref('realty_bds.access_group_full_product')),
+							(4, ref('product.group_product_manager')),
+							(4, ref('product.group_product_pricelist')),
+							(4, ref('product.group_product_variant')),
+							(4, ref('realty_bds.access_group_full_tag')),
+							(4, ref('mail.group_mail_notification_type_inbox')),
+							(4, ref('hr.group_hr_user')),
+							(4, ref('base.group_partner_manager')),
+							(4, ref('realty_bds.access_group_seen_attributes')),
+						]
+					"/>
+				</record>
+		</data>
+</odoo>

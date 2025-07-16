@@ -1,0 +1,8 @@
+<odoo>
+    <menuitem 
+        id="menu_company_root" 
+        name="Company" 
+        parent="menu_user_root"
+        action="action_res_company"
+        sequence="10"/>
+</odoo>

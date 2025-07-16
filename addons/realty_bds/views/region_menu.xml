@@ -1,0 +1,10 @@
+<odoo>
+    <menuitem 
+        id="menu_region_root" 
+        name="Region" 
+        parent="menu_address_root"
+        action="action_region"
+        sequence="10"/>
+</odoo>
+
+

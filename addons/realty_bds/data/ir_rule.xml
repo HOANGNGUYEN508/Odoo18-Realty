@@ -1,0 +1,497 @@
+<odoo>
+    <data>
+        <!-- Rule for hr.department -->
+        <!-- 1. Full CRUD for user's own company -->
+				<record id="hr_department_company_rule" model="ir.rule">
+						<field name="name">Department: Full access to own company</field>
+						<field name="model_id" ref="hr.model_hr_department"/>
+						<field name="domain_force">[('company_id', '=', user.company_id.id)]</field>
+						<field name="groups" eval="[(4, ref('realty_bds.access_group_full_department'))]"/>
+						<field name="perm_read" eval="True"/>
+						<field name="perm_write" eval="True"/>
+						<field name="perm_create" eval="True"/>
+						<field name="perm_unlink" eval="True"/>
+				</record>
+
+				<!-- 2. Read-only access to base company (id=1) -->
+				<record id="hr_department_base_company_read_rule" model="ir.rule">
+						<field name="name">Department: Access own or base company records</field>
+						<field name="model_id" ref="hr.model_hr_department"/>
+						<field name="domain_force">['|', ('company_id', '=', user.company_id.id), ('company_id','=', 1)]</field>
+						<field name="groups" eval="[
+								(4, ref('realty_bds.access_group_seen_department')),
+								(4, ref('realty_bds.access_group_full_department'))
+						]"/>
+						<field name="perm_read" eval="True"/>
+						<field name="perm_write" eval="False"/>
+						<field name="perm_create" eval="False"/>
+						<field name="perm_unlink" eval="False"/>
+				</record>
+
+        <!-- Rule for hr.employee -->
+				<!-- 1. Full CRUD for user's own company -->
+				<record id="hr_employee_company_rule" model="ir.rule">
+						<field name="name">Employee: Full access to own company</field>
+						<field name="model_id" ref="hr.model_hr_employee"/>
+						<field name="domain_force">[('company_id', '=', user.company_id.id)]</field>
+						<field name="groups" eval="[(4, ref('realty_bds.access_group_full_employee'))]"/>
+						<field name="perm_read" eval="True"/>
+						<field name="perm_write" eval="True"/>
+						<field name="perm_create" eval="True"/>
+						<field name="perm_unlink" eval="True"/>
+				</record>
+
+				<!-- 2. Read-only access to base company (id=1) -->
+				<record id="hr_employee_base_company_read_rule" model="ir.rule">
+						<field name="name">Employee: Access own or base company records</field>
+						<field name="model_id" ref="hr.model_hr_employee"/>
+						<field name="domain_force">['|', ('company_id', '=', user.company_id.id), ('company_id','=', 1)]</field>
+						<field name="groups" eval="[
+								(4, ref('realty_bds.access_group_seen_employee')),
+								(4, ref('realty_bds.access_group_full_employee'))
+						]"/>
+						<field name="perm_read" eval="True"/>
+						<field name="perm_write" eval="False"/>
+						<field name="perm_create" eval="False"/>
+						<field name="perm_unlink" eval="False"/>
+				</record>
+
+        <!-- Rule for hr.job -->
+				<!-- 1. Full CRUD for user's own company -->
+				<record id="hr_job_company_rule" model="ir.rule">
+						<field name="name">Job: Full access to own company</field>
+						<field name="model_id" ref="hr.model_hr_job"/>
+						<field name="domain_force">[('company_id', '=', user.company_id.id)]</field>
+						<field name="groups" eval="[(4, ref('realty_bds.access_group_full_job'))]"/>
+						<field name="perm_read" eval="True"/>
+						<field name="perm_write" eval="True"/>
+						<field name="perm_create" eval="True"/>
+						<field name="perm_unlink" eval="True"/>
+				</record>
+
+				<!-- 2. Read-only access to base company (id=1) -->
+				<record id="hr_job_base_company_read_rule" model="ir.rule">
+						<field name="name">Job: Access own or base company records</field>
+						<field name="model_id" ref="hr.model_hr_job"/>
+						<field name="domain_force">['|', ('company_id', '=', user.company_id.id), ('company_id','=', 1)]</field>
+						<field name="groups" eval="[
+								(4, ref('realty_bds.access_group_seen_job')),
+								(4, ref('realty_bds.access_group_full_job'))
+						]"/>
+						<field name="perm_read" eval="True"/>
+						<field name="perm_write" eval="False"/>
+						<field name="perm_create" eval="False"/>
+						<field name="perm_unlink" eval="False"/>
+				</record>
+
+        <!-- Rule for policy -->
+				<!-- 1. Full CRUD for user's own company -->
+				<record id="realty_policy_company_rule" model="ir.rule">
+						<field name="name">Policy: Full access to own company</field>
+						<field name="model_id" ref="realty_bds.model_policy"/>
+						<field name="domain_force">[('company_id', '=', user.company_id.id)]</field>
+						<field name="groups" eval="[(4, ref('realty_bds.access_group_full_policy'))]"/>
+						<field name="perm_read" eval="True"/>
+						<field name="perm_write" eval="True"/>
+						<field name="perm_create" eval="True"/>
+						<field name="perm_unlink" eval="True"/>
+				</record>
+
+				<!-- 2. Read-only access to base company (id=1) -->
+				<record id="realty_policy_base_company_read_rule" model="ir.rule">
+						<field name="name">Policy: Access own or base company records</field>
+						<field name="model_id" ref="realty_bds.model_policy"/>
+						<field name="domain_force">['|', ('company_id', '=', user.company_id.id), ('company_id','=', 1)]</field>
+						<field name="groups" eval="[
+								(4, ref('realty_bds.access_group_seen_policy')),
+								(4, ref('realty_bds.access_group_full_policy'))
+						]"/>
+						<field name="perm_read" eval="True"/>
+						<field name="perm_write" eval="False"/>
+						<field name="perm_create" eval="False"/>
+						<field name="perm_unlink" eval="False"/>
+				</record>
+
+        <!-- Rule for feature -->
+				<!-- 1. Full CRUD for user's own company -->
+				<record id="realty_feature_company_rule" model="ir.rule">
+						<field name="name">Real Estate Feature: Full access to own company</field>
+						<field name="model_id" ref="realty_bds.model_feature"/>
+						<field name="domain_force">[('company_id', '=', user.company_id.id)]</field>
+						<field name="groups" eval="[(4, ref('realty_bds.access_group_full_feature'))]"/>
+						<field name="perm_read" eval="True"/>
+						<field name="perm_write" eval="True"/>
+						<field name="perm_create" eval="True"/>
+						<field name="perm_unlink" eval="True"/>
+				</record>
+
+				<!-- 2. Read-only access to base company (id=1) -->
+				<record id="realty_feature_base_company_read_rule" model="ir.rule">
+						<field name="name">Real Estate Feature: Access own or base company records</field>
+						<field name="model_id" ref="realty_bds.model_feature"/>
+						<field name="domain_force">['|', ('company_id', '=', user.company_id.id), ('company_id','=', 1)]</field>
+						<field name="groups" eval="[
+								(4, ref('realty_bds.access_group_seen_feature')),
+								(4, ref('realty_bds.access_group_full_feature'))
+						]"/>
+						<field name="perm_read" eval="True"/>
+						<field name="perm_write" eval="False"/>
+						<field name="perm_create" eval="False"/>
+						<field name="perm_unlink" eval="False"/>
+				</record>
+
+        <!-- Rule for group_home_direction -->
+				<!-- 1. Full CRUD for user's own company -->
+				<record id="realty_group_home_direction_company_rule" model="ir.rule">
+						<field name="name">Real Estate Group Home Direction: Full access to own company</field>
+						<field name="model_id" ref="realty_bds.model_group_home_direction"/>
+						<field name="domain_force">[('company_id', '=', user.company_id.id)]</field>
+						<field name="groups" eval="[(4, ref('realty_bds.access_group_full_g_home_direction'))]"/>
+						<field name="perm_read" eval="True"/>
+						<field name="perm_write" eval="True"/>
+						<field name="perm_create" eval="True"/>
+						<field name="perm_unlink" eval="True"/>
+				</record>
+
+				<!-- 2. Read-only access to base company (id=1) -->
+				<record id="realty_group_home_direction_base_company_read_rule" model="ir.rule">
+						<field name="name">Real Estate Group Home Direction: Access own or base company records</field>
+						<field name="model_id" ref="realty_bds.model_group_home_direction"/>
+						<field name="domain_force">['|', ('company_id', '=', user.company_id.id), ('company_id','=', 1)]</field>
+						<field name="groups" eval="[
+								(4, ref('realty_bds.access_group_seen_g_home_direction')),
+								(4, ref('realty_bds.access_group_full_g_home_direction'))
+						]"/>
+						<field name="perm_read" eval="True"/>
+						<field name="perm_write" eval="False"/>
+						<field name="perm_create" eval="False"/>
+						<field name="perm_unlink" eval="False"/>
+				</record>
+
+        <!-- Rule for home_direction -->
+				<!-- 1. Full CRUD for user's own company -->
+				<record id="realty_home_direction_company_rule" model="ir.rule">
+						<field name="name">Real Estate Home Direction: Full access to own company</field>
+						<field name="model_id" ref="realty_bds.model_home_direction"/>
+						<field name="domain_force">[('company_id', '=', user.company_id.id)]</field>
+						<field name="groups" eval="[(4, ref('realty_bds.access_group_full_home_direction'))]"/>
+						<field name="perm_read" eval="True"/>
+						<field name="perm_write" eval="True"/>
+						<field name="perm_create" eval="True"/>
+						<field name="perm_unlink" eval="True"/>
+				</record>
+
+				<!-- 2. Read-only access to base company (id=1) -->
+				<record id="realty_home_direction_base_company_read_rule" model="ir.rule">
+						<field name="name">Real Estate Home Direction: Access own or base company records</field>
+						<field name="model_id" ref="realty_bds.model_home_direction"/>
+						<field name="domain_force">['|', ('company_id', '=', user.company_id.id), ('company_id','=', 1)]</field>
+						<field name="groups" eval="[
+								(4, ref('realty_bds.access_group_seen_home_direction')),
+								(4, ref('realty_bds.access_group_full_home_direction'))
+						]"/>
+						<field name="perm_read" eval="True"/>
+						<field name="perm_write" eval="False"/>
+						<field name="perm_create" eval="False"/>
+						<field name="perm_unlink" eval="False"/>
+				</record>
+        
+        <!-- Rule for reasons_buy -->
+				<!-- 1. Full CRUD for user's own company -->
+				<record id="realty_reasons_buy_company_rule" model="ir.rule">
+						<field name="name">Real Estate Reasons: Full access to own company</field>
+						<field name="model_id" ref="realty_bds.model_reasons_buy"/>
+						<field name="domain_force">[('company_id', '=', user.company_id.id)]</field>
+						<field name="groups" eval="[(4, ref('realty_bds.access_group_full_reasons_buy'))]"/>
+						<field name="perm_read" eval="True"/>
+						<field name="perm_write" eval="True"/>
+						<field name="perm_create" eval="True"/>
+						<field name="perm_unlink" eval="True"/>
+				</record>
+
+				<!-- 2. Read-only access to base company (id=1) -->
+				<record id="realty_reasons_buy_base_company_read_rule" model="ir.rule">
+						<field name="name">Real Estate Reasons: Access own or base company records</field>
+						<field name="model_id" ref="realty_bds.model_reasons_buy"/>
+						<field name="domain_force">['|', ('company_id', '=', user.company_id.id), ('company_id','=', 1)]</field>
+						<field name="groups" eval="[
+								(4, ref('realty_bds.access_group_seen_reasons_buy')),
+								(4, ref('realty_bds.access_group_full_reasons_buy'))
+						]"/>
+						<field name="perm_read" eval="True"/>
+						<field name="perm_write" eval="False"/>
+						<field name="perm_create" eval="False"/>
+						<field name="perm_unlink" eval="False"/>
+				</record>
+
+        <!-- Rule for status -->
+				<!-- 1. Full CRUD for user's own company -->
+				<record id="realty_status_company_rule" model="ir.rule">
+						<field name="name">Real Estate Status: Full access to own company</field>
+						<field name="model_id" ref="realty_bds.model_status"/>
+						<field name="domain_force">[('company_id', '=', user.company_id.id)]</field>
+						<field name="groups" eval="[(4, ref('realty_bds.access_group_full_status'))]"/>
+						<field name="perm_read" eval="True"/>
+						<field name="perm_write" eval="True"/>
+						<field name="perm_create" eval="True"/>
+						<field name="perm_unlink" eval="True"/>
+				</record>
+
+				<!-- 2. Read-only access to base company (id=1) -->
+				<record id="realty_status_base_company_read_rule" model="ir.rule">
+						<field name="name">Real Estate Status: Access own or base company records</field>
+						<field name="model_id" ref="realty_bds.model_status"/>
+						<field name="domain_force">['|', ('company_id', '=', user.company_id.id), ('company_id','=', 1)]</field>
+						<field name="groups" eval="[
+								(4, ref('realty_bds.access_group_seen_status')),
+								(4, ref('realty_bds.access_group_full_status'))
+						]"/>
+						<field name="perm_read" eval="True"/>
+						<field name="perm_write" eval="False"/>
+						<field name="perm_create" eval="False"/>
+						<field name="perm_unlink" eval="False"/>
+				</record>
+
+        <!-- Rule for type -->
+				<!-- 1. Full CRUD for user's own company -->
+				<record id="realty_type_company_rule" model="ir.rule">
+						<field name="name">Real Estate Type: Full access to own company</field>
+						<field name="model_id" ref="realty_bds.model_type"/>
+						<field name="domain_force">[('company_id', '=', user.company_id.id)]</field>
+						<field name="groups" eval="[(4, ref('realty_bds.access_group_full_type'))]"/>
+						<field name="perm_read" eval="True"/>
+						<field name="perm_write" eval="True"/>
+						<field name="perm_create" eval="True"/>
+						<field name="perm_unlink" eval="True"/>
+				</record>
+
+				<!-- 2. Read-only access to base company (id=1) -->
+				<record id="realty_type_base_company_read_rule" model="ir.rule">
+						<field name="name">Real Estate Type: Access own or base company records</field>
+						<field name="model_id" ref="realty_bds.model_type"/>
+						<field name="domain_force">['|', ('company_id', '=', user.company_id.id), ('company_id','=', 1)]</field>
+						<field name="groups" eval="[
+								(4, ref('realty_bds.access_group_seen_type')),
+								(4, ref('realty_bds.access_group_full_type'))
+						]"/>
+						<field name="perm_read" eval="True"/>
+						<field name="perm_write" eval="False"/>
+						<field name="perm_create" eval="False"/>
+						<field name="perm_unlink" eval="False"/>
+				</record>
+
+        <!-- Rule for region -->
+				<!-- 1. Full CRUD for user's own company -->
+				<record id="realty_region_company_rule" model="ir.rule">
+						<field name="name">Real Estate Region: Full access to own company</field>
+						<field name="model_id" ref="realty_bds.model_region"/>
+						<field name="domain_force">[('company_id', '=', user.company_id.id)]</field>
+						<field name="groups" eval="[(4, ref('realty_bds.access_group_full_region'))]"/>
+						<field name="perm_read" eval="True"/>
+						<field name="perm_write" eval="True"/>
+						<field name="perm_create" eval="True"/>
+						<field name="perm_unlink" eval="True"/>
+				</record>
+
+				<!-- 2. Read-only access to base company (id=1) -->
+				<record id="realty_region_base_company_read_rule" model="ir.rule">
+						<field name="name">Real Estate Region: Access own or base company records</field>
+						<field name="model_id" ref="realty_bds.model_region"/>
+						<field name="domain_force">['|', ('company_id', '=', user.company_id.id), ('company_id','=', 1)]</field>
+						<field name="groups" eval="[
+								(4, ref('realty_bds.access_group_seen_region')),
+								(4, ref('realty_bds.access_group_full_region'))
+						]"/>
+						<field name="perm_read" eval="True"/>
+						<field name="perm_write" eval="False"/>
+						<field name="perm_create" eval="True"/>
+						<field name="perm_unlink" eval="False"/>
+				</record>
+
+        <!-- Rule for tag -->
+				<!-- 1. Full CRUD for user's own company -->
+				<record id="realty_tag_company_rule" model="ir.rule">
+						<field name="name">Real Estate Tag: Full access to own company</field>
+						<field name="model_id" ref="realty_bds.model_tag"/>
+						<field name="domain_force">[('company_id', '=', user.company_id.id)]</field>
+						<field name="groups" eval="[(4, ref('realty_bds.access_group_full_tag'))]"/>
+						<field name="perm_read" eval="True"/>
+						<field name="perm_write" eval="True"/>
+						<field name="perm_create" eval="True"/>
+						<field name="perm_unlink" eval="True"/>
+				</record>
+
+				<!-- 2. Read-only access to base company (id=1) -->
+				<record id="realty_tag_base_company_read_rule" model="ir.rule">
+						<field name="name">Real Estate Tag: Access own or base company records</field>
+						<field name="model_id" ref="realty_bds.model_tag"/>
+						<field name="domain_force">['|', ('company_id', '=', user.company_id.id), ('company_id','=', 1)]</field>
+						<field name="groups" eval="[
+								(4, ref('realty_bds.access_group_seen_create_tag')),
+								(4, ref('realty_bds.access_group_full_tag'))
+						]"/>
+						<field name="perm_read" eval="True"/>
+						<field name="perm_write" eval="False"/>
+						<field name="perm_create" eval="False"/>
+						<field name="perm_unlink" eval="False"/>
+				</record>
+
+				<!-- Rule for land_tittle -->
+				<!-- 1. Full CRUD for user's own company -->
+				<record id="realty_land_tittle_company_rule" model="ir.rule">
+						<field name="name">Real Estate Land Tittle: Full access to own company</field>
+						<field name="model_id" ref="realty_bds.model_land_tittle"/>
+						<field name="domain_force">[('company_id', '=', user.company_id.id)]</field>
+						<field name="groups" eval="[(4, ref('realty_bds.access_group_full_land_tittle'))]"/>
+						<field name="perm_read" eval="True"/>
+						<field name="perm_write" eval="True"/>
+						<field name="perm_create" eval="True"/>
+						<field name="perm_unlink" eval="True"/>
+				</record>
+
+				<!-- 2. Read-only access to base company (id=1) -->
+				<record id="realty_land_tittle_base_company_read_rule" model="ir.rule">
+						<field name="name">Real Estate Land Tittle: Access own or base company records</field>
+						<field name="model_id" ref="realty_bds.model_land_tittle"/>
+						<field name="domain_force">['|', ('company_id', '=', user.company_id.id), ('company_id','=', 1)]</field>
+						<field name="groups" eval="[
+								(4, ref('realty_bds.access_group_seen_land_tittle')),
+								(4, ref('realty_bds.access_group_full_land_tittle'))
+						]"/>
+						<field name="perm_read" eval="True"/>
+						<field name="perm_write" eval="False"/>
+						<field name="perm_create" eval="False"/>
+						<field name="perm_unlink" eval="False"/>
+				</record>
+
+				<!-- Rule for unit_price -->
+				<!-- 1. Full CRUD for user's own company -->
+				<record id="realty_unit_price_company_rule" model="ir.rule">
+						<field name="name">Real Estate Unit Price: Full access to own company</field>
+						<field name="model_id" ref="realty_bds.model_unit_price"/>
+						<field name="domain_force">[('company_id', '=', user.company_id.id)]</field>
+						<field name="groups" eval="[(4, ref('realty_bds.access_group_full_unit_price'))]"/>
+						<field name="perm_read" eval="True"/>
+						<field name="perm_write" eval="True"/>
+						<field name="perm_create" eval="True"/>
+						<field name="perm_unlink" eval="True"/>
+				</record>
+
+				<!-- 2. Read-only access to base company (id=1) -->
+				<record id="realty_unit_price_base_company_read_rule" model="ir.rule">
+						<field name="name">Real Estate Unit Price: Access own or base company records</field>
+						<field name="model_id" ref="realty_bds.model_unit_price"/>
+						<field name="domain_force">['|', ('company_id', '=', user.company_id.id), ('company_id','=', 1)]</field>
+						<field name="groups" eval="[
+								(4, ref('realty_bds.access_group_seen_unit_price')),
+								(4, ref('realty_bds.access_group_full_unit_price'))
+						]"/>
+						<field name="perm_read" eval="True"/>
+						<field name="perm_write" eval="False"/>
+						<field name="perm_create" eval="False"/>
+						<field name="perm_unlink" eval="False"/>
+				</record>
+
+				<!-- Rule for product.template -->
+				<!-- 1. Full CRUD for user's own company -->
+				<record id="product_template_company_rule" model="ir.rule">
+						<field name="name">Product: Full access to own company</field>
+						<field name="model_id" ref="product.model_product_template"/>
+						<field name="domain_force">[('company_id', '=', user.company_id.id)]</field>
+						<field name="groups" eval="[(4, ref('realty_bds.access_group_full_product'))]"/>
+						<field name="perm_read" eval="True"/>
+						<field name="perm_write" eval="True"/>
+						<field name="perm_create" eval="True"/>
+						<field name="perm_unlink" eval="True"/>
+				</record>
+
+				<!-- 2. Read-only access to base company (id=1) -->
+				<record id="product_template_base_company_read_rule" model="ir.rule">
+						<field name="name">Product: Access own or base company records</field>
+						<field name="model_id" ref="product.model_product_template"/>
+						<field name="domain_force">['|', ('company_id', '=', user.company_id.id), ('company_id','=', 1)]</field>
+						<field name="groups" eval="[
+								(4, ref('realty_bds.access_group_seen_product')),
+								(4, ref('realty_bds.access_group_full_product'))
+						]"/>
+						<field name="perm_read" eval="True"/>
+						<field name="perm_write" eval="False"/>
+						<field name="perm_create" eval="False"/>
+						<field name="perm_unlink" eval="False"/>
+				</record>
+
+        <!-- Rule for res.partner -->
+        <!-- 1. Users are only allowed to view and edit their own partner. -->
+        <record id="res_partner_own" model="ir.rule">
+            <field name="name">Only view and edit their own Partner</field>
+            <field name="model_id" ref="base.model_res_partner"/>
+            <field name="domain_force">[('id', '=', user.partner_id.id)]</field>
+            <field name="groups" eval="[(4, ref('realty_bds.access_group_seen_write_partner'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+        <!-- 2. Administrators can edit all Partners of their company -->
+        <record id="res_partner_admin" model="ir.rule">
+            <field name="name">Administrators: Access Partners of Own Company</field>
+            <field name="model_id" ref="base.model_res_partner"/>
+            <field name="domain_force">[('company_id', '=', user.company_id.id)]</field>
+            <field name="groups" eval="[(4, ref('realty_bds.access_group_full_partner'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_unlink" eval="True"/>
+        </record>
+
+        <!-- Rule for res.users -->
+				<!-- 1. Full CRUD for user's own company -->
+				<record id="res_users_company_rule" model="ir.rule">
+						<field name="name">Users: Restrict CRUD to User's Company</field>
+						<field name="model_id" ref="base.model_res_users"/>
+						<field name="domain_force">[('company_id', '=', user.company_id.id)]</field>
+						<field name="groups" eval="[(4, ref('realty_bds.access_group_full_users'))]"/>
+						<field name="perm_read" eval="True"/>
+						<field name="perm_write" eval="True"/>
+						<field name="perm_create" eval="True"/>
+						<field name="perm_unlink" eval="True"/>
+				</record>
+
+				<!-- 2. Read-only for user's own company -->
+				<record id="res_users_company_read_rule" model="ir.rule">
+						<field name="name">Users: Restrict Read to User's Company</field>
+						<field name="model_id" ref="base.model_res_users"/>
+						<field name="domain_force">[('id', '=', user.company_id.id)]</field>
+						<field name="groups" eval="[(4, ref('realty_bds.access_group_seen_users')),]"/>
+						<field name="perm_read" eval="True"/>
+						<field name="perm_write" eval="False"/>
+						<field name="perm_create" eval="False"/>
+						<field name="perm_unlink" eval="False"/>
+				</record>
+
+				<!-- Rule for res.company -->
+				<!-- 1. Full CRUD for user's own company -->
+				<record id="res_company_company_rule" model="ir.rule">
+						<field name="name">Company: Restrict CRUD to User's Company</field>
+						<field name="model_id" ref="base.model_res_company"/>
+						<field name="domain_force">[('id', '=', user.company_id.id)]</field>
+						<field name="groups" eval="[(4, ref('realty_bds.access_group_full_company'))]"/>
+						<field name="perm_read" eval="True"/>
+						<field name="perm_write" eval="True"/>
+						<field name="perm_create" eval="True"/>
+						<field name="perm_unlink" eval="True"/>
+				</record>
+
+				<!-- 2. Read-only for user's own company -->
+				<record id="res_company_company_read_rule" model="ir.rule">
+						<field name="name">Company: Restrict Read to User's Company</field>
+						<field name="model_id" ref="base.model_res_company"/>
+						<field name="domain_force">[('id', '=', user.company_id.id)]</field>
+						<field name="groups" eval="[(4, ref('realty_bds.access_group_seen_company')),]"/>
+						<field name="perm_read" eval="True"/>
+						<field name="perm_write" eval="False"/>
+						<field name="perm_create" eval="False"/>
+						<field name="perm_unlink" eval="False"/>
+				</record>
+    </data>
+</odoo>

@@ -1,0 +1,130 @@
+<odoo>
+	<!-- Tree View -->
+	<record id="product_template_list_view" model="ir.ui.view">
+		<field name="name">product_template_list</field>
+		<field name="model">product.template</field>
+		<field name="priority" eval="9"/>
+		<field name="arch" type="xml">
+			<list>
+				<field name="is_favorite" widget="boolean_favorite" nolabel="1" optional="show"/>
+				<button name="action_view_history" title="View Update History" type="object" icon="fa-history"/>
+				<button name="action_schedule" title="Schedule" type="object" icon="fa-calendar"/>
+				<field name="status_id" string="Status" optional="show"/>
+				<field name="type_id" string="Type" optional="show"/>
+				<field name="land_tittle_id" string="Land Title" optional="show"/>
+				<field name="address" string="Address" optional="show"/>
+				<field name="attributes" string="Attributes" optional="show"/>
+				<field name="display_price" string="Price" optional="show"/>
+				<field name="price_per_sqm" string="Million/m²" optional="show"/>
+				<field name="create_uid" string="Real Estate Owner" optional="show"/>
+				<!-- <field name="contact" string="Owner Contact" optional="show"/>  -->
+				<field name="feature_ids" string="Feature" widget="many2many_chip" options="{'maxVisible':3}" optional="show"/>
+				<button name="action_make_report" title="Make Report" type="object" icon="fa-file-text-o"/>
+				<button name="action_view_detail" title="Property Detail" type="object" icon="fa-info-circle"/>
+			</list>
+		</field>
+	</record>
+
+	<!-- Form View -->
+	<!-- Create Form -->
+	<record id="product_template_form_view" model="ir.ui.view">
+		<field name="name">product_template_form</field>
+		<field name="model">product.template</field>
+		<field name="priority" eval="7"/>
+		<field name="arch" type="xml">
+			<form>
+				<sheet>
+					<field name="currency_id" invisible="1"/>
+					<group>
+						<group string="Address">
+							<!-- <div class="o_form_label fw-bold text-black text-center">Address</div> -->
+							<field id="field_province" name="province_id" widget="selection" autocomplete="off" domain="[('country_id.code', '=', 'VN')]"/>
+							<field id="field_district" name="district_id" widget="selection" domain="[('province_id', '=', province_id)]" autocomplete="off"/>
+							<field id="field_commune" name="commune_id" widget="selection" domain="[('district_id', '=', district_id)]" autocomplete="off"/>
+							<field id="field_house_number" name="house_number" autocomplete="off"/>
+							<field id="field_street" name="street" autocomplete="off"/>
+							<field id="field_region" name="region_id" widget="selection" domain="[('province_ids', 'in', province_id)]" autocomplete="off"/>
+						</group>
+						<group string="Information">
+							<!-- <div class="o_form_label fw-bold text-black text-center">Information</div> -->
+							<div class="o_row">
+								<div class="o_form_label fw-bold text-black">Price</div>
+								<field id="field_list_price" name="list_price" widget="monetary" options="{'currency_field': 'currency_id'}" autocomplete="off"/>
+								<div class="o_form_label fw-bold text-black">Unit</div>
+								<field name="unit_price_id" widget="selection" required="1"/>
+							</div>
+							<field id="field_status" name="status_id" widget="selection" autocomplete="off"/>
+							<field id="field_type" name="type_id" widget="selection" autocomplete="off"/>
+							<field id="field_land_tittle" name="land_tittle_id" widget="selection" autocomplete="off"/>
+							<field id="field_feature" name="feature_ids" widget="many2many_tags" autocomplete="off" options="{'no_create': True}"/>
+						</group>
+						<group string="Attributes">
+							<!-- <div class="o_form_label fw-bold text-black text-center">Attributes</div> -->
+							<field id="field_real_estate_area" name="real_estate_area" autocomplete="off"/>
+							<field id="usable_area" name="usable_area" autocomplete="off"/>
+							<field id="field_number_of_floors" name="number_of_floors" autocomplete="off"/>
+							<field id="field_frontage" name="frontage" autocomplete="off"/>
+							<field id="field_home_direction" name="home_direction_id" widget="selection" autocomplete="off"/>
+						</group>
+					</group>
+					<group>
+						<field id="field_images" name="bds_image_ids" widget="many2many_image" options="{'number_of_files': 5, 'accepted_file_extensions': '.png,.jpg,.jpeg,.gif,.webp'}"/>
+					</group>
+				</sheet>
+				<chatter/>
+			</form>
+		</field>
+	</record>
+
+	<!-- Kanban View -->
+	<record id="product_template_kanban_view" model="ir.ui.view">
+		<field name="name">product_template_kanban</field>
+		<field name="model">product.template</field>
+		<field name="priority" eval="15"/>
+		<field name="arch" type="xml">
+			<kanban>
+				<!-- Fields to load -->
+				<field name="name"/>
+				<field name="presentation_image_id"/>
+				<field name="is_favorite"/>
+				<templates>
+					<t t-name="kanban-box">
+						<div class="oe_kanban_card oe_product_kanban d-flex flex-column align-items-center justify-content-center">
+							<!-- Name field with line breaks -->
+							<div class="o_kanban_record_title mb4 w-100" style="word-wrap: break-word; text-align: left;">
+								<field name="is_favorite" widget="boolean_favorite" nolabel="1" optional="show"/>
+								<field name="name"/>
+							</div>
+
+							<!-- Image container -->
+							<div class="d-flex justify-content-center align-items-center" style="width: 100%; height: 150px;">
+								<img 
+									t-att-src="
+                    record.presentation_image_id.raw_value 
+                    ? '/web/content/' + record.presentation_image_id.raw_value + '?download=true' 
+                    : '/web/static/img/placeholder.png'
+									" 
+									class="img-fluid" 
+									style="max-height: 100%; object-fit: contain;" 
+									alt="Product Image" 
+								/>
+							</div>
+						</div>
+					</t>
+				</templates>
+			</kanban>
+		</field>
+	</record>
+
+	<!-- Menu -->
+	<record id="action_product_template" model="ir.actions.act_window">
+		<field name="name">Ware House</field>
+		<field name="res_model">product.template</field>
+		<field name="view_mode">list,form,kanban</field>
+		<field name="views" eval="[
+				(ref('realty_bds.product_template_list_view'), 'list'), 
+				(ref('realty_bds.product_template_form_view'), 'form'),
+				(ref('realty_bds.product_template_kanban_view'), 'kanban')
+			]" />
+	</record>
+</odoo>

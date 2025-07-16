@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Form View Inherit -->
+    <record id="view_partner_form_inherit_job_title" model="ir.ui.view">
+        <field name="name">res.partner.form.inherit.job.title</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <!-- Replace the address fields in the partner. -->
+            <xpath expr="//div[@class='o_address_format']" position="after">
+                <h6>Hometown</h6>
+                <div class="o_hometown_address_format">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <field name="province_id" placeholder="Province" options="{'no_create': True}" domain="[('country_id.code', '=', 'VN')]"/>
+                        </div>
+                        <div class="col-md-4">
+                            <field name="district_id" placeholder="District" options="{'no_create': True}" domain="[('province_id', '=', province_id)]"/>
+                        </div>
+                        <div class="col-md-4">
+                            <field name="commune_id" placeholder="Commune" options="{'no_create': True}" domain="[('district_id', '=', district_id)]"/>
+                        </div>
+                    </div>
+                </div>
+                <h6>Permanent Address</h6>
+                <div class="o_resident_address_format">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <field name="province_resident_id" placeholder="Province" options="{'no_create': True}" domain="[('country_id.code', '=', 'VN')]"/>
+                        </div>
+                        <div class="col-md-4">
+                            <field name="district_resident_id" placeholder="District" options="{'no_create': True}" domain="[('province_id', '=', province_resident_id)]"/>
+                        </div>
+                        <div class="col-md-4">
+                            <field name="commune_resident_id" placeholder="Commune" options="{'no_create': True}" domain="[('district_id', '=', district_resident_id)]"/>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+
+            <xpath expr="//div[@class='o_address_format']//div[@name='partner_address_country'] //field[@name='country_id']" position="attributes">
+                <attribute name="style">display: none;</attribute>
+            </xpath>
+            <xpath expr="//div[@class='o_address_format']//field[@name='street']" position="attributes">
+                <attribute name="style">display: none;</attribute>
+            </xpath>
+            <xpath expr="//div[@class='o_address_format']//field[@name='street2']" position="attributes">
+                <attribute name="style">display: none;</attribute>
+            </xpath>
+            <xpath expr="//div[@class='o_address_format']//field[@name='city']" position="attributes">
+                <attribute name="style">display: none;</attribute>
+            </xpath>
+            <xpath expr="//div[@class='o_address_format']//field[@name='state_id']" position="attributes">
+                <attribute name="style">display: none;</attribute>
+            </xpath>
+            <xpath expr="//div[@class='o_address_format']//field[@name='zip']" position="attributes">
+                <attribute name="style">display: none;</attribute>
+            </xpath>
+            <xpath expr="//group//group//field[@name='vat']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            
+            <!-- Add the ID number (CCCD) field to the partner. -->
+            <xpath expr="//group//group//field[@name='function']" position = "after">
+                <field name="citizen_id" string="Citizen ID"/>
+            </xpath>
+
+            <!-- Hide the notebook. -->
+            <xpath expr="//group//group//field[@name='function']" position = "attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//group//group//field[@name='title']" position = "attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//group//group//field[@name='lang']" position = "attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//group//group//field[@name='category_id']" position = "attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//notebook" position="after">
+                <div>
+                    <button name="action_create_user" string="Pass" type="object" class="btn-primary mx-2" groups="realty_bds.access_group_full_users"/>
+                    <button name="action_delete_partner" string="Delete" type="object" class="btn-danger" groups="realty_bds.access_group_full_users" confirm="Are you sure you want to delete this partner?"/>
+                </div>
+            </xpath>
+
+            <xpath expr="//notebook" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- View wizard select job title -->
+    <record id="view_create_user_wizard_form" model="ir.ui.view">
+        <field name="name">create.user.wizard.form</field>
+        <field name="model">create.user.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Select User Title">
+                <group>
+                    <field name="name" readonly="1"/>
+                    <field name="email" readonly="1"/>
+                    <field name="citizen_id" readonly="1"/>
+                    <field name="hr_job_id" options="{'no_create': True}" required="0"/>
+                </group>
+                <footer>
+                    <button name="action_confirm" string="Create" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,7 @@
+<odoo>
+    <menuitem 
+			id="menu_unit_price_root" 
+			name="Unit Price" 
+			parent="menu_product_root" 
+			action="action_unit_price"/>
+</odoo>

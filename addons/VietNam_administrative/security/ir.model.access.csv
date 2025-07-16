@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_province_use,Province Use,model_res_country_state,access_group_seen_address,1,0,0,0
+access_province_add,Province Add,model_res_country_state,access_group_full_address,1,1,1,1
+access_district_use,District Use,model_district,access_group_seen_address,1,0,0,0
+access_district_add,District Add,model_district,access_group_full_address,1,1,1,1
+access_commune_use,Commune Use,model_commune,access_group_seen_address,1,0,0,0
+access_commune_add,Commune Add,model_commune,access_group_full_address,1,1,1,1

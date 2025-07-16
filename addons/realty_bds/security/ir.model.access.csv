@@ -1,0 +1,59 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_status_use,Status Use,model_status,access_group_seen_status,1,0,0,0
+access_status_add,Status Add,model_status,access_group_full_status,1,1,1,1
+access_status_realty,Status Realty,model_status,access_group_realty_status,1,1,1,1
+access_type_use,Type Use,model_type,access_group_seen_type,1,0,0,0
+access_type_add,Type Add,model_type,access_group_full_type,1,1,1,1
+access_type_realty,Type Realty,model_type,access_group_realty_type,1,1,1,1
+access_feature_use,Feature Use,model_feature,access_group_seen_feature,1,0,0,0
+access_feature_add,Feature Add,model_feature,access_group_full_feature,1,1,1,1
+access_feature_realty,Feature Realty,model_feature,access_group_realty_feature,1,1,1,1
+access_reasons_buy_use,Reasons Buy Use,model_reasons_buy,access_group_seen_reasons_buy,1,0,0,0
+access_reasons_buy_add,Reasons Buy Add,model_reasons_buy,access_group_full_reasons_buy,1,1,1,1
+access_reasons_buy_realty,Reasons Buy Realty,model_reasons_buy,access_group_realty_reasons_buy,1,1,1,1
+access_home_direction_use,Home Direction Use,model_home_direction,access_group_seen_home_direction,1,0,0,0
+access_home_direction_add,Home Direction Add,model_home_direction,access_group_full_home_direction,1,1,1,1
+access_home_direction_realty,Home Direction Realty,model_home_direction,access_group_realty_home_direction,1,1,1,1
+access_group_home_direction_use,Group Home Direction Use,model_group_home_direction,access_group_seen_g_home_direction,1,0,0,0
+access_group_home_direction_add,Group Home Direction Add,model_group_home_direction,access_group_full_g_home_direction,1,1,1,1
+access_group_home_direction_realty,Group Home Direction Realty,model_group_home_direction,access_group_realty_g_home_direction,1,1,1,1
+access_land_tittle_use,Land Tittle Use,model_land_tittle,access_group_seen_land_tittle,1,0,0,0
+access_land_tittle_add,Land Tittle Add,model_land_tittle,access_group_full_land_tittle,1,1,1,1
+access_land_tittle_realty,Land Tittle Realty,model_land_tittle,access_group_realty_land_tittle,1,1,1,1
+access_unit_price_use,Unit Price Use,model_unit_price,access_group_seen_unit_price,1,0,0,0
+access_unit_price_add,Unit Price Add,model_unit_price,access_group_full_unit_price,1,1,1,1
+access_unit_price_realty,Unit Price Add,model_unit_price,access_group_realty_unit_price,1,1,1,1
+access_product_template_use,Real Estate Use,model_product_template,access_group_seen_product,1,0,0,0
+access_product_template_add,Real Estate Add,model_product_template,access_group_full_product,1,1,1,1
+access_product_template_realty,Real Estate Realty,model_product_template,access_group_realty_product,1,1,1,1
+access_tag_use,Tag Use,model_tag,access_group_seen_create_tag,1,0,1,0
+access_tag_add,Tag Add,model_tag,access_group_full_tag,1,1,1,1
+access_tag_realty,Tag Realty,model_tag,access_group_realty_tag,1,1,1,1
+access_policy_use,Policy Add,model_policy,access_group_seen_policy,1,0,0,0
+access_policy_add,Policy Add,model_policy,access_group_full_policy,1,1,1,1
+access_policy_realty,Policy Realty,model_policy,access_group_realty_policy,1,1,1,1
+access_region_use,Region Use,model_region,access_group_seen_region,1,0,0,0
+access_region_add,Region Add,model_region,access_group_full_region,1,1,1,1
+access_region_realty,Region Realty,model_region,access_group_realty_region,1,1,1,1
+access_hr_job_use,Job Use,model_hr_job,access_group_seen_job,1,0,0,0
+access_hr_job_add,Job Add,model_hr_job,access_group_full_job,1,1,1,1
+access_hr_job_realty,Job Realty,model_hr_job,access_group_realty_job,1,1,1,1
+access_res_users_use,Users Use,model_res_users,access_group_seen_users,1,0,0,0
+access_res_users_add,Users Add,model_res_users,access_group_full_users,1,1,1,1
+access_res_users_realty,Users Realty,model_res_users,access_group_realty_users,1,1,1,1
+access_res_partner_use,Res Partner Use,model_res_partner,access_group_seen_write_partner,1,1,0,0
+access_res_partner_own,Res Partner Own,model_res_partner,access_group_full_partner,1,1,1,1
+access_res_partner_realty,Res Partner Realty,model_res_partner,access_group_realty_partner,1,1,1,1
+access_create_user_wizard_add,Sign Up Add,model_create_user_wizard,access_group_full_users,1,1,1,1
+access_create_user_wizard_realty,Sign Up Realty,model_create_user_wizard,access_group_realty_users,1,1,1,1
+access_create_department_wizard_add,Sign Up Department Add,model_assign_employee_wizard,access_group_full_users,1,1,1,1
+access_create_department_wizard_realty,Sign Up Department Realty,model_assign_employee_wizard,access_group_realty_users,1,1,1,1
+access_employee_use,Employee Use,model_hr_employee,access_group_seen_employee,1,0,0,0
+access_employee_add,Employee Add,model_hr_employee,access_group_full_employee,1,1,1,1
+access_employee_realty,Employee Realty,model_hr_employee,access_group_realty_employee,1,1,1,1
+access_department_use,Department Use,model_hr_department,access_group_seen_department,1,0,0,0
+access_department_add,Department Add,model_hr_department,access_group_full_department,1,1,1,1
+access_res_department_realty,Department Realty,model_res_company,access_group_realty_department,1,1,1,1
+access_res_company_use,Company Use,model_res_company,access_group_seen_company,1,0,0,0
+access_res_company_add,Company Add,model_res_company,access_group_full_company,1,1,1,1
+access_res_company_realty,Company Realty,model_res_company,access_group_realty_company,1,1,1,1

@@ -1,0 +1,40 @@
+<odoo>
+    <!-- List View -->
+    <record id="type_tree" model="ir.ui.view">
+        <field name="name">type_list</field>
+        <field name="model">type</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="type_form" model="ir.ui.view">
+        <field name="name">type_form</field>
+        <field name="model">type</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field id="type_name" name="name" placeholder="Enter a name" autocomplete="off"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_type" model="ir.actions.act_window">
+        <field name="name">Type</field>
+        <field name="res_model">type</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>
+
+
+
+
+

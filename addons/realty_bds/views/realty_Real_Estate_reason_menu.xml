@@ -1,0 +1,10 @@
+<odoo>
+    <menuitem 
+        id="menu_reasons_buy_root" 
+        name="Reasons for buying "
+        parent="menu_product_root" 
+        action="action_reasons_buy"
+        sequence="10"/>
+</odoo>
+
+

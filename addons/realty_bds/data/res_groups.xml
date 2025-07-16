@@ -1,0 +1,363 @@
+<odoo>
+    <data>
+				<!-- region -->
+				<!-- seen -->
+        <record id="access_group_seen_region" model="res.groups">
+            <field name="name">[Company Restricted]Right to read the region</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+        <!-- full -->
+        <record id="access_group_full_region" model="res.groups">
+            <field name="name">[Company Restricted]Right to CRUD the region</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+				<!-- realty -->
+				<record id="access_group_realty_region" model="res.groups">
+            <field name="name">[No Restricted]Right to CRUD the region</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+				<!-- hr.job -->
+				<!-- seen -->
+        <record id="access_group_seen_job" model="res.groups">
+            <field name="name">[Company Restricted]Right to read the hr.job</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+        <!-- full -->
+        <record id="access_group_full_job" model="res.groups">
+            <field name="name">[Company Restricted]Right to CRUD the hr.job</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+				<!-- realty -->
+				<record id="access_group_realty_job" model="res.groups">
+            <field name="name">[No Restricted]Right to CRUD the hr.job</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+				<!-- policy -->
+				<!-- seen -->
+        <record id="access_group_seen_policy" model="res.groups">
+            <field name="name">[Company Restricted]Right to read the policy</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+        <!-- full -->
+        <record id="access_group_full_policy" model="res.groups">
+            <field name="name">[Company Restricted]Right to CRUD the policy</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+				<!-- realty -->
+				<record id="access_group_realty_policy" model="res.groups">
+            <field name="name">[No Restricted]Right to CRUD the policy</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+				<!-- tag -->
+				<!-- seen -->
+        <record id="access_group_seen_create_tag" model="res.groups">
+            <field name="name">[Company Restricted]Right to read, create the tag</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+        <!-- full -->
+        <record id="access_group_full_tag" model="res.groups">
+            <field name="name">[Company Restricted]Right to CRUD the tag</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+				<!-- realty -->
+				<record id="access_group_realty_tag" model="res.groups">
+            <field name="name">[No Restricted]Right to CRUD the tag</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+				<!-- product.template -->
+				<!-- seen -->
+        <record id="access_group_seen_product" model="res.groups">
+            <field name="name">[Company Restricted]Right to read the product.template</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+        <!-- full -->
+        <record id="access_group_full_product" model="res.groups">
+            <field name="name">[Company Restricted]Right to CRUD the product.template</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+				<!-- realty -->
+				<record id="access_group_realty_product" model="res.groups">
+            <field name="name">[No Restricted]Right to CRUD the product.template</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+				<!-- status -->
+				<!-- seen -->
+        <record id="access_group_seen_status" model="res.groups">
+            <field name="name">[Company Restricted]Right to read the status</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+        <!-- full -->
+        <record id="access_group_full_status" model="res.groups">
+            <field name="name">[Company Restricted]Right to CRUD the status</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+				<!-- realty -->
+				<record id="access_group_realty_status" model="res.groups">
+            <field name="name">[No Restricted]Right to CRUD the status</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+				<!-- type -->
+				<!-- seen -->
+        <record id="access_group_seen_type" model="res.groups">
+            <field name="name">[Company Restricted]Right to read the type</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+        <!-- full -->
+        <record id="access_group_full_type" model="res.groups">
+            <field name="name">[Company Restricted]Right to CRUD the type</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+				<!-- realty -->
+				<record id="access_group_realty_type" model="res.groups">
+            <field name="name">[No Restricted]Right to CRUD the type</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+				<!-- feature -->
+				<!-- seen -->
+        <record id="access_group_seen_feature" model="res.groups">
+            <field name="name">[Company Restricted]Right to read the feature</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+        <!-- full -->
+        <record id="access_group_full_feature" model="res.groups">
+            <field name="name">[Company Restricted]Right to CRUD the feature</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+				<!-- realty -->
+				<record id="access_group_realty_feature" model="res.groups">
+            <field name="name">[No Restricted]Right to CRUD the feature</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+				<!-- reasons_buy -->
+				<!-- seen -->
+        <record id="access_group_seen_reasons_buy" model="res.groups">
+            <field name="name">[Company Restricted]Right to read the reasons_buy</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+        <!-- full -->
+        <record id="access_group_full_reasons_buy" model="res.groups">
+            <field name="name">[Company Restricted]Right to CRUD the reasons_buy</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+				<!-- realty -->
+				<record id="access_group_realty_reasons_buy" model="res.groups">
+            <field name="name">[No Restricted]Right to CRUD the reasons_buy</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+				<!-- home_direction -->
+				<!-- seen -->
+        <record id="access_group_seen_home_direction" model="res.groups">
+            <field name="name">[Company Restricted]Right to read the home_direction</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+        <!-- full -->
+        <record id="access_group_full_home_direction" model="res.groups">
+            <field name="name">[Company Restricted]Right to CRUD the home_direction</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+				<!-- realty -->
+				<record id="access_group_realty_home_direction" model="res.groups">
+            <field name="name">[No Restricted]Right to CRUD the home_direction</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+				<!-- group_home_direction -->
+				<!-- seen -->
+        <record id="access_group_seen_g_home_direction" model="res.groups">
+            <field name="name">[Company Restricted]Right to read the group_home_direction</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+        <!-- full -->
+        <record id="access_group_full_g_home_direction" model="res.groups">
+            <field name="name">[Company Restricted]Right to CRUD the group_home_direction</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+				<!-- realty -->
+				<record id="access_group_realty_g_home_direction" model="res.groups">
+            <field name="name">[No Restricted]Right to CRUD the group_home_direction</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+				<!-- land_tittle -->
+				<!-- seen -->
+        <record id="access_group_seen_land_tittle" model="res.groups">
+            <field name="name">[Company Restricted]Right to read the land_tittle</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+        <!-- full -->
+        <record id="access_group_full_land_tittle" model="res.groups">
+            <field name="name">[Company Restricted]Right to CRUD the land_tittle</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+				<!-- realty -->
+				<record id="access_group_realty_land_tittle" model="res.groups">
+            <field name="name">[No Restricted]Right to CRUD the land_tittle</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+				<!-- unit_price -->
+				<!-- seen -->
+        <record id="access_group_seen_unit_price" model="res.groups">
+            <field name="name">[Company Restricted]Right to read the unit_price</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+        <!-- full -->
+        <record id="access_group_full_unit_price" model="res.groups">
+            <field name="name">[Company Restricted]Right to CRUD the unit_price</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+				<!-- realty -->
+				<record id="access_group_realty_unit_price" model="res.groups">
+            <field name="name">[No Restricted]Right to CRUD the unit_price</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+				<!-- res.partner -->
+				<!-- seen -->
+        <record id="access_group_seen_write_partner" model="res.groups">
+            <field name="name">[Company Restricted]Right to read, write the res.partner</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+        <!-- full -->
+        <record id="access_group_full_partner" model="res.groups">
+            <field name="name">[Company Restricted]Right to CRUD the res.partner</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+				<!-- realty -->
+				<record id="access_group_realty_partner" model="res.groups">
+            <field name="name">[No Restricted]Right to CRUD the res.parter</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+				<!-- hr.employee -->
+				<!-- seen -->
+        <record id="access_group_seen_employee" model="res.groups">
+            <field name="name">[Company Restricted]Right to read the hr.employee</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+        <!-- full -->
+        <record id="access_group_full_employee" model="res.groups">
+            <field name="name">[Company Restricted]Right to CRUD the hr.employee</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+				<!-- realty -->
+				<record id="access_group_realty_employee" model="res.groups">
+            <field name="name">[No Restricted]Right to CRUD the hr.employee</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+				<!-- hr.department -->
+				<!-- seen -->
+        <record id="access_group_seen_department" model="res.groups">
+            <field name="name">[Company Restricted]Right to read the hr.department</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+        <!-- full -->
+        <record id="access_group_full_department" model="res.groups">
+            <field name="name">[Company Restricted]Right to CRUD the hr.department</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+				<!-- realty -->
+				<record id="access_group_realty_department" model="res.groups">
+            <field name="name">[No Restricted]Right to CRUD the hr.department</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+				<!-- res.users -->
+				<!-- seen -->
+        <record id="access_group_seen_users" model="res.groups">
+            <field name="name">[Company Restricted]Right to read the res.users</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+        <!-- full -->
+        <record id="access_group_full_users" model="res.groups">
+            <field name="name">[Company Restricted]Right to CRUD the res.users</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+				<!-- realty -->
+				<record id="access_group_realty_users" model="res.groups">
+            <field name="name">[No Restricted]Right to CRUD the res.users</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+				<!-- res.company -->
+				<!-- seen -->
+        <record id="access_group_seen_company" model="res.groups">
+            <field name="name">[Company Restricted]Right to read the res.company</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+        <!-- full -->
+        <record id="access_group_full_company" model="res.groups">
+            <field name="name">[Company Restricted]Right to CRUD the res.company</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+				<!-- realty -->
+				<record id="access_group_realty_company" model="res.groups">
+            <field name="name">[No Restricted]Right to CRUD the res.company</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+    </data>
+</odoo>

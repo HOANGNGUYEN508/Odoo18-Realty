@@ -1,0 +1,14 @@
+<odoo>
+	<data noupdate="1">
+		<record id="unit_price_billion" model="unit_price">
+			<field name="name">Billion</field>
+			<field name="multiplier">1000000000</field>
+			<field name="company_id" ref="base.main_company"/>
+		</record>
+		<record id="unit_price_million" model="unit_price">
+			<field name="name">Million</field>
+			<field name="multiplier">1000000</field>
+			<field name="company_id" ref="base.main_company"/>
+		</record>
+	</data>
+</odoo>

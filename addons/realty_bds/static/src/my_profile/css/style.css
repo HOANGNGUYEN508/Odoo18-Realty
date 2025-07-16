@@ -1,0 +1,52 @@
+.border-style {
+    border-radius: 25px;
+    padding: 20px; 
+    background: #585858; 
+    color: white;
+}
+
+.font-style {
+    display: flex;
+    font-weight: 600; 
+    font-size: 1.125rem; 
+    line-height: 1.75rem;
+    gap: 1rem;
+}
+
+.panel {
+    display: grid;
+    grid-template-columns: 15% 35% 45%; 
+    border: 1px solid #12780024;
+}
+
+.button-panel {
+    display: grid;
+    grid-template-columns: 50% 50%;
+    align-items: end;
+    border: 1px solid #12780024;
+    padding: 0.5em;
+}
+
+.noti-panel {
+    float: right;
+    background-color: #90EE90;
+    top: 0;
+    font-weight: 200;
+    font-size: 1.125rem; 
+    line-height: 1.75rem;
+    z-index: 3;
+    position: sticky;
+    width: 400px;
+    height: 50px;
+    text-align: center;
+    padding: 20px 0;
+}
+
+.button {
+    height: 60px; 
+    background: #7a7a7a;
+    color: white;
+    font-weight: 600; 
+    font-size: 1.125rem; 
+    line-height: 1.75rem;
+}

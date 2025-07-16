@@ -1,0 +1,78 @@
+<odoo>
+	<data>
+		<!-- Admin -->
+		<record id="realty_admin" model="hr.job">
+			<field name="company_id" ref="base.main_company"/>
+			<field name="name">Admin</field>
+			<field name="implied_ids" eval="
+				[
+					(4, ref('base.group_user')),
+					(4, ref('realty_bds.access_group_realty_tag')),
+					(4, ref('mail.group_mail_notification_type_inbox')),
+					(4, ref('realty_bds.access_group_realty_policy')),
+					(4, ref('VietNam_administrative.access_group_full_address')),
+					(4, ref('realty_bds.access_group_realty_region')),
+					(4, ref('uom.group_uom')),
+					(4, ref('realty_bds.access_group_realty_status')),
+					(4, ref('realty_bds.access_group_realty_type')),
+					(4, ref('realty_bds.access_group_realty_feature')),
+					(4, ref('realty_bds.access_group_realty_reasons_buy')),
+					(4, ref('realty_bds.access_group_realty_home_direction')),
+					(4, ref('realty_bds.access_group_realty_g_home_direction')),
+					(4, ref('realty_bds.access_group_realty_land_tittle')),
+					(4, ref('realty_bds.access_group_realty_unit_price')),
+				]
+			"/>
+		</record>
+
+		<!-- Super User -->
+		<record id="realty_superUser" model="hr.job">
+			<field name="company_id" ref="base.main_company"/>
+			<field name="name">Realty Super User</field>
+			<field name="implied_ids" eval="
+				[
+					(4, ref('base.group_user')),
+					(4, ref('realty_bds.access_group_realty_tag')),
+					(4, ref('mail.group_mail_notification_type_inbox')),
+					(4, ref('realty_bds.access_group_realty_policy')),
+					(4, ref('VietNam_administrative.access_group_full_address')),
+					(4, ref('realty_bds.access_group_realty_region')),
+					(4, ref('realty_bds.access_group_realty_company')),
+					(4, ref('uom.group_uom')),
+					(4, ref('realty_bds.access_group_realty_status')),
+					(4, ref('realty_bds.access_group_realty_type')),
+					(4, ref('realty_bds.access_group_realty_feature')),
+					(4, ref('realty_bds.access_group_realty_reasons_buy')),
+					(4, ref('realty_bds.access_group_realty_home_direction')),
+					(4, ref('realty_bds.access_group_realty_g_home_direction')),
+					(4, ref('realty_bds.access_group_realty_land_tittle')),
+					(4, ref('realty_bds.access_group_realty_unit_price')),
+					(4, ref('realty_bds.access_group_realty_partner')),
+					(4, ref('realty_bds.access_group_realty_employee')),
+					(4, ref('realty_bds.access_group_realty_department')),
+					(4, ref('base.group_allow_export')),
+					(4, ref('base.group_erp_manager')),
+					(4, ref('base.group_multi_currency')),
+					(4, ref('base.group_no_one')),
+					(4, ref('base.group_partner_manager')),
+					(4, ref('base.group_sanitize_override')),
+					(4, ref('base.group_system')),
+					(4, ref('hr.group_hr_manager')),
+					(4, ref('mail.group_mail_canned_response_admin')),
+					(4, ref('mail.group_mail_template_editor')),
+					(4, ref('product.group_product_manager')),
+					(4, ref('product.group_product_pricelist')),
+					(4, ref('product.group_product_variant')),
+					(4, ref('product.group_stock_packaging')),
+					(4, ref('realty_bds.access_group_realty_job')),
+					(4, ref('realty_bds.access_group_realty_product')),
+					(4, ref('realty_bds.access_group_realty_users')),
+					(4, ref('website.group_multi_website')),
+					(4, ref('website.group_website_designer')),
+					(4, ref('website.group_website_restricted_editor')),
+					(4, ref('website.website_page_controller_expose')),
+				]
+			"/>
+		</record>
+	</data>
+</odoo>

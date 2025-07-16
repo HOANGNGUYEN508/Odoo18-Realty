@@ -1,0 +1,10 @@
+<odoo>
+    <menuitem 
+        id="menu_feature_root" 
+        name="Feature"
+        parent="menu_product_root"
+        action="action_feature"
+        sequence="10"/>
+</odoo>
+
+
