@@ -104,7 +104,7 @@ Hoàng: phân tích và thiết kế hệ thống.
 
 🌟 Báo cáo - Spring 2:
 
-		- Company Isolation:
+		- Company Isolation: Người dùng từ các công ty khác chỉ có thể tương tác với dữ liệu của riêng họ, nhưng vẫn có thể đọc dữ liệu gốc của công ty cơ sở; họ không thể tạo, cập nhật hoặc xóa (CUD) dữ liệu đó.
 
 		- Mọi model trong module realty_bds sẽ có 2 view cơ bản: list, form
 
