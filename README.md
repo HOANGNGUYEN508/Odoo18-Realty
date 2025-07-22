@@ -19,7 +19,6 @@
 
   * [Spring 1](#spring-1)
   * [Spring 2](#spring-2)
-* [Contributing](#contributing)
 * [License](#license)
 
 ---
@@ -122,19 +121,13 @@ This project’s modules (`realty_bds` and `VietNam_administrative`) should resi
    cd Odoo18-Realty
    ```
 
-2. **Install Python dependencies**
-
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. **Add modules to Odoo addons path** (e.g., in `odoo.conf`):
+2. **Add modules to Odoo addons path** (e.g., in `odoo.conf`):
 
    ```ini
    addons_path = /path/to/odoo/addons,/path/to/Odoo18-Realty/realty_bds
    ```
 
-4. **Initialize and upgrade**
+3. **Initialize and upgrade**
 
    ```bash
    ./odoo-bin -c config/odoo.conf -d <your_db> --init realty_bds
@@ -142,16 +135,20 @@ This project’s modules (`realty_bds` and `VietNam_administrative`) should resi
    ./odoo-bin -c config/odoo.conf -d <your_db> --upgrade realty_bds
    ```
 
-5. **Restart Odoo** and log in as your admin user.
+4. **Restart Odoo** and log in as your admin user.
 
 ---
 
 ## ⚡️ Usage
 
-* **Real Estate Module** available under `Realty → Properties`.
-* Use the **Filters** dropdown to apply and save custom domains.
-* Create or import properties; upload images via drag‑and‑drop.
-* Configure `hr.job` titles for user roles and test company isolation.
+* **Realty_bds** available under `Real Estate` menu option.
+* **VietNam_administrative** avalable under `Vietnam Administration` menu option.
+* Use the **Filter** button in **Warehouse** submenu option to apply and save custom domains.
+* Configure who or which company can see your real estate via Additional Information in product's form view.
+* Upload images with drag‑and‑drop, set cover photo, download, delete via widget in product's form view.
+* Configure `hr.job` titles for user roles.
+* Admin from base company control other company real estate's property models, can create individual admin for each company but they can only interact with their own records.
+* Can add employee from department's form view without visit each employee form view.
 
 ---
 
@@ -168,8 +165,8 @@ This project’s modules (`realty_bds` and `VietNam_administrative`) should resi
 
 ### 🎯 Spring 1
 
-| Models & Components                                | Owner |     Status    |
-| -------------------------------------------------- | ----- | :-----------: |
+| Models & Components                                | Owner |     Status     |
+| -------------------------------------------------- | ----- | :-----------:  |
 | `muc_dich_mua`, `dac_diem_bds`                     | Hiếu  |  ✅ Completed  |
 | `chuc_danh`, `phan_quyen_chuc_danh`                | Khải  |  ✅ Completed  |
 | `huong_nha`, `group_huong_nha`                     | Huy   |  ✅ Completed  |
@@ -191,16 +188,6 @@ This project’s modules (`realty_bds` and `VietNam_administrative`) should resi
 
 ---
 
-## 🤝 Contributing
-
-We welcome contributions! Please review [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines on:
-
-* Issue reporting & labeling
-* Branch naming conventions
-* Commit message style
-* Pull request review process0
-
----
 
 ## 📄 License
 
