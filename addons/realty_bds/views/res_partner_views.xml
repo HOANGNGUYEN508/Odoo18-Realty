@@ -7,87 +7,112 @@
         <field name="inherit_id" ref="base.view_partner_form"/>
         <field name="arch" type="xml">
             <!-- Replace the address fields in the partner. -->
-            <xpath expr="//div[@class='o_address_format']" position="after">
+            <xpath expr="//div[hasclass('o_address_format')]" position="after">
                 <h6>Hometown</h6>
                 <div class="o_hometown_address_format">
                     <div class="row">
                         <div class="col-md-4">
-                            <field name="province_id" placeholder="Province" options="{'no_create': True}" domain="[('country_id.code', '=', 'VN')]"/>
+                            <field
+                                name="province_id"
+                                placeholder="Province"
+                                options="{'no_create': True}"
+                                domain="[('country_id.code', '=', 'VN')]"
+                            />
                         </div>
                         <div class="col-md-4">
-                            <field name="district_id" placeholder="District" options="{'no_create': True}" domain="[('province_id', '=', province_id)]"/>
+                            <field
+                                name="district_id"
+                                placeholder="District"
+                                options="{'no_create': True}"
+                                domain="[('province_id', '=', province_id)]"
+                            />
                         </div>
                         <div class="col-md-4">
-                            <field name="commune_id" placeholder="Commune" options="{'no_create': True}" domain="[('district_id', '=', district_id)]"/>
+                            <field
+                                name="commune_id"
+                                placeholder="Commune"
+                                options="{'no_create': True}"
+                                domain="[('district_id', '=', district_id)]"
+                            />
                         </div>
                     </div>
                 </div>
+
                 <h6>Permanent Address</h6>
                 <div class="o_resident_address_format">
                     <div class="row">
                         <div class="col-md-4">
-                            <field name="province_resident_id" placeholder="Province" options="{'no_create': True}" domain="[('country_id.code', '=', 'VN')]"/>
+                            <field
+                                name="province_resident_id"
+                                placeholder="Province"
+                                options="{'no_create': True}"
+                                domain="[('country_id.code', '=', 'VN')]"
+                            />
                         </div>
                         <div class="col-md-4">
-                            <field name="district_resident_id" placeholder="District" options="{'no_create': True}" domain="[('province_id', '=', province_resident_id)]"/>
+                            <field
+                                name="district_resident_id"
+                                placeholder="District"
+                                options="{'no_create': True}"
+                                domain="[('province_id', '=', province_resident_id)]"
+                            />
                         </div>
                         <div class="col-md-4">
-                            <field name="commune_resident_id" placeholder="Commune" options="{'no_create': True}" domain="[('district_id', '=', district_resident_id)]"/>
+                            <field
+                                name="commune_resident_id"
+                                placeholder="Commune"
+                                options="{'no_create': True}"
+                                domain="[('district_id', '=', district_resident_id)]"
+                            />
                         </div>
                     </div>
                 </div>
             </xpath>
 
-            <xpath expr="//div[@class='o_address_format']//div[@name='partner_address_country'] //field[@name='country_id']" position="attributes">
+            <!-- Hide the default address fields under o_address_format -->
+            <xpath expr="//div[hasclass('o_address_format')]//field[@name='country_id' or @name='street' or @name='street2' or @name='city' or @name='state_id' or @name='zip']" position="attributes">
                 <attribute name="style">display: none;</attribute>
             </xpath>
-            <xpath expr="//div[@class='o_address_format']//field[@name='street']" position="attributes">
-                <attribute name="style">display: none;</attribute>
-            </xpath>
-            <xpath expr="//div[@class='o_address_format']//field[@name='street2']" position="attributes">
-                <attribute name="style">display: none;</attribute>
-            </xpath>
-            <xpath expr="//div[@class='o_address_format']//field[@name='city']" position="attributes">
-                <attribute name="style">display: none;</attribute>
-            </xpath>
-            <xpath expr="//div[@class='o_address_format']//field[@name='state_id']" position="attributes">
-                <attribute name="style">display: none;</attribute>
-            </xpath>
-            <xpath expr="//div[@class='o_address_format']//field[@name='zip']" position="attributes">
-                <attribute name="style">display: none;</attribute>
-            </xpath>
+
+            <!-- Hide the VAT field -->
             <xpath expr="//group//group//field[@name='vat']" position="attributes">
                 <attribute name="invisible">1</attribute>
             </xpath>
-            
-            <!-- Add the ID number (CCCD) field to the partner. -->
-            <xpath expr="//group//group//field[@name='function']" position = "after">
+
+            <!-- Add the ID number (CCCD) field to the partner -->
+            <xpath expr="//group//group//field[@name='function']" position="after">
                 <field name="citizen_id" string="Citizen ID"/>
             </xpath>
 
-            <!-- Hide the notebook. -->
-            <xpath expr="//group//group//field[@name='function']" position = "attributes">
-                <attribute name="invisible">1</attribute>
-            </xpath>
-            <xpath expr="//group//group//field[@name='title']" position = "attributes">
-                <attribute name="invisible">1</attribute>
-            </xpath>
-            <xpath expr="//group//group//field[@name='lang']" position = "attributes">
-                <attribute name="invisible">1</attribute>
-            </xpath>
-            <xpath expr="//group//group//field[@name='category_id']" position = "attributes">
+            <!-- Hide notebook fields -->
+            <xpath expr="//group//group//field[@name='function' or @name='title' or @name='lang' or @name='category_id']" position="attributes">
                 <attribute name="invisible">1</attribute>
             </xpath>
 
-            <xpath expr="//notebook" position="after">
-                <div>
-                    <button name="action_create_user" string="Pass" type="object" class="btn-primary mx-2" groups="realty_bds.access_group_full_users"/>
-                    <button name="action_delete_partner" string="Delete" type="object" class="btn-danger" groups="realty_bds.access_group_full_users" confirm="Are you sure you want to delete this partner?"/>
-                </div>
-            </xpath>
-
+            <!-- Hide the notebook -->
             <xpath expr="//notebook" position="attributes">
                 <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <!-- Add action buttons after the notebook -->
+            <xpath expr="//notebook" position="after">
+                <div>
+                    <button
+                        name="action_create_user"
+                        string="Pass"
+                        type="object"
+                        class="btn-primary mx-2"
+                        groups="realty_bds.access_group_full_users"
+                    />
+                    <button
+                        name="action_delete_partner"
+                        string="Delete"
+                        type="object"
+                        class="btn-danger"
+                        groups="realty_bds.access_group_full_users"
+                        confirm="Are you sure you want to delete this partner?"
+                    />
+                </div>
             </xpath>
         </field>
     </record>

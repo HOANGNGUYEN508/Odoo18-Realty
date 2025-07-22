@@ -6,9 +6,7 @@
 			<field name="res_model_id" ref="base.model_ir_attachment"/>
 			<field name="recycle_mode">automatic</field>
 			<field name="recycle_action">unlink</field>
-			<field name="domain">
-				[("res_model", "=", "product.template"), ("res_id", "=", ""), ("mimetype", "ilike", "image")]
-			</field>
+			<field name="domain">[("res_model", "=", "product.template"), ("res_id", "=", ""), ("mimetype", "ilike", "image")]</field>
 			<!-- reference the base module's create_date field -->
 			<field name="time_field_id" ref="base.field_ir_attachment__create_date"/>
 			<field name="time_field_delta">30</field>

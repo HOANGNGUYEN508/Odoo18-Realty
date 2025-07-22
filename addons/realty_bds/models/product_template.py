@@ -39,6 +39,16 @@ class ProductTemplate(models.Model):
         string="Images", 
         domain="[('mimetype', 'like', 'image/%')]"
     )
+    shared_user_ids = fields.Many2many(
+        'res.users', 
+        string='Shared with Users',
+        help='Users (in other companies, or same) who can also read this department.'
+    )
+    shared_company_ids = fields.Many2many(
+        'res.company', 
+        string='Shared with Companies',
+        help='All users in these companies can also read this department.'
+    )
     company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company, required=True, ondelete='restrict', tracking=True)
 
     # Compute Attributes
@@ -127,7 +137,7 @@ class ProductTemplate(models.Model):
         return {}
 
     # Helper Method
-    def format_number(value):
+    def format_number(self, value):
         return str(int(value)) if value == int(value) else f"{value:.2f}"
     
     def _build_address_name(self, house_number, street, commune_id, district_id, real_estate_area, usable_area, number_of_floors, frontage, list_price, unit_price_id, create_uid):

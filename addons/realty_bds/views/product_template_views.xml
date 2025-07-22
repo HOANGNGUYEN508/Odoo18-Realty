@@ -66,6 +66,10 @@
 							<field id="field_frontage" name="frontage" autocomplete="off"/>
 							<field id="field_home_direction" name="home_direction_id" widget="selection" autocomplete="off"/>
 						</group>
+						<group string="Additional Information">
+							<field name="shared_user_ids" widget="many2many_tags" options="{'no_create': True}"/>
+            	<field name="shared_company_ids" widget="many2many_tags" options="{'no_create': True}"/>
+						</group>
 					</group>
 					<group>
 						<field id="field_images" name="bds_image_ids" widget="many2many_image" options="{'number_of_files': 5, 'accepted_file_extensions': '.png,.jpg,.jpeg,.gif,.webp'}"/>
@@ -82,14 +86,14 @@
 		<field name="model">product.template</field>
 		<field name="priority" eval="15"/>
 		<field name="arch" type="xml">
-			<kanban>
+			<kanban template="card" class="o_kanban_view">
 				<!-- Fields to load -->
 				<field name="name"/>
 				<field name="presentation_image_id"/>
 				<field name="is_favorite"/>
 				<templates>
-					<t t-name="kanban-box">
-						<div class="oe_kanban_card oe_product_kanban d-flex flex-column align-items-center justify-content-center">
+					<t t-name="card">
+						<div class="oe_product_kanban d-flex flex-column align-items-center justify-content-center">
 							<!-- Name field with line breaks -->
 							<div class="o_kanban_record_title mb4 w-100" style="word-wrap: break-word; text-align: left;">
 								<field name="is_favorite" widget="boolean_favorite" nolabel="1" optional="show"/>
@@ -97,7 +101,7 @@
 							</div>
 
 							<!-- Image container -->
-							<div class="d-flex justify-content-center align-items-center" style="width: 100%; height: 150px;">
+							<div class="d-flex justify-content-center align-items-center" style="width: 100%; height: 150px; aspect-ratio: 16/9;">
 								<img 
 									t-att-src="
                     record.presentation_image_id.raw_value 
