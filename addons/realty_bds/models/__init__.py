@@ -22,3 +22,7 @@ from . import hr_employee
 from . import res_company
 from . import ir_filters
 from . import product_template
+from . import mail_tracking_value
+from . import realty_Report_client_feedback
+from . import realty_Report_owner_feedback
+from . import realty_Real_Estate_report
