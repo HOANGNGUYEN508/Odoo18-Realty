@@ -71,6 +71,9 @@
 					(4, ref('website.group_website_designer')),
 					(4, ref('website.group_website_restricted_editor')),
 					(4, ref('website.website_page_controller_expose')),
+					(4, ref('realty_bds.access_group_realty_product_report')),
+					(4, ref('realty_bds.access_group_realty_owner_feedback')),
+					(4, ref('realty_bds.access_group_realty_client_feedback')),
 				]
 			"/>
 		</record>
