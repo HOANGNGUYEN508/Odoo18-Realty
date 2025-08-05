@@ -5,11 +5,13 @@ export class PhotoLightbox extends Component {
   static props = {
     files:             { type: Array },
     index:             { type: Number },
+		presentationImage: { type: Boolean },
 		presentationId:    { type: Number, optional: true },
     onClose:           { type: Function },
     onDelete:          { type: Function },
 		onNavigate:        { type: Function },
 		onSetPresentation: { type: Function }, 
+		readonly:          { type: Boolean },
   };
 
 	setup() {
