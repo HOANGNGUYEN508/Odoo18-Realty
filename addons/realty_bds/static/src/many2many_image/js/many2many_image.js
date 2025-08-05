@@ -23,6 +23,7 @@ export class Many2ManyImageField extends Component {
     name:                   { type: String },
     readonly:               { type: Boolean, optional: true },
     record:                 { type: Object },
+		presentationImage:      { type: Boolean, optional: true },
     acceptedFileExtensions: { type: String,  optional: true },
     className:              { type: String,  optional: true },
     numberOfFiles:          { type: Number,  optional: true },
@@ -35,6 +36,8 @@ export class Many2ManyImageField extends Component {
     fileSize:      5 * 1024 * 1024,
     rowHeight:     140,
     gutter:        8,
+		presentationImage: false,
+		readonly: false
   };
 
   setup() {
@@ -63,20 +66,22 @@ export class Many2ManyImageField extends Component {
     this.onDragOver =       this.onDragOver.bind(this);
     this.onDragLeave =      this.onDragLeave.bind(this);
     this.onDrop =           this.onDrop.bind(this);
-
-    onWillStart(async () => {
-      const { resId, resModel } = this.props.record;
-      if (resId) {
-        try {
-          const [data] = await this.orm.read(resModel, [resId], [
-            "presentation_image_id",
-          ]);
-          this.state.presentationId = data.presentation_image_id || -1;
-        } catch (err) {
-          console.error("Failed to fetch presentation_image_id:", err);
-        }
-      }
-    });
+		
+		if (this.props.presentationImage) {
+			onWillStart(async () => {
+				const { resId, resModel } = this.props.record;
+				if (resId) {
+					try {
+						const [data] = await this.orm.read(resModel, [resId], [
+							"presentation_image_id",
+						]);
+						this.state.presentationId = data.presentation_image_id || -1;
+					} catch (err) {
+						console.error("Failed to fetch presentation_image_id:", err);
+					}
+				}
+			});
+		}
   }
 
   get files() {
@@ -213,10 +218,12 @@ export class Many2ManyImageField extends Component {
 export const many2ManyImageField = {
   component: Many2ManyImageField,
   supportedOptions: [
-    { label: _t("Accepted file extensions"), name: "accepted_file_extensions", type: "string" },
-    { label: _t("Number of files"),          name: "number_of_files",          type: "integer" },
-    { label: _t("Row height"),               name: "row_height",               type: "integer" },
-    { label: _t("Gutter size"),              name: "gutter",                   type: "integer" },
+    { label: _t("Accepted file extensions"),        name: "accepted_file_extensions", type: "string" },
+    { label: _t("Number of files"),                 name: "number_of_files",          type: "integer" },
+    { label: _t("Row height"),                      name: "row_height",               type: "integer" },
+    { label: _t("Gutter size"),                     name: "gutter",                   type: "integer" },
+		{ label: _t("File size"),                       name: "file_size",                type: "integer" },
+		{ label: _t("Use Presentation Image Feature?"), name: "presentation_image",       type: "boolean" },
   ],
   supportedTypes: ["many2many"],
   isEmpty: () => false,
@@ -226,6 +233,8 @@ export const many2ManyImageField = {
   ],
   extractProps: ({ attrs, options }) => ({
     acceptedFileExtensions: options.accepted_file_extensions,
+		presentationImage: options.presentation_image,
+		readonly: attrs.readonly === "1",
     className: attrs.class,
     numberOfFiles: options.number_of_files,
     fileSize: options.file_size,
