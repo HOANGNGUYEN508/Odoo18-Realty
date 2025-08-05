@@ -66,6 +66,12 @@
 				'views/my_profile_template.xml',
 				'data/hr_job.xml',
 				'data/res_users.xml',
+				'views/realty_Report_client_feedback_views.xml',
+				'views/realty_Report_client_feedback_menu.xml',
+				'views/realty_Report_owner_feedback_views.xml',
+				'views/realty_Report_owner_feedback_menu.xml',
+				'views/realty_Real_Estate_report_views.xml',
+				'views/realty_Real_Estate_report_menu.xml',
     ],
     'assets': {
         'web.assets_frontend': [
