@@ -14,17 +14,23 @@
         id="menu_product_root"
         name="Real Estate"
         parent="menu_realty_root"
-        sequence="10"/>
+        sequence="20"/>
+
+		<menuitem
+        id="menu_report_root"
+        name="Report"
+        parent="menu_realty_root"
+        sequence="25"/>
 
     <menuitem
         id="menu_address_root"
         name="Address"
         parent="menu_realty_root"
-        sequence="10"/>
+        sequence="15"/>
 
     <menuitem
         id="menu_more_root"
         name="More"
         parent="menu_realty_root"
-        sequence="10"/>
+        sequence="30"/>
 </odoo>
