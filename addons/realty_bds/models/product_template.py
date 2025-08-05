@@ -33,7 +33,7 @@ class ProductTemplate(models.Model):
     feature_ids = fields.Many2many('feature', required=True, string="Feature")
     home_direction_id = fields.Many2one('home_direction', string="Direction", tracking=True)  # Not required
     unit_price_id = fields.Many2one('unit_price', required=True, string='Unit Price', tracking=True)
-    bds_image_ids = fields.Many2many(
+    img_ids = fields.Many2many(
         'ir.attachment', 
         required=True, 
         string="Images", 
@@ -122,19 +122,71 @@ class ProductTemplate(models.Model):
 
     # Action
     def action_view_history(self):
-        return {}
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': f'History: {self.name}',
+            'res_model': 'mail.tracking.value',
+            'view_mode': 'list',
+            'views': [(self.env.ref('realty_bds.view_product_history_tree').id, 'list')],
+            'domain': [
+                ('mail_message_id.model', '=', 'product.template'),
+                ('mail_message_id.res_id', '=', self.id),
+            ],
+            'target': 'new',
+        }
 
     def action_schedule(self):
-        return {}
+        self.ensure_one()  # Ensure only one record is selected
+        
+        # Calculate start (current time) and end (1 hour later)
+        start = fields.Datetime.now()
+        stop = fields.Datetime.add(start, hours=1)
+        
+        # Get the model ID for product.template
+        model_id = self.env['ir.model']._get_id('product.template')
+        
+        # Prepare attendees: current user + product owner (if different)
+        partner_ids = [self.env.user.partner_id.id]
+        owner_partner = self.create_uid.partner_id
+        if owner_partner.id != self.env.user.partner_id.id:
+            partner_ids.append(owner_partner.id)
+        
+        # Open calendar event creation dialog
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'calendar.event',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_name': f"Meeting: {self.name}",
+                'default_start': start,
+                'default_stop': stop,
+                'default_res_model_id': model_id,  # Link to product.template
+                'default_res_id': self.id,          # Current product ID
+                'default_user_id': self.env.user.id, # Current user as organizer
+                'default_partner_ids': [(6, 0, partner_ids)],  # Attendees
+            }
+        }
 
     def action_make_report(self):
-        return {}
-
-    def action_test(self):
-        return {}
-
-    def action_view_detail(self):
-        return {}
+        self.ensure_one()
+        # Generate unique report name: Report_<ProductID>_<Timestamp>
+        timestamp = fields.Datetime.now().strftime('%Y%m%d%H%M%S')
+        report_name = f"Report_{self.id}_{timestamp}"
+        
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Create Product Report',
+            'res_model': 'product_report',
+            'view_mode': 'form',
+            'view_id': self.env.ref('realty_bds.product_report_form_view_user').id,
+            'context': {
+                'default_product_id': self.id,
+                'default_name': report_name,
+            },
+            'target': 'new',
+        }
 
     # Helper Method
     def format_number(self, value):
