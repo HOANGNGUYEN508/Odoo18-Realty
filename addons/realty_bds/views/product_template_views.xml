@@ -3,7 +3,6 @@
 	<record id="product_template_list_view" model="ir.ui.view">
 		<field name="name">product_template_list</field>
 		<field name="model">product.template</field>
-		<field name="priority" eval="9"/>
 		<field name="arch" type="xml">
 			<list>
 				<field name="is_favorite" widget="boolean_favorite" nolabel="1" optional="show"/>
@@ -20,17 +19,14 @@
 				<!-- <field name="contact" string="Owner Contact" optional="show"/>  -->
 				<field name="feature_ids" string="Feature" widget="many2many_chip" options="{'maxVisible':3}" optional="show"/>
 				<button name="action_make_report" title="Make Report" type="object" icon="fa-file-text-o"/>
-				<button name="action_view_detail" title="Property Detail" type="object" icon="fa-info-circle"/>
 			</list>
 		</field>
 	</record>
 
 	<!-- Form View -->
-	<!-- Create Form -->
 	<record id="product_template_form_view" model="ir.ui.view">
 		<field name="name">product_template_form</field>
 		<field name="model">product.template</field>
-		<field name="priority" eval="7"/>
 		<field name="arch" type="xml">
 			<form>
 				<sheet>
@@ -68,11 +64,15 @@
 						</group>
 						<group string="Additional Information">
 							<field name="shared_user_ids" widget="many2many_tags" options="{'no_create': True}"/>
-            	<field name="shared_company_ids" widget="many2many_tags" options="{'no_create': True}"/>
+							<field name="shared_company_ids" widget="many2many_tags" options="{'no_create': True}"/>
 						</group>
 					</group>
 					<group>
-						<field id="field_images" name="bds_image_ids" widget="many2many_image" options="{'number_of_files': 5, 'accepted_file_extensions': '.png,.jpg,.jpeg,.gif,.webp'}"/>
+						<field name="img_ids" widget="many2many_image" options="{
+								'number_of_files': 5, 
+								'accepted_file_extensions': '.png,.jpg,.jpeg,.gif,.webp', 
+								'presentation_image': True
+							}" />
 					</group>
 				</sheet>
 				<chatter/>
@@ -84,7 +84,6 @@
 	<record id="product_template_kanban_view" model="ir.ui.view">
 		<field name="name">product_template_kanban</field>
 		<field name="model">product.template</field>
-		<field name="priority" eval="15"/>
 		<field name="arch" type="xml">
 			<kanban template="card" class="o_kanban_view">
 				<!-- Fields to load -->
@@ -94,24 +93,56 @@
 				<templates>
 					<t t-name="card">
 						<div class="oe_product_kanban d-flex flex-column align-items-center justify-content-center">
-							<!-- Name field with line breaks -->
-							<div class="o_kanban_record_title mb4 w-100" style="word-wrap: break-word; text-align: left;">
-								<field name="is_favorite" widget="boolean_favorite" nolabel="1" optional="show"/>
+							<!-- Header row: star on left, buttons on right -->
+							<div class="d-flex justify-content-between align-items-center w-100 mb2">
+								<!-- Favorite star -->
+								<field 
+									name="is_favorite" 
+									widget="boolean_favorite" 
+									nolabel="1" 
+									t-att-style="'color: #7e6dae;'"
+								/>
+								<!-- Your three action buttons -->
+								<div class="o_kanban_action_buttons">
+									<button 
+										name="action_view_history" 
+										type="object" 
+										icon="fa-history" 
+										title="View Update History" 
+										class="btn btn-sm"
+										t-att-style="'color: #7e6dae;'"
+									/>
+									<button 
+										name="action_schedule" 
+										type="object" 
+										icon="fa-calendar" 
+										title="Schedule" 
+										class="btn btn-sm"
+										t-att-style="'color: #7e6dae;'"
+									/>
+									<button 
+										name="action_make_report" 
+										type="object" 
+										icon="fa-file-text-o" 
+										title="Make Report" 
+										class="btn btn-sm"
+										t-att-style="'color: #7e6dae;'"
+									/>
+								</div>
+							</div>
+
+							<!-- Title row -->
+							<div class="o_kanban_record_title mb4 w-100 align-items-center" style="word-wrap: break-word; text-align: left;">
 								<field name="name"/>
 							</div>
 
 							<!-- Image container -->
 							<div class="d-flex justify-content-center align-items-center" style="width: 100%; height: 150px; aspect-ratio: 16/9;">
-								<img 
-									t-att-src="
+								<img t-att-src="
                     record.presentation_image_id.raw_value 
                     ? '/web/content/' + record.presentation_image_id.raw_value + '?download=true' 
                     : '/web/static/img/placeholder.png'
-									" 
-									class="img-fluid" 
-									style="max-height: 100%; object-fit: contain;" 
-									alt="Product Image" 
-								/>
+									" class="img-fluid" style="max-height: 100%; object-fit: contain;" alt="Product Image" />
 							</div>
 						</div>
 					</t>
@@ -120,15 +151,36 @@
 		</field>
 	</record>
 
+	<!-- History View -->
+	<record id="view_product_history_tree" model="ir.ui.view">
+		<field name="name">product_template_mail_tracking_value</field>
+		<field name="model">mail.tracking.value</field>
+		<field name="arch" type="xml">
+			<list string="Change History" create="false" edit="false" delete="false">
+				<field name="display_history" string="History" widget="text"/>
+			</list>
+		</field>
+	</record>
+
 	<!-- Menu -->
 	<record id="action_product_template" model="ir.actions.act_window">
 		<field name="name">Ware House</field>
 		<field name="res_model">product.template</field>
 		<field name="view_mode">list,form,kanban</field>
-		<field name="views" eval="[
-				(ref('realty_bds.product_template_list_view'), 'list'), 
-				(ref('realty_bds.product_template_form_view'), 'form'),
-				(ref('realty_bds.product_template_kanban_view'), 'kanban')
-			]" />
+		<field name="view_ids" eval="[
+      (5, 0, 0),
+      (0, 0, {
+        'view_mode': 'kanban',
+        'view_id': ref('realty_bds.product_template_kanban_view')
+      }),
+      (0, 0, {
+        'view_mode': 'list',
+        'view_id': ref('realty_bds.product_template_list_view')
+      }),
+      (0, 0, {
+        'view_mode': 'form',
+        'view_id': ref('realty_bds.product_template_form_view')
+      })
+    ]"/>
 	</record>
 </odoo>
