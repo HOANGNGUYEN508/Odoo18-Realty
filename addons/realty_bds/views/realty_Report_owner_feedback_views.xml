@@ -1,0 +1,35 @@
+<odoo>
+    <!-- List View -->
+    <record id="owner_feedback_tree" model="ir.ui.view">
+        <field name="name">Owner Feedback List</field>
+        <field name="model">owner_feedback</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="owner_feedback_form" model="ir.ui.view">
+        <field name="name">Owner Feedback Form</field>
+        <field name="model">owner_feedback</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field id="owner_feedback_name" name="name" placeholder="Enter a name" autocomplete="off"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_owner_feedback" model="ir.actions.act_window">
+        <field name="name">Owner Feedback</field>
+        <field name="res_model">owner_feedback</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

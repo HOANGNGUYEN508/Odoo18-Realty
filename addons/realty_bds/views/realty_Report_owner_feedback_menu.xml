@@ -1,0 +1,8 @@
+<odoo>
+	<menuitem 
+		id="menu_owner_feedback_root" 
+		name="Owner Feedback Options" 
+		parent="menu_report_root" 
+		action="action_owner_feedback"
+		sequence="10"/>
+</odoo>
