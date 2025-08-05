@@ -1,0 +1,17 @@
+<odoo>
+	<menuitem 
+		id="menu_product_report_manager_root" 
+		name="Assessing Report" 
+		parent="menu_report_root" 
+		action="action_product_report_manager"
+		sequence="10"
+		groups="realty_bds.access_group_manager_product_report,realty_bds.access_group_realty_product_report"/>
+
+	<menuitem 
+		id="menu_product_report_user_root" 
+		name="Your Report" 
+		parent="menu_report_root" 
+		action="action_product_report_user"
+		sequence="10"
+		groups="realty_bds.access_group_user_product_report,realty_bds.access_group_realty_product_report"/>
+</odoo>

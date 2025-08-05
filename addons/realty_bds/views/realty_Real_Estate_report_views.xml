@@ -1,0 +1,185 @@
+<odoo>
+	<!-- User Form View (also use for action method in product.template) -->
+	<record id="product_report_form_view_user" model="ir.ui.view">
+		<field name="name">User Report Form</field>
+		<field name="model">product_report</field>
+		<field name="arch" type="xml">
+			<form string="Product Report" create="false">
+				<sheet>
+					<group string="Information">
+						<field name="product_id" readonly="1"/>
+						<field name="name"/>
+						<field name="customer"/>
+						<field name="citizen_id"/>
+						<field name="phone"/>
+						<field name="email"/>
+					</group>
+
+					<group string="Feedback">
+						<field name="opinions"/>
+						<field name="reason_selection"/>
+						<field name="other_reason" invisible="reason_selection != 'other'"/>
+						<field name="owner_feedback_selection"/>
+						<field name="other_owner_feedback" invisible="owner_feedback_selection != 'other'"/>
+						<field name="client_feedback_selection"/>
+						<field name="other_client_feedback" invisible="client_feedback_selection != 'other'"/>
+					</group>
+
+					<group string="Attachments">
+						<field 
+							name="img_ids" 
+							widget="many2many_image" 
+							options="{
+								'number_of_files': 5, 
+								'accepted_file_extensions': '.png,.jpg,.jpeg,.gif,.webp',
+							}" 
+						/>
+					</group>
+
+					<group>
+						<field name="approval" widget="statusbar" options="{'clickable': 0}"/>
+					</group>
+				</sheet>
+			</form>
+		</field>
+	</record>
+
+	<!-- Manager Form View -->
+	<record id="product_report_form_view_manager" model="ir.ui.view">
+		<field name="name">Manager Report Form</field>
+		<field name="model">product_report</field>
+		<field name="arch" type="xml">
+			<form create="false">
+				<sheet>
+					<group string="Information">
+						<field name="product_id" readonly="1"/>
+						<field name="name" readonly="1"/>
+						<field name="customer" readonly="1"/>
+						<field name="citizen_id" readonly="1"/>
+						<field name="phone" readonly="1"/>
+						<field name="email" readonly="1"/>
+					</group>
+
+					<group string="Feedback">
+						<field name="opinions" readonly="1"/>
+						<field name="reason" string="Reason to Buy" readonly="1"/>
+						<field name="owner_feedback" string="Owner Feedback" readonly="1"/>
+						<field name="client_feedback" string="Client Feedback" readonly="1"/>
+					</group>
+
+					<group string="Attachments">
+						<field 
+							name="img_ids" 
+							widget="many2many_image" 
+							readonly="1"
+							options="{
+								'number_of_files': 5, 
+								'accepted_file_extensions': '.png,.jpg,.jpeg,.gif,.webp', 
+							}" 
+						/>
+					</group>
+
+					<group>
+						<field name="approval" widget="statusbar" options="{'clickable': 1}"/>
+					</group>
+				</sheet>
+				<chatter/>
+			</form>
+		</field>
+	</record>
+
+	<!-- Kanban View -->
+	<record id="product_report_kanban_view" model="ir.ui.view">
+		<field name="name">Report Kanban</field>
+		<field name="model">product_report</field>
+		<field name="arch" type="xml">
+			<kanban template="card" class="o_kanban_view" create="false">
+				<!-- make sure you load the approval field -->
+				<field name="approval"/>
+				<field name="product_id"/>
+				<field name="name"/>
+				<field name="create_uid"/>
+				<templates>
+					<t t-name="card">
+						<div t-att-class="
+              'oe_kanban_card o_kanban_record'
+              + (record.approval.raw_value === 'approved'
+                  ? ' o_kanban_success'
+                  : record.approval.raw_value === 'rejected'
+                    ? ' o_kanban_danger'
+                    : '')
+            " t-att-style="
+              'position:relative; '
+              + 'border:1px solid '
+              + (record.approval.raw_value === 'approved'
+                  ? '#28a745'
+                  : record.approval.raw_value === 'rejected'
+                    ? '#dc3545'
+                    : '#adb5bd')
+              + '; padding:0.75rem; border-radius:0.5rem;'
+            ">
+							<!-- Corner icon -->
+							<t t-if="record.approval.raw_value === 'approved'">
+								<i title="Approved" class="fa fa-check" style="position:absolute; top:0.5rem; left:0.5rem; font-size:1.2rem; color:#28a745;" />
+							</t>
+							<t t-if="record.approval.raw_value === 'rejected'">
+								<i title="Rejected" class="fa fa-times" style="position:absolute; top:0.5rem; left:0.5rem; font-size:1.2rem; color:#dc3545;" />
+							</t>
+
+							<!-- Product -->
+							<div class="o_kanban_record_title mb-2 w-100" style="padding-left:20px;">
+								<field name="product_id"/>
+							</div>
+							<!-- Name -->
+							<div class="o_kanban_record_title mb-2 w-100" style="padding-left:20px;">
+								<field name="name"/>
+							</div>
+							<!-- Created By (only for managers/realty group) -->
+							<t groups="realty_bds.access_group_manager_product_report,realty_bds.access_group_realty_product_report">
+								<div class="o_kanban_record_title w-100" style="padding-left:20px;">
+									<field name="create_uid"/>
+								</div>
+							</t>
+						</div>
+					</t>
+				</templates>
+			</kanban>
+		</field>
+	</record>
+
+	<!-- User Menu -->
+	<record id="action_product_report_user" model="ir.actions.act_window">
+		<field name="name">Your Report</field>
+		<field name="res_model">product_report</field>
+		<field name="view_mode">form,kanban</field>
+		<field name="view_ids" eval="[
+      (5, 0, 0),
+      (0, 0, {
+        'view_mode': 'kanban',
+        'view_id': ref('realty_bds.product_report_kanban_view')
+      }),
+      (0, 0, {
+        'view_mode': 'form',
+        'view_id': ref('realty_bds.product_report_form_view_user')
+      })
+    ]"/>
+	</record>
+
+	<!-- Manager Menu -->
+	<record id="action_product_report_manager" model="ir.actions.act_window">
+		<field name="name">Assessing Report</field>
+		<field name="res_model">product_report</field>
+		<field name="view_mode">form,kanban</field>
+		<field name="view_ids" eval="[
+      (5, 0, 0),
+      (0, 0, {
+        'view_mode': 'kanban',
+        'view_id': ref('realty_bds.product_report_kanban_view')
+      }),
+      (0, 0, {
+        'view_mode': 'form',
+        'view_id': ref('realty_bds.product_report_form_view_manager')
+      })
+    ]"/>
+	</record>
+</odoo>
