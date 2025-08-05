@@ -57,3 +57,12 @@ access_res_department_realty,Department Realty,model_res_company,access_group_re
 access_res_company_use,Company Use,model_res_company,access_group_seen_company,1,0,0,0
 access_res_company_add,Company Add,model_res_company,access_group_full_company,1,1,1,1
 access_res_company_realty,Company Realty,model_res_company,access_group_realty_company,1,1,1,1
+access_owner_feedback_use,Owner Feedback Use,model_owner_feedback,access_group_seen_owner_feedback,1,0,0,0
+access_owner_feedback_add,Owner Feedback Add,model_owner_feedback,access_group_full_owner_feedback,1,1,1,1
+access_owner_feedback_realty,Owner Feedback Realty,model_owner_feedback,access_group_realty_owner_feedback,1,1,1,1
+access_client_feedback_use,Client Feedback Use,model_client_feedback,access_group_seen_client_feedback,1,0,0,0
+access_client_feedback_add,Client Feedback Add,model_client_feedback,access_group_full_client_feedback,1,1,1,1
+access_client_feedback_realty,Client Feedback Realty,model_client_feedback,access_group_realty_client_feedback,1,1,1,1
+access_product_report_user,Product Report User,model_product_report,access_group_user_product_report,1,1,1,1
+access_product_report_manager,Product Report Mannager,model_product_report,access_group_manager_product_report,1,1,1,1
+access_product_report_realty,Product Report Realty,model_product_report,access_group_realty_product_report,1,1,1,1
