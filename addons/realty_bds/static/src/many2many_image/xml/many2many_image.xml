@@ -56,11 +56,13 @@
 						>
               <div class="photo-tile-icons">
 								<div class="left-icons">
-									<i 
-										t-att-class="'fa ' + (file.id === state.presentationId ? 'fa-star' : 'fa-star-o')"
-										t-on-click.stop="() =&gt; setPresentation(file.id)"
-										data-tooltip="Set as presentation" 
-									/>
+									<t t-if="props.presentationImage">
+										<i 
+											t-att-class="'fa ' + (file.id === state.presentationId ? 'fa-star' : 'fa-star-o')"
+											t-on-click.stop="() =&gt; setPresentation(file.id)"
+											data-tooltip="Set as presentation" 
+										/>
+									</t>
 								</div>
 								<div class="right-icons">
 									<a 
@@ -109,11 +111,13 @@
         <PhotoLightbox 
 					files="files"
           index="state.lightboxIndex"
+					presentationImage="props.presentationImage"
           presentationId="state.presentationId"
           onClose="closeLightbox"
           onDelete="onFileRemove"
           onNavigate="navigateLightbox"
           onSetPresentation="setPresentation"
+					readonly="props.readonly"
 				/>
       </t>
     </div>
