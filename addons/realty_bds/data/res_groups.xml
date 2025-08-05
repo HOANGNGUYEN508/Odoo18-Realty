@@ -359,5 +359,65 @@
             <field name="category_id" ref="base.module_category_realty"/>
             <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
         </record>
+
+				<!-- product_report -->
+				<!-- user -->
+				<record id="access_group_user_product_report" model="res.groups">
+            <field name="name">[Company Restricted]User of the product_report</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+        <!-- manager -->
+        <record id="access_group_manager_product_report" model="res.groups">
+            <field name="name">[Company Restricted]Manager of the product_report</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+				<!-- realty -->
+				<record id="access_group_realty_product_report" model="res.groups">
+            <field name="name">[No Restricted]Right to CRUD the product_report</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>				
+
+				<!-- owner_feedback -->
+				<!-- seen -->
+        <record id="access_group_seen_owner_feedback" model="res.groups">
+            <field name="name">[Company Restricted]Right to read the owner_feedback</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+        <!-- full -->
+        <record id="access_group_full_owner_feedback" model="res.groups">
+            <field name="name">[Company Restricted]Right to CRUD the owner_feedback</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+				<!-- realty -->
+				<record id="access_group_realty_owner_feedback" model="res.groups">
+            <field name="name">[No Restricted]Right to CRUD the owner_feedback</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+				<!-- client_feedback -->
+				<!-- seen -->
+        <record id="access_group_seen_client_feedback" model="res.groups">
+            <field name="name">[Company Restricted]Right to read the client_feedback</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+        <!-- full -->
+        <record id="access_group_full_client_feedback" model="res.groups">
+            <field name="name">[Company Restricted]Right to CRUD the client_feedback</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+				<!-- realty -->
+				<record id="access_group_realty_client_feedback" model="res.groups">
+            <field name="name">[No Restricted]Right to CRUD the client_feedback</field>
+            <field name="category_id" ref="base.module_category_realty"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
     </data>
 </odoo>
