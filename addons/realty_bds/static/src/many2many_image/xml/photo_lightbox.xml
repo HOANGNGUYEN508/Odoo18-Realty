@@ -9,7 +9,13 @@
 					</div>
 				</t>
 				<div class="lightbox-header">
-					<i t-att-class="'presentation-icon ' + (isPresentation ? 'fa fa-star' : 'fa fa-star-o')" t-on-click.stop="togglePresentation" data-tooltip="Set as presentation" />
+					<t t-if="props.presentationImage">
+						<i 
+							t-att-class="'presentation-icon ' + (isPresentation ? 'fa fa-star' : 'fa fa-star-o')" 
+							t-on-click.stop="togglePresentation" 
+							data-tooltip="Set as presentation" 
+						/>
+					</t>
 
 					<t t-if="!state.loading">
 						<span class="file-name" t-esc="currentFile?.name"/>
@@ -24,7 +30,7 @@
 						>
 							<i class="icon fa fa-download"/>
 						</a>
-						<button class="btn btn-delete" t-on-click.stop="deleteCurrent" data-tooltip="Delete image" t-att-disabled="state.loading">
+						<button t-if="!props.readonly" class="btn btn-delete" t-on-click.stop="deleteCurrent" data-tooltip="Delete image" t-att-disabled="state.loading">
 							<i class="fa fa-trash trash-icon"/>
 						</button>
 						<button class="btn btn-close" t-on-click.stop="close">
@@ -37,7 +43,12 @@
 						<button class="nav prev" t-on-click="prev" t-att-disabled="state.loading">&#10094;</button>
 					</t>
 					<t t-if="currentFile">
-						<img t-att-src="currentFile.url" t-att-alt="currentFile.name" t-on-load="onImageLoad" t-att-class="!state.loading ? '' : 'o_hidden'"/>
+						<img 
+							t-att-src="currentFile.url" 
+							t-att-alt="currentFile.name" 
+							t-on-load="onImageLoad" 
+							t-att-class="!state.loading ? '' : 'o_hidden'"
+						/>
 					</t>
 					<t t-if="props.files.length &gt; 1">
 						<button class="nav next" t-on-click="next" t-att-disabled="state.loading">&#10095;</button>
