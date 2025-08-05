@@ -1,6 +1,7 @@
 from odoo import models, fields, api # type: ignore
 from odoo.exceptions import ValidationError # type: ignore
 from odoo.http import request # type: ignore
+import re
 
 class ProductReport(models.Model):
     _name = 'product_report'
@@ -129,19 +130,77 @@ class ProductReport(models.Model):
     _sql_constraints = [
         ('unique_name', 'UNIQUE(name)', 'This name already exists!'),  # Ensure uniqueness
     ]
+    
+    @api.constrains('phone')
+    def _check_phone(self):
+        pattern = re.compile(r'^\d{9,12}$')
+        for rec in self:
+            if not pattern.match(rec.phone or ''):
+                raise ValidationError("❌ Error: Phone must be 9–12 digits, numbers only.")
 
-    @api.constrains('name')
-    def _check_name(self):
-        # Fetch reserved words dynamically from the policy model
-        reserved_words = request.env['policy'].sudo().search([]).mapped('name')
-        reserved_words = set(word.strip().lower() for word in reserved_words)  # Normalize        
-        for record in self:
-            clean_name = record.name.strip().lower()  # Convert to lowercase to check correctly
-            if not record.name.strip():  # Prevent empty or spaces-only names
-                raise ValidationError('❌ Error: Name cannot be empty or contain only spaces!')
-            if len(record.name) > 100:  # Limit name length
-                raise ValidationError('❌ Error: Name cannot exceed 100 characters!')
-            if any(char in record.name for char in r"@#$%&*<>?/|{}[]\\!+=;:,"):  # Block special characters
-                raise ValidationError('❌ Error: Name cannot contain special characters!')
-            if clean_name in reserved_words:  # Prevent reserved words
-                raise ValidationError(f"❌ Error: Name '{record.name}' is not allowed!")
+    @api.constrains('citizen_id')
+    def _check_citizen_id(self):
+        pattern = re.compile(r'^\d{9,12}$')
+        for rec in self:
+            if not pattern.match(rec.citizen_id or ''):
+                raise ValidationError("❌ Error: Citizen ID must be 9–12 digits, numbers only.")
+
+    @api.constrains('email')
+    def _check_email(self):
+        # very simple RFC-style check
+        pattern = re.compile(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
+        for rec in self:
+            if not pattern.match(rec.email or ''):
+                raise ValidationError("❌ Error: Please enter a valid email address.")
+
+    @api.constrains(
+        'name',
+        'customer',
+        'opinions',
+        'reason',
+        'owner_feedback',
+        'client_feedback',
+    )
+    def _check_text_fields(self):
+        # Pull reserved words once
+        reserved = request.env['policy'].sudo().search([]).mapped('name')
+        reserved = {w.strip().lower() for w in reserved}
+
+        # Define per-field requirements
+        specs = {
+            'name':        {'max_len': 100, 'allow_empty': False},
+            'customer':    {'max_len': 100, 'allow_empty': False},
+            'opinions':    {'max_len': 500, 'allow_empty': False},
+            'reason':      {'max_len': 300, 'allow_empty': False},
+            'owner_feedback':   {'max_len': 300, 'allow_empty': False},
+            'client_feedback':  {'max_len': 300, 'allow_empty': False},
+        }
+        special_chars = set(r"@#$%&*<>?/|{}[]\!+=;:,")
+
+        for rec in self:
+            for field_name, rules in specs.items():
+                val = getattr(rec, field_name) or ''
+                text = val.strip()
+                # Empty check
+                if not text and not rules['allow_empty']:
+                    raise ValidationError(
+                        f"❌ Error: {field_name.replace('_',' ').title()} cannot be empty."
+                    )
+                # Length check
+                if len(text) > rules['max_len']:
+                    raise ValidationError(
+                        f"❌ Error: {field_name.replace('_',' ').title()} "
+                        f"cannot exceed {rules['max_len']} characters."
+                    )
+                # Special-character check
+                if any(ch in special_chars for ch in text):
+                    raise ValidationError(
+                        f"❌ Error: {field_name.replace('_',' ').title()} "
+                        f"cannot contain special characters."
+                    )
+                # Reserved-word check
+                if text.lower() in reserved:
+                    raise ValidationError(
+                        f"❌ Error: {field_name.replace('_',' ').title()} "
+                        "contains a forbidden word."
+                    )
