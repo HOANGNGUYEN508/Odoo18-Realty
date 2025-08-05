@@ -1,6 +1,7 @@
 Hoàng: phân tích và thiết kế hệ thống.
 
 ⭐️ Spring 1:
+
     - Thêm các list model:
         + Hiếu:
             * Mục đính mua.
@@ -41,6 +42,7 @@ Hoàng: phân tích và thiết kế hệ thống.
         + Policy. ✅
 
 ⭐️ Spring 2:
+
     - Models:
         + User: Huy + Khải.
         + Product: Hiếu + Hoàng.
