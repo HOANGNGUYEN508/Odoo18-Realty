@@ -1,5 +1,5 @@
 <odoo>
-	<data>
+	<data noupdate="1">
 		<!-- Admin -->
 		<record id="realty_admin" model="hr.job">
 			<field name="company_id" ref="base.main_company"/>

@@ -40,6 +40,7 @@
 						<field name="approval" widget="statusbar" options="{'clickable': 0}"/>
 					</group>
 				</sheet>
+				<chatter/>
 			</form>
 		</field>
 	</record>

@@ -22,6 +22,7 @@
             <xpath expr="//h2/field[@name='login']" position="after">
                 <group>
                     <field name="partner_id" string="Related Partner" readonly="1" required="0"/>
+										<field name="company_ids" string="Allowed Companies" groups="realty_bds.access_group_realty_users" widget="many2many_tags"/>
 										<field name="company_id" string="Default Company" groups="realty_bds.access_group_realty_users"/>
                     <field name="citizen_id" string="Citizen ID"/>
                     <field name="hr_job_id" string="Job Title" options="{'no_create': True}"/>
@@ -42,7 +43,7 @@
         <field name="arch" type="xml">
             <xpath expr="//sheet" position="inside">
                 <group>
-                    <field name="partner_id" string="Related Partner" readonly="1"/>
+										<field name="citizen_id" string="Citizen ID"/>
                     <field name="hr_job_id" string="Job Title" options="{'no_create': True}"/>
                 </group>
             </xpath>

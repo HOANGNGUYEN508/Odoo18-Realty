@@ -38,15 +38,36 @@ class ResUsers(models.Model):
                                 help="The job title associated with this user", ondelete='restrict')
 
     # Helper Method
+    BLOCKED_GROUP_XML_IDS = [
+        'product.group_product_manager',
+        'base.group_sanitize_override',
+        'website.group_website_designer',
+        'hr.group_hr_manager',
+        'website.group_website_restricted_editor',
+        'hr.group_hr_user',
+    ]
+
     def _sync_groups_from_job_title(self):
+        # Get all blocked groups
+        blocked_groups = self.env['res.groups']
+        for xmlid in self.BLOCKED_GROUP_XML_IDS:
+            group = self.env.ref(xmlid, raise_if_not_found=False)
+            if group:
+                blocked_groups |= group
+
         for user in self:
             if user.hr_job_id:
-                user.groups_id = [(5, 0, 0)]
-                if user.hr_job_id.implied_ids:
-                    user.groups_id = [(4, group.id)
-                                      for group in user.hr_job_id.implied_ids]
+                # Get job's groups minus blocked ones
+                job_groups = user.hr_job_id.implied_ids - blocked_groups
+            
+                # Get current non-blocked groups
+                current_groups = user.groups_id - blocked_groups
+            
+                # Merge and set groups
+                user.groups_id = current_groups | job_groups
             else:
-                user.groups_id = [(5, 0, 0)]
+                # Just remove blocked groups (keep others)
+                user.groups_id = [(3, group.id) for group in blocked_groups]
 
     def _sync_to_partner(self):
         for user in self:
@@ -122,6 +143,10 @@ class ResUsers(models.Model):
         xml_ids_to_remove = [
             'product.group_product_manager',
             'base.group_sanitize_override',
+						'website.group_website_designer',
+            'hr.group_hr_manager',
+						'website.group_website_restricted_editor',
+            'hr.group_hr_user',
         ]
         group_ids_to_remove = []
         for xmlid in xml_ids_to_remove:

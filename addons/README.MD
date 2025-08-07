@@ -106,4 +106,9 @@ Hoàng: phân tích và thiết kế hệ thống.
 
 		- Hoàng:
 				+ Thêm chức năng để người tạo ra record của real estate sẽ có quyền quyết định cá nhân hoặc toàn bộ cá nhân thuộc công ty khác có quyền xem record của mình.
+				+ Thêm tính năng readonly và presentationImage vào many2many_image và photo_lightbox (do tính năng set ảnh đại diện là custom riêng cho product.template, dùng widget cho mấy field khác không có sử dụng). 
+				+ Thêm model: owner_feedback, client_feedback, product_report.
+				+ Thêm views và menu cho những model mới.
+				+ Hoàn thiện model action (xem lịch sử thay đổi, đặt lịch hẹn, làm report) của product.template.
+				+ Sửa 1 vài quyền. 1 số quyền ảnh hưởng đến logic của hệ thống không thể bỏ qua file data sẽ được thêm vào guideline.
 

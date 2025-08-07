@@ -1,5 +1,5 @@
 <odoo>
-    <data>
+    <data noupdate="1">
         <!-- Rule for hr.department -->
         <!-- 1. Full CRUD for user's own company -->
 				<record id="hr_department_company_rule" model="ir.rule">

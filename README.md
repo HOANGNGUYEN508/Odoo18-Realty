@@ -186,6 +186,13 @@ This project’s modules (`realty_bds` and `VietNam_administrative`) should resi
 | Standardize | Change model name, code from Vietnamese to English + merge code                             | Khải & Hoàng  | ✅ Completed |
 | Profile UI  | Upgrade profile page with changing password and better UI                                   | Phương        | ✅ Completed |
 
+### 🎯 Spring 3
+
+| Area          | Tasks                                                                                       | Owner(s)      |    Status    |
+| -----------   | ------------------------------------------------------------------------------------------- | ------------- | :----------: |
+| Report        | Extend `mail.tracking.value`; create `product_report`, `client_feedback`, `owner_feedback`  | Hoàng         | ✅ Completed |
+| Action method | Action method for product.template: view history, schedule, make report                     | Hoàng         | ✅ Completed |
+
 ---
 
 

@@ -1,5 +1,5 @@
 <odoo>
-    <data>
+    <data noupdate="1">
 				<!-- region -->
 				<!-- seen -->
         <record id="access_group_seen_region" model="res.groups">
