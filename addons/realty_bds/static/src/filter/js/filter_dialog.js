@@ -35,7 +35,7 @@ export class FilterDialog extends Component {
 			region_id: toStr(initial.region_id),
 			status_id: toStr(initial.status_id),
 			type_id: toStr(initial.type_id),
-			land_tittle_id: toStr(initial.land_tittle_id),
+			land_title_id: toStr(initial.land_title_id),
 			feature_ids: Array.isArray(initial.feature_ids)
 				? initial.feature_ids
 				: [],
@@ -60,8 +60,8 @@ export class FilterDialog extends Component {
 			districts: [],
 			communes: [],
 			types: [],
-			land_tittles: [],
-			unit_price_units: [],
+			land_titles: [],
+			unit_prices: [],
 			features: [],
 			statuss: [],
 		});
@@ -110,7 +110,7 @@ export class FilterDialog extends Component {
 					["district", "districts", ["id", "name", "province_id"]],
 					["commune", "communes", ["id", "name", "district_id"]],
 					["type", "types", ["id", "name"]],
-					["land_tittle", "land_tittles", ["id", "name"]],
+					["land_title", "land_titles", ["id", "name"]],
 					["unit_price", "unit_prices", ["id", "name", "multiplier"]],
 					["status", "statuss", ["id", "name"]],
 				];
@@ -139,7 +139,7 @@ export class FilterDialog extends Component {
 					districts: "Select District",
 					communes: "Select Commune",
 					types: "Select Type",
-					land_tittles: "Select Title",
+					land_titles: "Select Title",
 					unit_prices: "Select Unit Price",
 					statuss: "Select Status",
 				};

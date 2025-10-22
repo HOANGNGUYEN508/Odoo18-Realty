@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+	<t t-name="realty_bds.comment_dialog">
+		<Dialog t-props="{'title': 'Comments'}" size="lg">
+			<t t-if="state.topLevel.length === 0 &amp;&amp; !state.loading">
+				<div class="text-center p-3">No comments yet. Be the first to comment!</div>
+			</t>
+			<t t-else="">
+				<div class="o_comment_scroll">
+					<div class="o_pager mb-2 d-flex align-items-center">
+						<div class="ms-auto d-flex align-items-center gap-2">
+							<button type="button" class="btn btn-sm btn-light" t-att-disabled="state.loading || state.page == 0" t-on-click="loadPrevPage">&#10094;</button>
+							<span>Page <t t-esc="state.page + 1"/></span>
+							<button type="button" class="btn btn-sm btn-light" t-att-disabled="state.loading || !state.hasMore" t-on-click="loadNextPage">&#10095;</button>
+						</div>
+					</div>
+
+					<div class="o_comment_list">
+						<t t-foreach="state.topLevel" t-as="cid" t-key="cid">
+							<RealtyCommentItem
+								id="cid"
+								getComment="(id) =&gt; state.commentsById[id]"
+								level="0"
+								onReply="startReply"
+								onUpdated="_onCommentUpdated"
+								onDeleted="_onCommentDeleted"
+								replyingTo="state.replyingTo"
+								isModerator="isModerator"
+								isUser="isUser"
+								getReplies="(pid) =&gt; state.repliesByParent[pid] || []"
+								loadReplies="(pid, page) =&gt; loadRepliesFor(pid, page)"
+								loadMoreReplies="(pid) =&gt; loadMoreRepliesFor(pid)"
+								toggleReplies="(pid) =&gt; toggleRepliesFor(pid)"
+								getRepliesMeta="(pid) =&gt; state.repliesMeta[pid] || {}"
+								isRepliesVisible="(pid) =&gt; !!state.showRepliesByParent[pid]"
+							/>
+						</t>
+					</div>
+				</div>
+			</t>
+
+			<div class="o_comment_form mb-3 mt-3">
+				<t t-if="state.replyingTo">
+					<div class="replying-overlay d-flex align-items-center mb-2">
+						<div class="replying-text">Replying to 
+							<strong>
+								<t t-esc="replyingToName"/>
+							</strong>
+						</div>
+						<button type="button" class="btn btn-sm btn-outline-secondary ms-auto" t-on-click="cancelReply">✕</button>
+					</div>
+				</t>
+
+				<div class="d-flex align-items-center w-100 comment-input-row" t-on-click="(ev) =&gt; ev.stopPropagation()">
+					<input type="text" class="form-control flex-grow-1" t-att-placeholder="state.replyingTo ? 'Write a reply...' : 'Add a comment...'" t-ref="commentInput" t-on-keydown="handleKeydown" />
+					<button type="button" class="btn btn-primary ms-2" t-on-click="createTopLevelComment" title="Send">
+						<i class="fa fa-paper-plane" aria-hidden="true"/>
+					</button>
+				</div>
+
+				<t t-if="state.replyingTo">
+					<div t-on-click="cancelReply" class="reply-cancel-capture" aria-hidden="true"></div>
+				</t>
+			</div>
+		</Dialog>
+	</t>
+</templates>

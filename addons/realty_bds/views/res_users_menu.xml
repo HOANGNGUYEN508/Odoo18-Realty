@@ -1,8 +1,0 @@
-<odoo>
-    <menuitem 
-        id="menu_user_extension_root" 
-        name="User Extension" 
-        parent="menu_user_root"
-        action="action_res_users_with_job_title"
-        sequence="10"/>
-</odoo>

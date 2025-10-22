@@ -1,0 +1,33 @@
+<odoo>
+	<menuitem 
+    id="menu_job_title_root" 
+    name="Job Title"
+    parent="menu_user_root"
+    action="action_job_title"
+    sequence="0"
+	/>
+
+	<menuitem 
+    id="menu_user_extension_root" 
+    name="Users" 
+    parent="menu_user_root"
+    action="action_res_users_with_job_title"
+    sequence="1"
+	/>
+
+	<menuitem 
+    id="menu_company_root" 
+    name="Company" 
+    parent="menu_user_root"
+    action="action_res_company"
+    sequence="2"
+	/>  
+
+	<menuitem 
+    id="menu_department_root" 
+    name="Department"
+    parent="menu_user_root" 
+    action="action_department"
+    sequence="3"
+	/>
+</odoo>

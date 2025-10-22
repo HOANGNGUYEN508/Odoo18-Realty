@@ -1,0 +1,247 @@
+$avatar-size: 40px;
+$avatar-gap: 16px; // gap between avatar column and bubble
+$bubble-radius: 14px;
+$bubble-padding-vertical: 10px;
+$bubble-padding-horizontal: 12px;
+$border-accent: rgba(11, 95, 255, 0.06);
+$border-accent-strong: rgba(11, 95, 255, 0.28);
+$shadow-weak: 0 6px 18px rgba(15, 23, 42, 0.06);
+$shadow-strong: 0 10px 30px rgba(11, 95, 255, 0.08);
+$text-color: #111;
+$muted-bg: #f7f9ff;
+$muted-border: rgba(11, 95, 255, 0.08);
+
+.o_comment_list,
+.o_comment_list * {
+  box-sizing: border-box;
+}
+
+.comment-item {
+  position: relative;
+  margin-bottom: 12px;
+  /* inline CSS vars expected: --level-offset, --connector-left */
+  /* e.g. style="--level-offset: 22px; --connector-left: 42px;" */
+}
+
+/* scope highlight only to this item’s own bubble */
+.comment-item.is-highlighted > .comment-row > .comment-bubble {
+  border-left-color: $border-accent-strong;
+  box-shadow: $shadow-strong;
+  transform: translateY(-2px);
+  transition: all 0.15s ease;
+}
+
+/* row: avatar + bubble */
+.comment-row {
+  display: flex;
+  align-items: flex-start;
+}
+
+/* avatar column - this *moves* based on level */
+.comment-avatar {
+  width: $avatar-size;
+  flex: 0 0 $avatar-size;
+  /* move avatar right per level so bubble's right stays fixed */
+  margin-left: var(--level-offset, 0px);
+  margin-right: 8px; // gap between avatar and bubble
+
+  .avatar-img {
+    width: $avatar-size;
+    height: $avatar-size;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.06);
+    display: block;
+  }
+}
+
+/* bubble - DO NOT shift horizontally; reduce width instead */
+.comment-bubble {
+  background: #ffffff;
+  border-radius: $bubble-radius;
+  padding: $bubble-padding-vertical $bubble-padding-horizontal;
+  box-shadow: $shadow-weak;
+  position: relative;
+  z-index: 2;
+  border-left: 4px solid $border-accent;
+
+  /* bubble is anchored; its left space is reduced by avatar + gap + level-offset */
+  margin-left: 0;
+  max-width: calc(100% - #{$avatar-size} - #{$avatar-gap} - var(--level-offset, 0px));
+
+  @media (max-width: 560px) {
+    max-width: calc(100% - #{$avatar-size} - 8px - var(--level-offset, 0px));
+  }
+
+  .comment-header {
+    display: flex;
+    align-items: center;
+
+    .comment-author {
+      color: $text-color;
+      font-size: 0.85rem;
+    }
+
+    .ms-auto {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn {
+      padding: 0.25rem 0.4rem;
+      line-height: 1;
+      font-size: 0.82rem;
+    }
+  }
+
+  .comment-content {
+    color: $text-color;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    margin-top: 6px;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .comment-actions {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .btn {
+      font-size: 0.82rem;
+      padding: 0.25rem 0.5rem;
+    }
+  }
+}
+
+/* connector: line joining reply chains. template should set --connector-left. */
+.comment-replies {
+  margin-top: 8px;
+  position: relative;
+
+  > .comment-item::before {
+		display: none;
+  }
+}
+
+/* edit mode inputs */
+.comment-bubble input[type="text"],
+.comment-bubble textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* comment input row at bottom of dialog */
+.o_comment_form {
+  margin-top: 12px;
+
+  .comment-input-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+
+    input.form-control {
+      flex-grow: 1;
+      min-width: 0;
+    }
+
+    .btn {
+      flex: 0 0 auto;
+    }
+  }
+}
+
+/* replying overlay shown above the input when replying */
+.replying-overlay {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: $muted-bg;
+  color: $border-accent-strong;
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+  border: 1px solid $muted-border;
+}
+
+/* invisible capture area to cancel reply when clicked below input */
+.reply-cancel-capture {
+  display: block;
+  width: 100%;
+  height: 12px;
+  cursor: default;
+}
+
+/* replies spacing tweaks */
+.comment-replies .comment-item {
+  margin-bottom: 10px;
+}
+
+/* center load-more area */
+.comment-replies .text-center {
+  text-align: center;
+}
+
+/* accessibility / focus */
+button:focus,
+input:focus,
+textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(11,95,255,0.06);
+  border-radius: 6px;
+}
+
+/* ensure connector is visually behind the bubble */
+.comment-replies,
+.comment-item {
+  position: relative;
+}
+
+/* responsive adjustments */
+@media (max-width: 480px) {
+  .comment-bubble {
+    padding: 8px 10px;
+    border-radius: 10px;
+    font-size: 0.92rem;
+  }
+
+  .comment-avatar {
+    width: 36px;
+    flex: 0 0 36px;
+  }
+}
+
+/* Add: scrollable area containing pager + list */
+.o_comment_scroll {
+  /* Give the scrollable area a reasonable max-height within the dialog */
+  max-height: calc(60vh); /* tweak this value as you prefer (e.g. 55vh / 65vh) */
+  overflow: auto;
+  padding: 8px;
+  border-radius: 8px;
+  background: transparent;
+  position: relative;
+}
+
+/* Make pager stick to top of the scrolling area */
+.o_comment_scroll .o_pager {
+  position: sticky;
+  top: 0;
+  z-index: 6;
+  background: #ffffff; /* keep it visually separate from list */
+  padding-top: 6px;
+  padding-bottom: 6px;
+  /* subtle bottom divider so it's obvious it's pinned */
+  box-shadow: 0 4px 8px rgba(0,0,0,0.04);
+}
+
+/* Make sure comment list itself is spaced below sticky pager */
+.o_comment_scroll .o_comment_list {
+  /* leave a small gap so content doesn't butt directly to pager */
+  margin-top: 8px;
+}
+

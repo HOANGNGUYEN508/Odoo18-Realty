@@ -19,7 +19,7 @@
 					(4, ref('realty_bds.access_group_realty_reasons_buy')),
 					(4, ref('realty_bds.access_group_realty_home_direction')),
 					(4, ref('realty_bds.access_group_realty_g_home_direction')),
-					(4, ref('realty_bds.access_group_realty_land_tittle')),
+					(4, ref('realty_bds.access_group_realty_land_title')),
 					(4, ref('realty_bds.access_group_realty_unit_price')),
 				]
 			"/>
@@ -45,7 +45,7 @@
 					(4, ref('realty_bds.access_group_realty_reasons_buy')),
 					(4, ref('realty_bds.access_group_realty_home_direction')),
 					(4, ref('realty_bds.access_group_realty_g_home_direction')),
-					(4, ref('realty_bds.access_group_realty_land_tittle')),
+					(4, ref('realty_bds.access_group_realty_land_title')),
 					(4, ref('realty_bds.access_group_realty_unit_price')),
 					(4, ref('realty_bds.access_group_realty_partner')),
 					(4, ref('realty_bds.access_group_realty_employee')),
@@ -74,6 +74,14 @@
 					(4, ref('realty_bds.access_group_realty_product_report')),
 					(4, ref('realty_bds.access_group_realty_owner_feedback')),
 					(4, ref('realty_bds.access_group_realty_client_feedback')),
+					(4, ref('realty_bds.access_group_realty_congratulation')),
+					(4, ref('realty_bds.access_group_realty_guideline')),
+					(4, ref('realty_bds.access_group_realty_notification')),
+					(4, ref('realty_bds.access_group_realty_urgent_buying')),
+					(4, ref('realty_bds.access_group_realty_reject_reason')),
+					(4, ref('realty_bds.access_group_realty_remove_reason')),
+					(4, ref('realty_bds.access_group_realty_moderator_guideline')),
+					(4, ref('realty_bds.access_group_realty_moderator_assignment_sequence')),
 				]
 			"/>
 		</record>

@@ -1,9 +1,0 @@
-<odoo>
-    <menuitem 
-        id="menu_job_title_root" 
-        name="Job Title"
-        parent="menu_user_root"
-        action="action_job_title"
-        sequence="10"/>
-    
-</odoo>

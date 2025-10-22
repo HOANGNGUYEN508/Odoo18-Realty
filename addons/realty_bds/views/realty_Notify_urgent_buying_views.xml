@@ -1,0 +1,382 @@
+<odoo>
+	<!-- Form View -->
+	<record id="urgent_buying_form_view" model="ir.ui.view">
+		<field name="name">urgent_buying_form</field>
+		<field name="model">urgent_buying</field>
+		<field name="arch" type="xml">
+			<form>
+				<sheet>
+					<group>
+						<field name="name" readonly="approval == 'pending'"/>
+					</group>
+
+					<group string="Details">
+						<field name="demand" readonly="approval == 'pending'"/>
+						<field name="area" readonly="approval == 'pending'"/>
+						<field name="finance" readonly="approval == 'pending'"/>
+						<field name="reason_buy_id" widget="selection" readonly="approval == 'pending'"/>
+						<field name="region_id" widget="selection" readonly="approval == 'pending'"/>
+						<field name="district_id" widget="selection" readonly="approval == 'pending'"/>
+						<field name="tag_ids" widget="many2many_tags" options="{'no_create': True}" readonly="approval == 'pending'"/>
+					</group>
+
+					<group>
+						<field name="approval" readonly="1" widget="statusbar" options="{'clickable': 0}"/>
+						<field name="moderator_id" string="Moderator" readonly="1" invisible="approval == 'pending'"/>
+						<button name="action_send" string="Send" type="object" class="btn-primary" invisible="edit_counter != -1"/>
+						<field name="edit_counter" readonly="1" invisible="edit_counter == -1"/>
+						<button name="action_resend" string="Resend" type="object" class="btn-primary" invisible="edit_counter == -1 or edit_counter == 0"/>
+					</group>
+				</sheet>
+				<chatter/>
+			</form>
+		</field>
+	</record>
+
+	<!-- Kanban View for user -->
+	<record id="urgent_buying_kanban_view" model="ir.ui.view">
+		<field name="name">urgent_buying_kanban</field>
+		<field name="model">urgent_buying</field>
+		<field name="arch" type="xml">
+			<kanban class="two-per-row-kanban">
+				<!-- fields to load -->
+				<field name="name"/>
+				<field name="create_uid"/>
+				<field name="create_date"/>
+				<field name="demand"/>
+				<field name="area"/>
+				<field name="finance"/>
+				<field name="reason_buy_id"/>
+				<field name="region_id"/>
+				<field name="district_id"/>
+				<field name="like_count"/>
+				<field name="tag_ids"/>
+				<field name="comment_count"/>
+				<field name="approval"/>
+				<field name="moderated_on"/>
+				<field name="moderator_id"/>
+				<field name="reason"/>
+				<templates>
+					<t t-name="card">
+						<div class="o_post_box p-3 mb-2">
+
+							<!-- Header: avatar + name + datetime -->
+							<div class="d-flex align-items-center mb-2 header_notify" t-att-data-approval="record.approval.raw_value or ''">
+								<!-- Avatar (option using /web/image) -->
+								<t t-if="record.create_uid">
+									<img t-att-src="'/web/image_protected?model=res.users&amp;id=' + record.create_uid.raw_value + '&amp;field=avatar_128'" alt="avatar" class="o_post_avatar avatar_notify" />
+								</t>
+								<div class="flex-grow-1 d-flex flex-column">
+									<div class="fw-bold">
+										<t t-esc="record.create_uid and record.create_uid.value or '—'"/>
+									</div>
+									<div class="small text-muted">
+										<t t-esc="record.create_date and record.create_date.value or '—'"/>
+									</div>
+								</div>
+							</div>
+
+							<!-- Title -->
+							<div class="fw-bold mb-2">
+                  I have a client who urgently needs to make a purchase; please assist me in finding it. Client criteria:
+							</div>
+
+							<!-- Content -->
+							<div class="o_post_content small">
+
+								<!-- Region -->
+								<div class="d-flex align-items-center mb-1">
+									<strong class="me-2 cotent_notify">Region:</strong>
+									<div class="flex-grow-1 text-truncate" style="min-width:0;">
+										<t t-esc="record.region_id and record.region_id.value or '—'"/>
+									</div>
+								</div>
+
+								<!-- District -->
+								<div class="d-flex align-items-center mb-1">
+									<strong class="me-2 cotent_notify">District:</strong>
+									<div class="flex-grow-1 text-truncate" style="min-width:0;">
+										<t t-esc="record.district_id and record.district_id.value or '—'"/>
+									</div>
+								</div>
+
+								<!-- Finance -->
+								<div class="d-flex align-items-center mb-1">
+									<strong class="me-2 cotent_notify">Finance:</strong>
+									<div class="flex-grow-1 text-truncate" style="min-width:0;">
+										<t t-esc="record.finance and record.finance.value or '—'"/>
+									</div>
+								</div>
+
+								<!-- Area -->
+								<div class="d-flex align-items-center mb-1">
+									<strong class="me-2 cotent_notify">Area:</strong>
+									<div class="flex-grow-1 text-truncate" style="min-width:0;">
+										<t t-esc="record.area and record.area.value or '—'"/>
+									</div>
+								</div>
+
+								<!-- Reason Buy -->
+								<div class="d-flex align-items-center mb-1">
+									<strong class="me-2 cotent_notify">Reason buy:</strong>
+									<div class="flex-grow-1 text-truncate" style="min-width:0;">
+										<t t-esc="record.reason_buy_id and record.reason_buy_id.value or '—'"/>
+									</div>
+								</div>
+
+								<!-- Demand -->
+								<div class="d-flex align-items-center mb-1">
+									<strong class="me-2 cotent_notify">Demand:</strong>
+									<div class="flex-grow-1 text-truncate" style="min-width:0;">
+										<t t-esc="record.demand and record.demand.value or '—'"/>
+									</div>
+								</div>
+							</div>
+
+							<!-- Tags -->
+							<t t-if="record.tag_ids">
+								<field name="tag_ids" widget="many2many_tags"/>
+							</t>
+						</div>
+						<!-- BOX END -->
+
+						<!-- Footer section -->
+						<div class="o_post_footer mt-1 d-flex gap-2 align-items-center">
+							<!-- Like button: shows count and acts as toggle -->
+							<button name="action_toggle_like" type="object" class="btn btn-sm btn-outline-primary d-flex align-items-center">
+								<i class="fa fa-thumbs-up me-1" aria-hidden="true"></i>
+								<span>
+									<t t-esc="record.like_count.value or 0"/>
+								</span>
+							</button>
+
+							<t groups="realty_bds.access_group_mod_urgent_buying,realty_bds.access_group_realty_urgent_buying" t-if="record.approval and record.approval.raw_value == 'approved'">
+								<!-- Remove button -->
+								<button name="action_remove" type="object" class="btn btn-sm btn-outline-danger d-flex align-items-center">
+									<i class="fa fa-times me-1" aria-hidden="true"></i>
+									<span>Remove</span>
+								</button>
+							</t>
+
+							<t t-if="record.approval and (record.approval.raw_value == 'rejected' or record.approval.raw_value == 'removed')">
+								<i class="fa fa-times me-1" aria-hidden="true"></i>
+								<span class="badge_rejected" t-esc="record.approval.raw_value"/>
+							</t>
+
+							<!-- Reply / open comments -->
+							<button name="action_open_comments" type="object" class="btn btn-sm btn-outline-secondary ms-auto">
+								<i class="fa fa-comment me-1" aria-hidden="true"></i>
+								<t t-esc="record.comment_count.value or 0"/>
+							</button>
+						</div>
+
+						<!-- Reason to reject or remove post -->
+						<t t-if="record.approval and (record.approval.raw_value == 'rejected' or record.approval.raw_value == 'removed')">
+							<div class="o_rejection_container mt-3 p-3">
+								<div class="d-flex align-items-center mb-2">
+									<!-- Avatar -->
+									<t t-if="record.moderator_id">
+										<img t-att-src="'/web/image_protected?model=res.users&amp;id=' + record.moderator_id.raw_value + '&amp;field=avatar_128'" alt="avatar" class="o_post_avatar avatar_notify" />
+									</t>
+									<div class="flex-grow-1 d-flex flex-column">
+										<div class="fw-bold">
+											<t t-esc="record.moderator_id and record.moderator_id.value or '—'"/>
+										</div>
+										<div class="small text-muted">
+											<t t-esc="record.moderated_on and record.moderated_on.value or '—'"/>
+										</div>
+									</div>
+								</div>
+
+								<!-- Reason -->
+								<div class="o_rejection_reason">
+									<span class="fw-bold" t-esc="'Reason ' + record.approval.raw_value + ':'"/>
+									<t t-esc="record.reason.value or 'No reason provided.'"/>
+								</div>
+							</div>
+						</t>
+					</t>
+				</templates>
+			</kanban>
+		</field>
+	</record>
+
+	<!-- User Menu -->
+	<record id="action_urgent_buying" model="ir.actions.act_window">
+		<field name="name">Urgent Buying Post</field>
+		<field name="res_model">urgent_buying</field>
+		<field name="view_mode">form,kanban</field>
+		<field name="domain">
+		[
+			'|', '|',
+			'&amp;', ('company_id', 'in', allowed_company_ids), ('create_uid', '=', uid),
+			'&amp;', ('company_id', '=', 1), ('approval', '=', 'approved'),
+			'&amp;', '&amp;', ('company_id', 'in', allowed_company_ids), ('approval', '=', 'approved'), ('create_uid', '!=', uid)
+  	]	
+		</field>
+		<field name="view_ids" eval="[
+      (5, 0, 0),
+      (0, 0, {
+        'view_mode': 'kanban',
+        'view_id': ref('realty_bds.urgent_buying_kanban_view')
+      }),
+      (0, 0, {
+        'view_mode': 'form',
+        'view_id': ref('realty_bds.urgent_buying_form_view')
+      })
+    ]"/>
+	</record>
+
+	<!-- Kanban View -->
+	<record id="urgent_buying_kanban_view_mod" model="ir.ui.view">
+		<field name="name">urgent_buying_kanban_mod</field>
+		<field name="model">urgent_buying</field>
+		<field name="arch" type="xml">
+			<kanban class="two-per-row-kanban" js_class="info_kanban">
+				<!-- fields to load -->
+				<field name="name"/>
+				<field name="create_uid"/>
+				<field name="create_date"/>
+				<field name="demand"/>
+				<field name="area"/>
+				<field name="finance"/>
+				<field name="reason_buy_id"/>
+				<field name="region_id"/>
+				<field name="district_id"/>
+				<field name="like_count"/>
+				<field name="tag_ids"/>
+				<field name="comment_count"/>
+				<templates>
+					<t t-name="card">
+						<div class="o_post_box p-3 mb-2">
+
+							<!-- Header: avatar + name + datetime -->
+							<div class="d-flex align-items-center mb-2 header_notify">
+								<!-- Avatar (option using /web/image) -->
+								<t t-if="record.create_uid">
+									<img t-att-src="'/web/image_protected?model=res.users&amp;id=' + record.create_uid.raw_value + '&amp;field=avatar_128'" alt="avatar" class="o_post_avatar avatar_notify" />
+								</t>
+								<div class="flex-grow-1 d-flex flex-column">
+									<div class="fw-bold">
+										<t t-esc="record.create_uid and record.create_uid.value or '—'"/>
+									</div>
+									<div class="small text-muted">
+										<t t-esc="record.create_date and record.create_date.value or '—'"/>
+									</div>
+								</div>
+							</div>
+
+							<!-- Title -->
+							<div class="fw-bold mb-2">
+                  I have a client who urgently needs to make a purchase; please assist me in finding it. Client criteria:
+							</div>
+
+							<!-- Content -->
+							<div class="o_post_content small">
+
+								<!-- Region -->
+								<div class="d-flex align-items-center mb-1">
+									<strong class="me-2 cotent_notify">Region:</strong>
+									<div class="flex-grow-1 text-truncate" style="min-width:0;">
+										<t t-esc="record.region_id and record.region_id.value or '—'"/>
+									</div>
+								</div>
+
+								<!-- District -->
+								<div class="d-flex align-items-center mb-1">
+									<strong class="me-2 cotent_notify">District:</strong>
+									<div class="flex-grow-1 text-truncate" style="min-width:0;">
+										<t t-esc="record.district_id and record.district_id.value or '—'"/>
+									</div>
+								</div>
+
+								<!-- Finance -->
+								<div class="d-flex align-items-center mb-1">
+									<strong class="me-2 cotent_notify">Finance:</strong>
+									<div class="flex-grow-1 text-truncate" style="min-width:0;">
+										<t t-esc="record.finance and record.finance.value or '—'"/>
+									</div>
+								</div>
+
+								<!-- Area -->
+								<div class="d-flex align-items-center mb-1">
+									<strong class="me-2 cotent_notify">Area:</strong>
+									<div class="flex-grow-1 text-truncate" style="min-width:0;">
+										<t t-esc="record.area and record.area.value or '—'"/>
+									</div>
+								</div>
+
+								<!-- Reason Buy -->
+								<div class="d-flex align-items-center mb-1">
+									<strong class="me-2 cotent_notify">Reason buy:</strong>
+									<div class="flex-grow-1 text-truncate" style="min-width:0;">
+										<t t-esc="record.reason_buy_id and record.reason_buy_id.value or '—'"/>
+									</div>
+								</div>
+
+								<!-- Demand -->
+								<div class="d-flex align-items-center mb-1">
+									<strong class="me-2 cotent_notify">Demand:</strong>
+									<div class="flex-grow-1 text-truncate" style="min-width:0;">
+										<t t-esc="record.demand and record.demand.value or '—'"/>
+									</div>
+								</div>
+							</div>
+
+							<!-- Tags -->
+							<t t-if="record.tag_ids">
+								<field name="tag_ids" widget="many2many_tags"/>
+							</t>
+						</div>
+						<!-- BOX END -->
+
+						<!-- Footer section -->
+						<div class="o_post_footer mt-1 d-flex gap-2 align-items-center">
+							<!-- Like button: shows count and acts as toggle -->
+							<button name="action_toggle_like" type="object" class="btn btn-sm btn-outline-primary d-flex align-items-center">
+								<i class="fa fa-thumbs-up me-1" aria-hidden="true"></i>
+								<span>
+									<t t-esc="record.like_count.value or 0"/>
+								</span>
+							</button>
+
+							<!-- Approve button -->
+							<button name="action_approve" type="object" class="btn btn-sm btn-outline-success d-flex align-items-center">
+								<i class="fa fa-check me-1" aria-hidden="true"></i>
+								<span>Approve</span>
+							</button>
+
+							<!-- Reject button -->
+							<button name="action_reject" type="object" class="btn btn-sm btn-outline-danger d-flex align-items-center">
+								<i class="fa fa-times me-1" aria-hidden="true"></i>
+								<span>Reject</span>
+							</button>
+
+							<!-- Reply / open comments -->
+							<button name="action_open_comments" type="object" class="btn btn-sm btn-outline-secondary ms-auto">
+								<i class="fa fa-comment me-1" aria-hidden="true"></i>
+								<t t-esc="record.comment_count.value or 0"/>
+							</button>
+						</div>
+					</t>
+				</templates>
+			</kanban>
+		</field>
+	</record>
+
+	<!-- Moderator Menu -->
+	<record id="action_urgent_buying_mod" model="ir.actions.act_window">
+		<field name="name">Urgent Buying Post Queue</field>
+		<field name="res_model">urgent_buying</field>
+		<field name="view_mode">kanban</field>
+		<field name="view_ids" eval="[
+      (5, 0, 0),
+      (0, 0, {
+        'view_mode': 'kanban',
+        'view_id': ref('realty_bds.urgent_buying_kanban_view_mod')
+      })
+    ]"/>
+		<field name="domain">[('approval', '=', 'pending')]</field>
+    <field name="context">{'create': False, 'show_guideline_button': True}</field>
+	</record>
+</odoo>

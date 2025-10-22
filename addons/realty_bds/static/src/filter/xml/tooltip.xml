@@ -1,20 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
-  <t t-name="realty_bds.Many2ManyChipTooltip">
-    <div class="o-tooltip tooltip-inner">
-      <div
-        class="d-grid"
-        t-att-style="`
+	<t t-name="realty_bds.Many2ManyChipTooltip">
+		<div class="o-tooltip tooltip-inner">
+			<div class="d-grid" t-att-style="`
           grid-template-columns: repeat(${ columnCount }, max-content);
           gap: 0.5rem;
-        `"
-      >
-        <t t-foreach="items" t-as="item" t-key="item">
-          <div class="py-1 px-2 text-truncate" style="white-space: nowrap;">
-            <t t-esc="item"/>
-          </div>
-        </t>
-      </div>
-    </div>
-  </t>
+        `">
+				<t t-foreach="items" t-as="item" t-key="item">
+					<div class="py-1 px-2 text-truncate" style="white-space: nowrap;">
+						<t t-esc="item"/>
+					</div>
+				</t>
+			</div>
+		</div>
+	</t>
 </templates>

@@ -1,0 +1,28 @@
+<odoo>
+	<!-- Reject form -->
+	<record id="view_generic_wizard_form" model="ir.ui.view">
+		<field name="name">notify_wizard_form</field>
+		<field name="model">notify_wizard</field>
+		<field name="arch" type="xml">
+			<form>
+				<sheet>
+					<group>
+						<group>
+							<field name="model_name" invisible="1" readonly="1"/>
+							<field name="record_id" invisible="1" readonly="1"/>
+							<field name="action_type" invisible="1" readonly="1"/>
+							<div class="o_form_label">Please provide a reason:</div>
+							<field name="reject_select" invisible="action_type == 'remove'"/>
+							<field name="remove_select" invisible="action_type == 'reject'"/>
+							<field name="reason" placeholder="Enter the reason..." nolabel="1" invisible="(action_type == 'reject' and reject_select != 'other') or (action_type == 'remove' and remove_select != 'other')" />
+						</group>
+					</group>
+				</sheet>
+				<footer>
+					<button name="action_confirm" string="Confirm" type="object" class="btn-danger"/>
+					<button string="Cancel" class="btn-secondary" special="cancel"/>
+				</footer>
+			</form>
+		</field>
+	</record>
+</odoo>

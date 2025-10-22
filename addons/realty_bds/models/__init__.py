@@ -6,7 +6,7 @@ from . import realty_Real_Estate_feature
 from . import realty_Real_Estate_reason
 from . import realty_Real_Estate_group_home_direction
 from . import realty_Real_Estate_home_direction
-from . import realty_Real_Estate_land_tittle
+from . import realty_Real_Estate_land_title
 from . import realty_Real_Estate_unit_price
 from . import realty_region
 from . import VNadmin_province
@@ -26,3 +26,15 @@ from . import mail_tracking_value
 from . import realty_Report_client_feedback
 from . import realty_Report_owner_feedback
 from . import realty_Real_Estate_report
+from . import realty_notify
+from . import realty_Notify_moderator_assignment_sequence
+from . import realty_Notify_guideline 
+from . import realty_Notify_urgent_buying
+from . import realty_Notify_congratulation
+from . import realty_Notify_notification
+from . import realty_Notify_moderator_guideline
+from . import realty_Notify_reject_reason
+from . import realty_Notify_remove_reason
+from . import realty_Notify_wizard
+from . import realty_Notify_comment
+from . import ir_attachment

@@ -1,0 +1,29 @@
+<odoo>
+	<!-- Form view inherit -->
+	<record id="view_attachment_form_inherit" model="ir.ui.view">
+		<field name="name">ir.attachment.form.inherit</field>
+		<field name="model">ir.attachment</field>
+		<field name="inherit_id" ref="base.view_attachment_form"/>
+		<field name="arch" type="xml">
+			<xpath expr="//div[@name='creation_div']" position="after">
+				<field name="orphaned_date"/>
+				<field name="orphaned_from_model"/>
+				<field name="orphaned_from_res_id"/>
+			</xpath>
+		</field>
+	</record>
+
+	<!-- List view inherit -->
+	<record id="view_attachment_tree_inherit" model="ir.ui.view">
+		<field name="name">ir.attachment.tree.inherit</field>
+		<field name="model">ir.attachment</field>
+		<field name="inherit_id" ref="base.view_attachment_tree"/>
+		<field name="arch" type="xml">
+			<field name="create_date" position="after">
+				<field name="orphaned_date"/>
+				<field name="orphaned_from_model"/>
+				<field name="orphaned_from_res_id"/>
+			</field>
+		</field>
+	</record>
+</odoo>

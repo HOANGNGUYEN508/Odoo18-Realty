@@ -1,0 +1,35 @@
+<odoo>
+	<!-- List View -->
+	<record id="moderator_guideline_tree" model="ir.ui.view">
+		<field name="name">Moderator Guideline List</field>
+		<field name="model">moderator_guideline</field>
+		<field name="arch" type="xml">
+			<list>
+				<field name="name"/>
+			</list>
+		</field>
+	</record>
+
+	<!-- Form View -->
+	<record id="moderator_guideline_form" model="ir.ui.view">
+		<field name="name">Moderator Guideline Form</field>
+		<field name="model">moderator_guideline</field>
+		<field name="arch" type="xml">
+			<form>
+				<sheet>
+					<group>
+						<field id="moderator_guideline_name" name="name" placeholder="Enter a name" autocomplete="off"/>
+					</group>
+				</sheet>
+				<chatter/>
+			</form>
+		</field>
+	</record>
+
+	<!-- Action -->
+	<record id="action_moderator_guideline" model="ir.actions.act_window">
+		<field name="name">Moderator Guideline</field>
+		<field name="res_model">moderator_guideline</field>
+		<field name="view_mode">list,form</field>
+	</record>
+</odoo>

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+	<t t-name="realty_bds.RealtyCommentItem" owl="1">
+		<div t-att-class="'comment-item comment-level-' + (props.level || 0) + (isHighlighted ? ' is-highlighted' : '')" t-att-style="(
+        '--level-offset: ' + ((props.level || 0) * 22) + 'px; ' +
+        '--connector-left: ' + (20 + ((props.level || 0) * 22)) + 'px;'
+      )">
+			<div class="comment-row d-flex">
+				<div class="comment-avatar me-2">
+					<img t-att-src="'/web/image_protected?model=res.users&amp;id=' + (commentData.create_uid &amp;&amp; commentData.create_uid[0]) + '&amp;field=avatar_128'" alt="avatar" class="avatar-img" />
+				</div>
+
+				<div class="comment-bubble flex-grow-1">
+					<div class="comment-header d-flex align-items-center">
+						<span class="comment-author fw-bold me-2">
+							<t t-esc="commentData.create_uid &amp;&amp; commentData.create_uid[1]"/>
+						</span>
+
+						<div class="ms-auto d-flex align-items-center gap-1">
+							<button type="button" class="btn btn-sm btn-outline-secondary" t-if="isCommentAuthor" t-on-click="startEdit" title="Edit">
+								<i class="fa fa-pencil" aria-hidden="true"/>
+							</button>
+
+							<button type="button" class="btn btn-sm btn-outline-danger" t-if="isCommentAuthor || props.isModerator" t-on-click="deleteComment" title="Delete">
+								<i class="fa fa-trash" aria-hidden="true"/>
+							</button>
+						</div>
+					</div>
+
+					<div class="comment-content mt-1">
+						<t t-if="!local.editing">
+							<t t-esc="commentData.content"/>
+						</t>
+						<t t-else="">
+							<div class="d-flex">
+								<input t-ref="editInput" t-model="local.editingContent" class="form-control me-2" />
+								<button class="btn btn-sm btn-primary me-1" t-on-click="saveEdit">
+									<i class="fa fa-floppy-o" aria-hidden="true"/>
+								</button>
+								<button class="btn btn-sm btn-outline-secondary" t-on-click="cancelEdit">✕</button>
+							</div>
+						</t>
+					</div>
+
+					<div class="comment-actions d-flex align-items-center mt-2" t-if="props.isUser">
+						<button type="button" class="btn btn-sm btn-outline-secondary me-2" t-att-disabled="local.togglingLike" t-on-click="toggleLike">
+							<i class="fa fa-thumbs-up me-1" t-att-class="local.togglingLike ? 'text-muted' : ''"/>
+							<span t-esc="commentData.like_count || 0"/>
+						</button>
+
+						<button type="button" class="btn btn-sm btn-outline-secondary me-2" t-on-click="startReply">
+							<i class="fa fa-reply" aria-hidden="true"/>
+						</button>
+
+						<button 
+							type="button" 
+							t-if="commentData.child_count &gt; 0" 
+							class="btn btn-sm btn-outline-secondary" 
+							t-att-disabled="(props.getRepliesMeta(props.id) || {}).loading" 
+							t-on-click="toggleReplies"
+						>
+							<t t-esc="props.isRepliesVisible(props.id) ? 'Hide ' : 'Show '"/>
+							<t t-esc="commentData.child_count"/>
+							<t t-esc="commentData.child_count === 1 ? ' reply' : ' replies'"/>
+							<i t-att-class="'fa ' + (props.isRepliesVisible(props.id) ? 'fa-chevron-up' : 'fa-chevron-down') + ' ms-1'"/>
+						</button>
+					</div>
+				</div>
+			</div>
+
+			<div t-if="props.isRepliesVisible(props.id)" class="comment-replies mt-3">
+				<t t-if="(props.getRepliesMeta(props.id) || {}).loading">
+					<div class="text-center">Loading replies...</div>
+				</t>
+
+				<t t-foreach="props.getReplies(props.id)" t-as="rid" t-key="rid">
+					<RealtyCommentItem 
+						id="rid" 
+						getComment="props.getComment" 
+						level="(props.level || 0) + 1" 
+						onReply="props.onReply" 
+						onUpdated="props.onUpdated" 
+						onDeleted="props.onDeleted" 
+						isModerator="props.isModerator" 
+						isUser="props.isUser" 
+						replyingTo="props.replyingTo" 
+						getReplies="props.getReplies" 
+						loadReplies="props.loadReplies" 
+						loadMoreReplies="props.loadMoreReplies" 
+						toggleReplies="props.toggleReplies" 
+						getRepliesMeta="props.getRepliesMeta" 
+						isRepliesVisible="props.isRepliesVisible" 
+					/>
+				</t>
+
+				<div t-if="(props.getRepliesMeta(props.id) || {}).hasMore" class="text-center mt-2">
+					<button class="btn btn-sm btn-outline-primary" t-att-disabled="(props.getRepliesMeta(props.id) || {}).loading" t-on-click="loadNextReplies">
+      			Load More
+					</button>
+				</div>
+			</div>
+
+		</div>
+	</t>
+</templates>

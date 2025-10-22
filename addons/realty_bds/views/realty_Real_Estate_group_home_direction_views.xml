@@ -1,37 +1,37 @@
 <odoo>
-    <!-- List View -->
-    <record id="group_home_direction_tree" model="ir.ui.view">
-        <field name="name">group_home_direction_list</field>
-        <field name="model">group_home_direction</field>
-        <field name="arch" type="xml">
-            <list>
-                <field name="name"/>
-            </list>
-        </field>
-    </record>
+	<!-- List View -->
+	<record id="group_home_direction_tree" model="ir.ui.view">
+		<field name="name">group_home_direction_list</field>
+		<field name="model">group_home_direction</field>
+		<field name="arch" type="xml">
+			<list>
+				<field name="name"/>
+			</list>
+		</field>
+	</record>
 
-    <!-- Form View -->
-    <record id="group_home_direction_form" model="ir.ui.view">
-        <field name="name">group_home_direction_form</field>
-        <field name="model">group_home_direction</field>
-        <field name="arch" type="xml">
-            <form>
-                <sheet>
-                    <group>
-                        <field id="group_home_direction_name" name="name" placeholder="Enter a name" autocomplete="off"/>
-                    </group>
-                </sheet>
-                <chatter/>
-            </form>
-        </field>
-    </record>
+	<!-- Form View -->
+	<record id="group_home_direction_form" model="ir.ui.view">
+		<field name="name">group_home_direction_form</field>
+		<field name="model">group_home_direction</field>
+		<field name="arch" type="xml">
+			<form>
+				<sheet>
+					<group>
+						<field id="group_home_direction_name" name="name" placeholder="Enter a name" autocomplete="off"/>
+					</group>
+				</sheet>
+				<chatter/>
+			</form>
+		</field>
+	</record>
 
-    <!-- Action -->
-    <record id="action_group_home_direction" model="ir.actions.act_window">
-        <field name="name">Group home direction</field>
-        <field name="res_model">group_home_direction</field>
-        <field name="view_mode">list,form</field>
-    </record>
+	<!-- Action -->
+	<record id="action_group_home_direction" model="ir.actions.act_window">
+		<field name="name">Group home direction</field>
+		<field name="res_model">group_home_direction</field>
+		<field name="view_mode">list,form</field>
+	</record>
 </odoo>
 
 

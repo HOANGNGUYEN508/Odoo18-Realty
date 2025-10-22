@@ -1,77 +1,76 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
-  <t t-name="web.ControlPanel" t-inherit="web.ControlPanel" t-inherit-mode="extension">
+	<t t-name="web.ControlPanel" t-inherit="web.ControlPanel" t-inherit-mode="extension">
 
-    <!-- Filter button -->
-    <xpath expr="//div[@t-ref='mainButtons' and contains(@class, 'o_control_panel_main_buttons')]" position="inside">
-      <t t-if="env.searchModel?.resModel === 'product.template' &amp;&amp; (env.config.viewType === 'list' || env.config.viewType === 'kanban')">
-        <button type="button" class="btn btn-primary" t-on-click="openFilterDialog">
-          <i class="fa fa-filter me"/>
-        </button>
-      </t>
-    </xpath>
+		<!-- Filter button -->
+		<xpath expr="//div[@t-ref='mainButtons' and contains(@class, 'o_control_panel_main_buttons')]" position="inside">
+			<t t-if="env.searchModel?.resModel === 'product.template' &amp;&amp; (env.config.viewType === 'list' || env.config.viewType === 'kanban')">
+				<button type="button" class="btn btn-primary" t-on-click="openFilterDialog">
+					<i class="fa fa-filter me"/>
+				</button>
+				<button type="button" class="btn btn-primary" t-on-click="favoriteToggle">
+					<i t-att-class="favoriteFilter.isFavorite ? 'fa fa-star' : 'fa fa-star-o'"/>
+				</button>
+			</t>
+		</xpath>
 
-    <!-- Chips area -->
-    <xpath expr="//div[contains(@class, 'o_control_panel_actions')]" position="inside">
-      <t t-if="env.searchModel?.resModel === 'product.template'
+		<!-- Chips area -->
+		<xpath expr="//div[contains(@class, 'o_control_panel_actions')]" position="inside">
+			<t t-if="env.searchModel?.resModel === 'product.template'
             &amp;&amp; env.config.viewType === 'list'
             &amp;&amp; allChips.length &gt; 0">
-        <div class="o_filter_chips d-flex flex-wrap align-items-center gap-1">
-          <t t-foreach="(chipState.isExpanded ? allChips : allChips.slice(0, maxVisibleChips))"
-             t-as="chip" t-key="chip.key">
+				<div class="o_filter_chips d-flex flex-wrap align-items-center gap-1">
+					<t t-foreach="(chipState.isExpanded ? allChips : allChips.slice(0, maxVisibleChips))" t-as="chip" t-key="chip.key">
 
-            <!-- Default preference chip -->
-            <t t-if="chip.key === 'preference' and chip.isDefault">
-              <span class="badge preference_default d-inline-flex p-0">
-                <span class="chip-left d-flex align-items-center justify-content-center">
-                  <i class="fa fa-star" aria-hidden="true"/>
-                </span>
-                <span class="chip-right d-flex align-items-center">
-                  <t t-esc="chip.label"/>
-                  <i class="fa fa-times ms-2 cursor-pointer"
-                     t-on-click="removePreferenceChip"/>
-                </span>
-              </span>
-            </t>
+						<!-- Default preference chip -->
+						<t t-if="chip.key === 'preference' and chip.isDefault">
+							<span class="badge preference_default d-inline-flex p-0">
+								<span class="chip-left d-flex align-items-center justify-content-center">
+									<i class="fa fa-star" aria-hidden="true"/>
+								</span>
+								<span class="chip-right d-flex align-items-center">
+									<t t-esc="chip.label"/>
+									<i class="fa fa-times ms-2 cursor-pointer" t-on-click="removePreferenceChip"/>
+								</span>
+							</span>
+						</t>
 
-            <!-- Non-default preference chip -->
-            <t t-elif="chip.key === 'preference'">
-              <span class="badge bg-light border d-flex align-items-center">
-                <t t-esc="chip.label"/>
-                <i class="fa fa-times ms-2 cursor-pointer" t-on-click="removePreferenceChip"/>
-              </span>
-            </t>
+						<!-- Non-default preference chip -->
+						<t t-elif="chip.key === 'preference'">
+							<span class="badge bg-light border d-flex align-items-center">
+								<t t-esc="chip.label"/>
+								<i class="fa fa-times ms-2 cursor-pointer" t-on-click="removePreferenceChip"/>
+							</span>
+						</t>
 
-            <!-- Normal chips -->
-            <t t-else="">
-              <span class="badge bg-light border d-flex align-items-center">
-                <t t-esc="chip.label"/>
-                <i class="fa fa-times ms-2 cursor-pointer" t-on-click="() =&gt; chip.remove()"/>
-              </span>
-            </t>
+						<!-- Normal chips -->
+						<t t-else="">
+							<span class="badge bg-light border d-flex align-items-center">
+								<t t-esc="chip.label"/>
+								<i class="fa fa-times ms-2 cursor-pointer" t-on-click="() =&gt; chip.remove()"/>
+							</span>
+						</t>
 
-          </t>
+					</t>
 
-          <!-- Collapsed indicator + expand control -->
-          <t t-if="!chipState.isExpanded &amp;&amp; allChips.length &gt; maxVisibleChips">
-            <span class="badge bg-light border d-flex align-items-center">
-              +<t t-esc="allChips.length - maxVisibleChips"/>…
-            </span>
-            <span class="bg-light cursor-pointer d-flex align-items-center"
-                  t-on-click="toggleExpand">
-              <i class="fa fa-chevron-right fa-lg"/>
-            </span>
-          </t>
+					<!-- Collapsed indicator + expand control -->
+					<t t-if="!chipState.isExpanded &amp;&amp; allChips.length &gt; maxVisibleChips">
+						<span class="badge bg-light border d-flex align-items-center">
+              +	<t t-esc="allChips.length - maxVisibleChips"/> …
+						</span>
+						<span class="bg-light cursor-pointer d-flex align-items-center" t-on-click="toggleExpand">
+							<i class="fa fa-chevron-right fa-lg"/>
+						</span>
+					</t>
 
-          <!-- Collapse control when expanded -->
-          <t t-if="chipState.isExpanded &amp;&amp; allChips.length &gt; maxVisibleChips">
-            <span class="bg-light cursor-pointer d-flex align-items-center"
-                  t-on-click="toggleExpand">
-              <i class="fa fa-chevron-left fa-lg"/>
-            </span>
-          </t>
-        </div>
-      </t>
-    </xpath>
-  </t>
+					<!-- Collapse control when expanded -->
+					<t t-if="chipState.isExpanded &amp;&amp; allChips.length &gt; maxVisibleChips">
+						<span class="bg-light cursor-pointer d-flex align-items-center" t-on-click="toggleExpand">
+							<i class="fa fa-chevron-left fa-lg"/>
+						</span>
+					</t>
+				</div>
+			</t>
+		</xpath>
+	</t>
 </templates>

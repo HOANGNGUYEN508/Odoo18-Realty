@@ -10,24 +10,14 @@
 				</t>
 				<div class="lightbox-header">
 					<t t-if="props.presentationImage">
-						<i 
-							t-att-class="'presentation-icon ' + (isPresentation ? 'fa fa-star' : 'fa fa-star-o')" 
-							t-on-click.stop="togglePresentation" 
-							data-tooltip="Set as presentation" 
-						/>
+						<i t-att-class="'presentation-icon ' + (isPresentation ? 'fa fa-star' : 'fa fa-star-o')" t-on-click.stop="togglePresentation" data-tooltip="Set as presentation" />
 					</t>
 
 					<t t-if="!state.loading">
 						<span class="file-name" t-esc="currentFile?.name"/>
 					</t>
 					<div class="controls">
-						<a 
-							t-att-class="'btn btn-download ' + (!state.loading ? '' : 'disabled-link')" 
-							t-att-href="state.loading ? null : currentFile.url"
-							t-att-download="state.loading ? null : currentFile.name" 
-							data-tooltip="Download image" 
-							target="_blank"
-						>
+						<a t-att-class="'btn btn-download ' + (!state.loading ? '' : 'disabled-link')" t-att-href="state.loading ? null : currentFile.url" t-att-download="state.loading ? null : currentFile.name" data-tooltip="Download image" target="_blank">
 							<i class="icon fa fa-download"/>
 						</a>
 						<button t-if="!props.readonly" class="btn btn-delete" t-on-click.stop="deleteCurrent" data-tooltip="Delete image" t-att-disabled="state.loading">
@@ -43,12 +33,7 @@
 						<button class="nav prev" t-on-click="prev" t-att-disabled="state.loading">&#10094;</button>
 					</t>
 					<t t-if="currentFile">
-						<img 
-							t-att-src="currentFile.url" 
-							t-att-alt="currentFile.name" 
-							t-on-load="onImageLoad" 
-							t-att-class="!state.loading ? '' : 'o_hidden'"
-						/>
+						<img t-att-src="currentFile.url" t-att-alt="currentFile.name" t-on-load="onImageLoad" t-att-class="!state.loading ? '' : 'o_hidden'" />
 					</t>
 					<t t-if="props.files.length &gt; 1">
 						<button class="nav next" t-on-click="next" t-att-disabled="state.loading">&#10095;</button>

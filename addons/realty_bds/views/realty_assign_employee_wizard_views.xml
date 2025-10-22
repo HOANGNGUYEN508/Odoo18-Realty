@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Form View-->
-    <record id="assign_employee_wizard_form" model="ir.ui.view">
-        <field name="name">assign.employee.wizard.form</field>
-        <field name="model">assign.employee.wizard</field>
-        <field name="arch" type="xml">
-            <form string="Assign Employees to Department">
-                <group>
-                    <field name="department_id" readonly="1"/>
-                    <field name="employee_ids" widget="many2many_tags"/>
-                </group>
-                <footer>
-                    <button name="action_assign_employees" string="Assign Employees" type="object" class="oe_highlight"/>
-                    <button string="Cancel" class="oe_link" special="cancel"/>
-                </footer>
-            </form>
-        </field>
-    </record>
+	<!-- Form View-->
+	<record id="assign_employee_wizard_form" model="ir.ui.view">
+		<field name="name">assign.employee.wizard.form</field>
+		<field name="model">assign.employee.wizard</field>
+		<field name="arch" type="xml">
+			<form string="Assign Employees to Department">
+				<group>
+					<field name="department_id" readonly="1"/>
+					<field name="employee_ids" widget="many2many_tags"/>
+				</group>
+				<footer>
+					<button name="action_assign_employees" string="Assign Employees" type="object" class="oe_highlight"/>
+					<button string="Cancel" class="oe_link" special="cancel"/>
+				</footer>
+			</form>
+		</field>
+	</record>
 
-    <record id="action_assign_employee_wizard" model="ir.actions.act_window">
-        <field name="name">Assign Employees</field>
-        <field name="res_model">assign.employee.wizard</field>
-        <field name="view_mode">form</field>
-        <field name="target">new</field>
-    </record>
+	<record id="action_assign_employee_wizard" model="ir.actions.act_window">
+		<field name="name">Assign Employees</field>
+		<field name="res_model">assign.employee.wizard</field>
+		<field name="view_mode">form</field>
+		<field name="target">new</field>
+	</record>
 </odoo>

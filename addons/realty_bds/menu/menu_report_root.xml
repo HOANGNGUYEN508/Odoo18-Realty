@@ -1,0 +1,36 @@
+<odoo>
+	<!-- Canned Responses -->
+	<menuitem 
+		id="menu_client_feedback_root" 
+		name="Client Feedback Options" 
+		parent="menu_report_root" 
+		action="action_client_feedback"
+		sequence="0"
+	/>
+
+	<menuitem 
+		id="menu_owner_feedback_root" 
+		name="Owner Feedback Options" 
+		parent="menu_report_root" 
+		action="action_owner_feedback"
+		sequence="1"/>
+
+	<!-- Report -->
+	<menuitem 
+		id="menu_product_report_manager_root" 
+		name="Assessing Report" 
+		parent="menu_report_root" 
+		action="action_product_report_manager"
+		sequence="20"
+		groups="realty_bds.access_group_manager_product_report,realty_bds.access_group_realty_product_report"
+	/>
+
+	<menuitem 
+		id="menu_product_report_user_root" 
+		name="Your Report" 
+		parent="menu_report_root" 
+		action="action_product_report_user"
+		sequence="21"
+		groups="realty_bds.access_group_user_product_report,realty_bds.access_group_realty_product_report"
+	/>
+</odoo>

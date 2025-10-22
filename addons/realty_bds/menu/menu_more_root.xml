@@ -1,0 +1,25 @@
+<odoo>
+  <menuitem 
+    id="menu_policy_list_root"
+    name="Policy" 
+    parent="menu_more_root"
+    action="action_policy"
+    sequence="0"
+	/>
+
+	<menuitem 
+    id="menu_tag_root" 
+    name="Tag"
+    parent="menu_more_root" 
+    action="action_tag"
+    sequence="1"
+	/>
+
+	<menuitem 
+    id="menu_moderator_assignment_sequence_root" 
+    name="Moderator Assignment Sequence"
+    parent="menu_more_root" 
+    action="action_moderator_assignment_sequence"
+    sequence="2"
+	/>
+</odoo>

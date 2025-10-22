@@ -17,9 +17,9 @@ access_home_direction_realty,Home Direction Realty,model_home_direction,access_g
 access_group_home_direction_use,Group Home Direction Use,model_group_home_direction,access_group_seen_g_home_direction,1,0,0,0
 access_group_home_direction_add,Group Home Direction Add,model_group_home_direction,access_group_full_g_home_direction,1,1,1,1
 access_group_home_direction_realty,Group Home Direction Realty,model_group_home_direction,access_group_realty_g_home_direction,1,1,1,1
-access_land_tittle_use,Land Tittle Use,model_land_tittle,access_group_seen_land_tittle,1,0,0,0
-access_land_tittle_add,Land Tittle Add,model_land_tittle,access_group_full_land_tittle,1,1,1,1
-access_land_tittle_realty,Land Tittle Realty,model_land_tittle,access_group_realty_land_tittle,1,1,1,1
+access_land_title_use,Land Title Use,model_land_title,access_group_seen_land_title,1,0,0,0
+access_land_title_add,Land Title Add,model_land_title,access_group_full_land_title,1,1,1,1
+access_land_title_realty,Land Tittle Realty,model_land_title,access_group_realty_land_title,1,1,1,1
 access_unit_price_use,Unit Price Use,model_unit_price,access_group_seen_unit_price,1,0,0,0
 access_unit_price_add,Unit Price Add,model_unit_price,access_group_full_unit_price,1,1,1,1
 access_unit_price_realty,Unit Price Add,model_unit_price,access_group_realty_unit_price,1,1,1,1
@@ -41,7 +41,7 @@ access_hr_job_realty,Job Realty,model_hr_job,access_group_realty_job,1,1,1,1
 access_res_users_use,Users Use,model_res_users,access_group_seen_users,1,0,0,0
 access_res_users_add,Users Add,model_res_users,access_group_full_users,1,1,1,1
 access_res_users_realty,Users Realty,model_res_users,access_group_realty_users,1,1,1,1
-access_res_partner_use,Res Partner Use,model_res_partner,access_group_seen_write_partner,1,1,0,0
+access_res_partner_use,Res Partner Use,model_res_partner,access_group_user_partner,1,1,0,0
 access_res_partner_own,Res Partner Own,model_res_partner,access_group_full_partner,1,1,1,1
 access_res_partner_realty,Res Partner Realty,model_res_partner,access_group_realty_partner,1,1,1,1
 access_create_user_wizard_add,Sign Up Add,model_create_user_wizard,access_group_full_users,1,1,1,1
@@ -66,3 +66,45 @@ access_client_feedback_realty,Client Feedback Realty,model_client_feedback,acces
 access_product_report_user,Product Report User,model_product_report,access_group_user_product_report,1,1,1,1
 access_product_report_manager,Product Report Mannager,model_product_report,access_group_manager_product_report,1,1,1,1
 access_product_report_realty,Product Report Realty,model_product_report,access_group_realty_product_report,1,1,1,1
+access_congratulation_user,Congratulation User,model_congratulation,access_group_user_congratulation,1,1,1,1
+access_congratulation_mod,Congratulation Moderator,model_congratulation,access_group_mod_congratulation,1,1,1,1
+access_congratulation_realty,Congratulation Realty,model_congratulation,access_group_realty_congratulation,1,1,1,1
+access_guideline_user,Guideline User,model_guideline,access_group_user_guideline,1,1,1,1
+access_guideline_mod,Guideline Moderator,model_guideline,access_group_mod_guideline,1,1,1,1
+access_guideline_realty,Guideline Realty,model_guideline,access_group_realty_guideline,1,1,1,1
+access_notification_user,Notification User,model_notification,access_group_user_notification,1,1,1,1
+access_notification_mod,Notification Moderator,model_notification,access_group_mod_notification,1,1,1,1
+access_notification_realty,Notification Realty,model_notification,access_group_realty_notification,1,1,1,1
+access_urgent_buying_user,Urgent Buying User,model_urgent_buying,access_group_user_urgent_buying,1,1,1,1
+access_urgent_buying_mod,Urgent Buying Moderator,model_urgent_buying,access_group_mod_urgent_buying,1,1,1,1
+access_urgent_buying_realty,Urgent Buying Realty,model_urgent_buying,access_group_realty_urgent_buying,1,1,1,1
+access_reject_reason_use,Reject Reason Use,model_reject_reason,access_group_seen_reject_reason,1,0,0,0
+access_reject_reason_add,Reject Reason Add,model_reject_reason,access_group_full_reject_reason,1,1,1,1
+access_reject_reason_realty,Reject Reason Realty,model_reject_reason,access_group_realty_reject_reason,1,1,1,1
+access_remove_reason_use,Remove Reason Use,model_remove_reason,access_group_seen_remove_reason,1,0,0,0
+access_remove_reason_add,Remove Reason Add,model_remove_reason,access_group_full_remove_reason,1,1,1,1
+access_remove_reason_realty,Remove Reason Realty,model_remove_reason,access_group_realty_remove_reason,1,1,1,1
+access_moderator_guideline_use,Moderator Guideline Use,model_moderator_guideline,access_group_seen_moderator_guideline,1,0,0,0
+access_moderator_guideline_add,Moderator Guideline Add,model_moderator_guideline,access_group_full_moderator_guideline,1,1,1,1
+access_moderator_guideline_realty,Moderator Guideline Realty,model_moderator_guideline,access_group_realty_moderator_guideline,1,1,1,1
+access_notify_wizard_congratulation_mod,Notify Wizard Congratulation Mod,model_notify_wizard,access_group_mod_congratulation,1,1,1,1
+access_notify_wizard_guideline_mod,Notify Wizard Guideline Mod,model_notify_wizard,access_group_mod_guideline,1,1,1,1
+access_notify_wizard_notification_mod,Notify Wizard Notification Mod,model_notify_wizard,access_group_mod_notification,1,1,1,1
+access_notify_wizard_urgent_buying_mod,Notify Wizard Urgent Buying Mod,model_notify_wizard,access_group_mod_urgent_buying,1,1,1,1
+access_notify_wizard_congratulation_realty,Notify Wizard Congratulation Realty,model_notify_wizard,access_group_realty_congratulation,1,1,1,1
+access_notify_wizard_guideline_realty,Notify Wizard Guideline Realty,model_notify_wizard,access_group_realty_guideline,1,1,1,1
+access_notify_wizard_notification_realty,Notify Wizard Notification Realty,model_notify_wizard,access_group_realty_notification,1,1,1,1
+access_notify_wizard_urgent_buying_realty,Notify Wizard Urgent Buying Realty,model_notify_wizard,access_group_realty_urgent_buying,1,1,1,1
+access_moderator_assignment_sequence,Moderator Assignment Sequence Realty,model_moderator_assignment_sequence,access_group_realty_moderator_assignment_sequence,1,1,1,1
+access_congratulation_comment_user,Congratulation Comment User,model_realty_comment,access_group_user_congratulation,1,1,1,1
+access_guideline_comment_user,Guideline Comment User,model_realty_comment,access_group_user_guideline,1,1,1,1
+access_notification_comment_user,Notification Comment User,model_realty_comment,access_group_user_notification,1,1,1,1
+access_urgent_buying_comment_user,Urgent Buying Comment User,model_realty_comment,access_group_user_urgent_buying,1,1,1,1
+access_congratulation_comment_mod,Congratulation Comment Mod,model_realty_comment,access_group_mod_congratulation,1,1,1,1
+access_guideline_comment_mod,Guideline Comment Mod,model_realty_comment,access_group_mod_guideline,1,1,1,1
+access_notification_comment_mod,Notification Comment Mod,model_realty_comment,access_group_mod_notification,1,1,1,1
+access_urgent_buying_comment_mod,Urgent Buying Comment Mod,model_realty_comment,access_group_mod_urgent_buying,1,1,1,1
+access_congratulation_comment_realty,Congratulation Comment Realty,model_realty_comment,access_group_realty_congratulation,1,1,1,1
+access_guideline_comment_realty,Guideline Comment Realty,model_realty_comment,access_group_realty_guideline,1,1,1,1
+access_notification_comment_realty,Notification Comment Realty,model_realty_comment,access_group_realty_notification,1,1,1,1
+access_urgent_buying_comment_realty,Urgent Buying Comment Realty,model_realty_comment,access_group_realty_urgent_buying,1,1,1,1

@@ -1,27 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <!-- Form View Inherit-->
-    <record id="hr_department_add_employee_form" model="ir.ui.view">
-        <field name="name">hr.department.add.employee.form</field>
-        <field name="model">hr.department</field>
-        <field name="inherit_id" ref="hr.view_department_form"/>
-        <field name="arch" type="xml">
-            <xpath expr="//field[@name='color']" position="after">
-                <button 
-										name="action_open_assign_employee_wizard" 
-										string="Add Employees" 
-										type="object" 
-										groups="realty_bds.access_group_full_users,realty_bds.access_group_realty_users" 
-										class="oe_highlight"
-								/>
-            </xpath>
-        </field>
-    </record>
+	<!-- Form View Inherit-->
+	<record id="hr_department_add_employee_form" model="ir.ui.view">
+		<field name="name">hr.department.add.employee.form</field>
+		<field name="model">hr.department</field>
+		<field name="inherit_id" ref="hr.view_department_form"/>
+		<field name="arch" type="xml">
+			<xpath expr="//field[@name='color']" position="after">
+				<button name="action_open_assign_employee_wizard" string="Add Employees" type="object" groups="realty_bds.access_group_full_users,realty_bds.access_group_realty_users" class="oe_highlight" />
+			</xpath>
+		</field>
+	</record>
 
-    <!-- Action -->
-    <record id="action_department" model="ir.actions.act_window">
-        <field name="name">Department</field>
-        <field name="res_model">hr.department</field>
-        <field name="view_mode">list,form,kanban,hierarchy</field>
-    </record>
+	<!-- Action -->
+	<record id="action_department" model="ir.actions.act_window">
+		<field name="name">Department</field>
+		<field name="res_model">hr.department</field>
+		<field name="view_mode">list,form,kanban,hierarchy</field>
+	</record>
 </odoo>

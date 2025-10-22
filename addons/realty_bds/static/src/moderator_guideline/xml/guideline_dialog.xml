@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+	<t t-name="realty_bds.GuidelineDialog" owl="1">
+		<Dialog size="lg" t-props="{'title': 'Moderator Guidelines'}">
+			<div class="modal-body">
+				<div class="container">
+					<!-- Loading indicator -->
+					<t t-if="loading.active">
+						<div class="text-center p-3">
+							<i class="fa fa-refresh fa-spin"/>
+ 							Loading guideline...
+						</div>
+					</t>
+
+					<!-- Main content -->
+					<t t-if="!loading.active">
+						<div class="guideline-list">
+							<t t-foreach="values.list" t-as="guideline" t-key="guideline.id">
+								<div class="d-flex align-items-start mb-2">
+									<span class="badge bg-primary me-2" t-esc="guideline_index + 1"/>
+									<span t-esc="guideline.name"/>
+								</div>
+							</t>
+						</div>
+
+						<t t-if="!values.list.length">
+							<div class="alert alert-info text-center">
+								No guidelines available.
+							</div>
+						</t>
+					</t>
+				</div>
+			</div>
+		</Dialog>
+	</t>
+</templates>

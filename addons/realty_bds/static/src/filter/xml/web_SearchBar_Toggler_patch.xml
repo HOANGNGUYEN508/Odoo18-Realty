@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
-    <t t-name="web.SearchBar.Toggler" t-inherit="web.SearchBar.Toggler" t-inherit-mode="extension">
-        <xpath expr="//button" position="attributes">
-            <attribute name="t-if">props.isSmall &amp; env.searchModel.resModel != 'product.template'</attribute>
-        </xpath>
-    </t>
+	<t t-name="web.SearchBar.Toggler" t-inherit="web.SearchBar.Toggler" t-inherit-mode="extension">
+		<xpath expr="//button" position="attributes">
+			<attribute name="t-if">props.isSmall &amp; env.searchModel.resModel != 'product.template'</attribute>
+		</xpath>
+	</t>
 </templates>

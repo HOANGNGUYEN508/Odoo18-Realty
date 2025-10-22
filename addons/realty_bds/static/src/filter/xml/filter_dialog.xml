@@ -1,233 +1,226 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
-  <t t-name="realty_bds.FilterDialog" owl="1">
-    <Dialog title="Filter" size="lg">
-      <div class="modal-body">
-        <div class="container">
-          <!-- Loading indicator -->
-          <t t-if="loading.active">
-            <div class="text-center p-3">
-              <i class="fa fa-refresh fa-spin"/>
+	<t t-name="realty_bds.FilterDialog" owl="1">
+		<Dialog t-props="{'title': 'Filter'}" size="lg">
+			<div class="modal-body">
+				<div class="container">
+					<!-- Loading indicator -->
+					<t t-if="loading.active">
+						<div class="text-center p-3">
+							<i class="fa fa-refresh fa-spin"/>
  							Loading filters...
-            </div>
-          </t>
+						</div>
+					</t>
 
-          <!-- Main content -->
-          <t t-if="!loading.active">
-            <!-- ─── Filter Fields ─── -->
-            <div class="row">
-              <!-- Price Column -->
-              <div class="col-4">
-                <h5 class="text-center fw-bold mb-3">Price</h5>
-                <div class="form-group mb-3">
-                  <div class="row g-1">
-                    <div class="col-6">
-                      <input type="number" id="min_price" name="min_price" class="form-control" t-model="values.min_price" min="0" step="1000000" placeholder="Min Price" />
-                    </div>
-                    <div class="col-6">
-                      <select id="unit_price_min_id" name="unit_price_min_id" class="form-select" t-model="values.unit_price_min_id">
-                        <t t-foreach="options.unit_prices" t-as="u" t-key="u.id">
-                          <option t-att-value="u.id.toString()" t-esc="u.name"/>
-                        </t>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-                <div class="form-group mb-3">
-                  <div class="row g-1">
-                    <div class="col-6">
-                      <input type="number" id="max_price" name="max_price" class="form-control" t-model="values.max_price" min="0" step="1000000" placeholder="Max Price" />
-                    </div>
-                    <div class="col-6">
-                      <select id="unit_price_max_id" name="unit_price_max_id" class="form-select" t-model="values.unit_price_max_id">
-                        <t t-foreach="options.unit_prices" t-as="u" t-key="u.id">
-                          <option t-att-value="u.id.toString()" t-esc="u.name"/>
-                        </t>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              </div>
+					<!-- Main content -->
+					<t t-if="!loading.active">
+						<!-- ─── Filter Fields ─── -->
+						<div class="row">
+							<!-- Price Column -->
+							<div class="col-4">
+								<h5 class="text-center fw-bold mb-3">Price</h5>
+								<div class="form-group mb-3">
+									<div class="row g-1">
+										<div class="col-6">
+											<input type="number" id="min_price" name="min_price" class="form-control" t-model="values.min_price" min="0" step="1000000" placeholder="Min Price" />
+										</div>
+										<div class="col-6">
+											<select id="unit_price_min_id" name="unit_price_min_id" class="form-select" t-model="values.unit_price_min_id">
+												<t t-foreach="options.unit_prices" t-as="u" t-key="u.id">
+													<option t-att-value="u.id.toString()" t-esc="u.name"/>
+												</t>
+											</select>
+										</div>
+									</div>
+								</div>
+								<div class="form-group mb-3">
+									<div class="row g-1">
+										<div class="col-6">
+											<input type="number" id="max_price" name="max_price" class="form-control" t-model="values.max_price" min="0" step="1000000" placeholder="Max Price" />
+										</div>
+										<div class="col-6">
+											<select id="unit_price_max_id" name="unit_price_max_id" class="form-select" t-model="values.unit_price_max_id">
+												<t t-foreach="options.unit_prices" t-as="u" t-key="u.id">
+													<option t-att-value="u.id.toString()" t-esc="u.name"/>
+												</t>
+											</select>
+										</div>
+									</div>
+								</div>
+							</div>
 
-              <!-- Location Column -->
-              <div class="col-4">
-                <h5 class="text-center fw-bold mb-3">Location</h5>
-                <div class="form-group mb-3">
-                  <label for="province_id">Province</label>
-                  <select id="province_id" name="province_id" class="form-select" t-model="values.province_id" t-on-change="onProvinceChange">
-                    <t t-foreach="options.provinces" t-as="p" t-key="p.id">
-                      <option t-att-value="p.id.toString()" t-esc="p.name"/>
-                    </t>
-                  </select>
-                </div>
-                <div class="form-group mb-3">
-                  <label for="district_id">District</label>
-                  <select id="district_id" name="district_id" class="form-select" t-model="values.district_id" t-on-change="onDistrictChange" t-att-disabled="!values.province_id">
-                    <t t-foreach="options.districts" t-as="d" t-key="d.id">
-                      <option t-att-value="d.id.toString()" t-esc="d.name"/>
-                    </t>
-                  </select>
-                </div>
-                <div class="form-group mb-3">
-                  <label for="commune_id">Commune</label>
-                  <select id="commune_id" name="commune_id" class="form-select" t-model="values.commune_id" t-att-disabled="!values.district_id">
-                    <t t-foreach="options.communes" t-as="c" t-key="c.id">
-                      <option t-att-value="c.id.toString()" t-esc="c.name"/>
-                    </t>
-                  </select>
-                </div>
-                <div class="form-group mb-3">
-                  <label for="region_id">Region</label>
-                  <select id="region_id" name="region_id" class="form-select" t-model="values.region_id">
-                    <t t-foreach="options.regions" t-as="r" t-key="r.id">
-                      <option t-att-value="r.id.toString()" t-esc="r.name"/>
-                    </t>
-                  </select>
-                </div>
-              </div>
+							<!-- Location Column -->
+							<div class="col-4">
+								<h5 class="text-center fw-bold mb-3">Location</h5>
+								<div class="form-group mb-3">
+									<label for="province_id">Province</label>
+									<select id="province_id" name="province_id" class="form-select" t-model="values.province_id" t-on-change="onProvinceChange">
+										<t t-foreach="options.provinces" t-as="p" t-key="p.id">
+											<option t-att-value="p.id.toString()" t-esc="p.name"/>
+										</t>
+									</select>
+								</div>
+								<div class="form-group mb-3">
+									<label for="district_id">District</label>
+									<select id="district_id" name="district_id" class="form-select" t-model="values.district_id" t-on-change="onDistrictChange" t-att-disabled="!values.province_id">
+										<t t-foreach="options.districts" t-as="d" t-key="d.id">
+											<option t-att-value="d.id.toString()" t-esc="d.name"/>
+										</t>
+									</select>
+								</div>
+								<div class="form-group mb-3">
+									<label for="commune_id">Commune</label>
+									<select id="commune_id" name="commune_id" class="form-select" t-model="values.commune_id" t-att-disabled="!values.district_id">
+										<t t-foreach="options.communes" t-as="c" t-key="c.id">
+											<option t-att-value="c.id.toString()" t-esc="c.name"/>
+										</t>
+									</select>
+								</div>
+								<div class="form-group mb-3">
+									<label for="region_id">Region</label>
+									<select id="region_id" name="region_id" class="form-select" t-model="values.region_id">
+										<t t-foreach="options.regions" t-as="r" t-key="r.id">
+											<option t-att-value="r.id.toString()" t-esc="r.name"/>
+										</t>
+									</select>
+								</div>
+							</div>
 
-              <!-- Properties Column -->
-              <div class="col-4">
-                <h5 class="text-center fw-bold mb-3">Properties</h5>
-                <div class="form-group mb-3">
-                  <label for="status_id">Status</label>
-                  <select id="status_id" name="status_id" class="form-select" t-model="values.status_id">
-                    <t t-foreach="options.statuss" t-as="s" t-key="s.id">
-                      <option t-att-value="s.id.toString()" t-esc="s.name"/>
-                    </t>
-                  </select>
-                </div>
-                <div class="form-group mb-3">
-                  <label for="type_id">Type</label>
-                  <select id="type_id" name="type_id" class="form-select" t-model="values.type_id">
-                    <t t-foreach="options.types" t-as="t" t-key="t.id">
-                      <option t-att-value="t.id.toString()" t-esc="t.name"/>
-                    </t>
-                  </select>
-                </div>
-                <div class="form-group mb-3">
-                  <label for="land_tittle_id">Land Title</label>
-                  <select id="land_tittle_id" name="land_tittle_id" class="form-select" t-model="values.land_tittle_id">
-                    <t t-foreach="options.land_tittles" t-as="ts" t-key="ts.id">
-                      <option t-att-value="ts.id.toString()" t-esc="ts.name"/>
-                    </t>
-                  </select>
-                </div>
-                <div class="form-group mb-3">
-                  <label class="d-block mb-1">Features
-                    <div class="tag-wrapper">
-                      <Many2ManyChip
-                        relationModel="'feature'"
-                        value="values.feature_ids"
-                        update="ids => values.feature_ids = ids"
-                        onOptionsLoaded="this.handleFeaturesOptions"
-                        maxVisible="3"
-                        readonly="false"
-                      />
-                    </div>
-                  </label>
-                </div>
-              </div>
-            </div>
+							<!-- Properties Column -->
+							<div class="col-4">
+								<h5 class="text-center fw-bold mb-3">Properties</h5>
+								<div class="form-group mb-3">
+									<label for="status_id">Status</label>
+									<select id="status_id" name="status_id" class="form-select" t-model="values.status_id">
+										<t t-foreach="options.statuss" t-as="s" t-key="s.id">
+											<option t-att-value="s.id.toString()" t-esc="s.name"/>
+										</t>
+									</select>
+								</div>
+								<div class="form-group mb-3">
+									<label for="type_id">Type</label>
+									<select id="type_id" name="type_id" class="form-select" t-model="values.type_id">
+										<t t-foreach="options.types" t-as="t" t-key="t.id">
+											<option t-att-value="t.id.toString()" t-esc="t.name"/>
+										</t>
+									</select>
+								</div>
+								<div class="form-group mb-3">
+									<label for="land_title_id">Land Title</label>
+									<select id="land_title_id" name="land_title_id" class="form-select" t-model="values.land_title_id">
+										<t t-foreach="options.land_titles" t-as="ts" t-key="ts.id">
+											<option t-att-value="ts.id.toString()" t-esc="ts.name"/>
+										</t>
+									</select>
+								</div>
+								<div class="form-group mb-3">
+									<label class="d-block mb-1">Features
+										<div class="tag-wrapper">
+											<Many2ManyChip relationModel="'feature'" value="values.feature_ids" update="ids => values.feature_ids = ids" onOptionsLoaded="this.handleFeaturesOptions" maxVisible="3" readonly="false" />
+										</div>
+									</label>
+								</div>
+							</div>
+						</div>
 
-            <!-- ─── Controls Row (below inputs) ─── -->
-            <div class="row align-items-center mt-3">
-              <!-- Left group: Preferences + Save + Default -->
-              <div class="col-auto pe-2">
-                <!-- SINGLE t-ref on this wrapper -->
-                <div class="dropdown preference-dropdown" t-ref="prefContainer">
-                  <!-- ─── Compute whether the currently selected filter is_default ─── -->
-                  <t t-set="currentIsDefault" t-value="savedFilters.list.find(f =&gt; f.id.toString() === values.preference_id)?.is_default" />
+						<!-- ─── Controls Row (below inputs) ─── -->
+						<div class="row align-items-center mt-3">
+							<!-- Left group: Preferences + Save + Default -->
+							<div class="col-auto pe-2">
+								<!-- SINGLE t-ref on this wrapper -->
+								<div class="dropdown preference-dropdown" t-ref="prefContainer">
+									<!-- ─── Compute whether the currently selected filter is_default ─── -->
+									<t t-set="currentIsDefault" t-value="savedFilters.list.find(f =&gt; f.id.toString() === values.preference_id)?.is_default" />
 
-                  <!-- ─── Toggle button itself ─── -->
-                  <div t-att-class="{
+									<!-- ─── Toggle button itself ─── -->
+									<div t-att-class="{
                       'btn btn-outline-secondary dropdown-toggle': true,
                       'default-toggle': currentIsDefault
                     }" tabindex="0" t-on-focus="onPreferenceDropdownFocus" t-on-keydown="onPreferenceSearchKeydown">
-                    <!-- 1) If currentIsDefault, render a star into the corner -->
-                    <i t-if="currentIsDefault" class="fa fa-star default-toggle-star" aria-hidden="true" />
-                    <!-- 2) Then the name of the selected preference (or the placeholder) -->
-                    <t t-if="values.preference_id">
-                      <t t-foreach="savedFilters.list" t-as="f" t-key="f.id">
-                        <t t-if="f.id.toString() === values.preference_id">
-                          <t t-esc="f.name"/>
-                        </t>
-                      </t>
-                    </t>
-                    <t t-if="!values.preference_id">
+										<!-- 1) If currentIsDefault, render a star into the corner -->
+										<i t-if="currentIsDefault" class="fa fa-star default-toggle-star" aria-hidden="true" />
+										<!-- 2) Then the name of the selected preference (or the placeholder) -->
+										<t t-if="values.preference_id">
+											<t t-foreach="savedFilters.list" t-as="f" t-key="f.id">
+												<t t-if="f.id.toString() === values.preference_id">
+													<t t-esc="f.name"/>
+												</t>
+											</t>
+										</t>
+										<t t-if="!values.preference_id">
                       -- Select Preference --
-                    </t>
-                  </div>
+										</t>
+									</div>
 
-                  <!-- ─── Dropdown menu ─── -->
-                  <ul class="dropdown-menu preference-menu" tabindex="0" t-if="state.dropdownOpen &amp;&amp; (savedFilters.list.length &gt;= 0)">
-                    <!-- “No Preference” row -->
-                    <li class="preference-item d-flex align-items-center justify-content-between px-2 py-1" t-att-class="{
+									<!-- ─── Dropdown menu ─── -->
+									<ul class="dropdown-menu preference-menu" tabindex="0" t-if="state.dropdownOpen &amp;&amp; (savedFilters.list.length &gt;= 0)">
+										<!-- “No Preference” row -->
+										<li class="preference-item d-flex align-items-center justify-content-between px-2 py-1" t-att-class="{
                         'focused': state.activeIndex === 0,
                         'active': !values.preference_id
                       }" t-on-click="() =&gt; this.selectPreference(null)">
-                      <div class="d-flex align-items-center">
-                        <span class="preference-name">-- No Preference --</span>
-                      </div>
-                      <i t-if="!values.preference_id" class="fa fa-check text-success ms-auto" />
-                    </li>
+											<div class="d-flex align-items-center">
+												<span class="preference-name">-- No Preference --</span>
+											</div>
+											<i t-if="!values.preference_id" class="fa fa-check text-success ms-auto" />
+										</li>
 
-                    <!-- Existing saved filters -->
-                    <t t-foreach="savedFiltersWithIndex" t-as="item" t-key="item.opt.id">
-                      <li class="preference-item d-flex align-items-center justify-content-between px-2 py-1" t-att-class="{
+										<!-- Existing saved filters -->
+										<t t-foreach="savedFiltersWithIndex" t-as="item" t-key="item.opt.id">
+											<li class="preference-item d-flex align-items-center justify-content-between px-2 py-1" t-att-class="{
                           'default-filter': item.opt.is_default,
                           'focused': state.activeIndex === (item.i + 1),
                           'active': item.opt.id.toString() === values.preference_id
                         }" t-on-click="() =&gt; this.selectPreference(item.opt.id)">
-                        <!-- Star in the corner, if this filter is_default -->
-                        <i t-if="item.opt.is_default" class="fa fa-star default-corner-star" aria-hidden="true" />
-                        <div class="d-flex align-items-center">
-                          <span class="preference-name">
-                            <t t-esc="item.opt.name"/>
-                          </span>
-                        </div>
-                        <i t-if="item.opt.id.toString() === values.preference_id" class="fa fa-check text-success ms-auto" />
-                        <i class="fa fa-trash trash-icon ms-2" t-on-click.stop="() =&gt; this.onDeletePreferenceClick(item.opt.id)" />
-                      </li>
-                    </t>
-                  </ul>
-                </div>
-              </div>
+												<!-- Star in the corner, if this filter is_default -->
+												<i t-if="item.opt.is_default" class="fa fa-star default-corner-star" aria-hidden="true" />
+												<div class="d-flex align-items-center">
+													<span class="preference-name">
+														<t t-esc="item.opt.name"/>
+													</span>
+												</div>
+												<i t-if="item.opt.id.toString() === values.preference_id" class="fa fa-check text-success ms-auto" />
+												<i class="fa fa-trash trash-icon ms-2" t-on-click.stop="() =&gt; this.onDeletePreferenceClick(item.opt.id)" />
+											</li>
+										</t>
+									</ul>
+								</div>
+							</div>
 
-              <div class="col-auto pe-2">
-                <div class="input-group">
-                  <input type="text" class="form-control filter-name-input" placeholder="Filter Name" t-model="save.name" />
-                  <button class="btn btn-outline-secondary" type="button" t-on-click="onSaveFilterClick">
+							<div class="col-auto pe-2">
+								<div class="input-group">
+									<input type="text" class="form-control filter-name-input" placeholder="Filter Name" t-model="save.name" />
+									<button class="btn btn-outline-secondary" type="button" t-on-click="onSaveFilterClick">
                     Save
-                  </button>
-                </div>
-              </div>
+									</button>
+								</div>
+							</div>
 
-              <div class="col-auto">
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" id="default_filter" t-model="save.is_default" />
-                  <label class="form-check-label" for="default_filter">
+							<div class="col-auto">
+								<div class="form-check">
+									<input class="form-check-input" type="checkbox" id="default_filter" t-model="save.is_default" />
+									<label class="form-check-label" for="default_filter">
                     Set as default
-                  </label>
-                </div>
-              </div>
+									</label>
+								</div>
+							</div>
 
-              <!-- Spacer to push Reset/Apply to right -->
-              <div class="col"></div>
+							<!-- Spacer to push Reset/Apply to right -->
+							<div class="col"></div>
 
-              <!-- Right group: Reset + Apply -->
-              <div class="col-auto text-end">
-                <button class="btn btn-secondary me-2" t-on-click="onResetButtonClick">
+							<!-- Right group: Reset + Apply -->
+							<div class="col-auto text-end">
+								<button class="btn btn-secondary me-2" t-on-click="onResetButtonClick">
                   Reset
-                </button>
-                <button class="btn btn-primary" t-on-click="onApplyButtonClick">
+								</button>
+								<button class="btn btn-primary" t-on-click="onApplyButtonClick">
                   Apply Filters
-                </button>
-              </div>
-            </div>
-          </t>
-        </div>
-      </div>
-    </Dialog>
-  </t>
+								</button>
+							</div>
+						</div>
+					</t>
+				</div>
+			</div>
+		</Dialog>
+	</t>
 </templates>

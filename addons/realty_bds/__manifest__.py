@@ -21,57 +21,63 @@
         - Allows admins to manage puprchase-purpose.
     """,
     'data': [
-        'data/res_groups.xml',
-        'data/ir_rule.xml',
-        'security/ir.model.access.csv',
-        'views/menu.xml',
+				# views				
         'views/hr_job_views.xml',
-        'views/hr_job_menu.xml',
         'views/realty_Real_Estate_feature_views.xml',
-        'views/realty_Real_Estate_feature_menu.xml',
         'views/realty_Real_Estate_type_views.xml',
-        'views/realty_Real_Estate_type_menu.xml',
         'views/realty_tag_views.xml',
-        'views/realty_tag_menu.xml',
         'views/realty_policy_views.xml',
-        'views/realty_policy_menu.xml',
         'views/realty_Real_Estate_status_views.xml',
-        'views/realty_Real_Estate_status_menu.xml',
         'views/realty_Real_Estate_reason_views.xml',
-        'views/realty_Real_Estate_reason_menu.xml',
         'views/realty_Real_Estate_group_home_direction_views.xml',
-        'views/realty_Real_Estate_group_home_direction_menu.xml',
         'views/realty_Real_Estate_home_direction_views.xml',
-        'views/realty_Real_Estate_home_direction_menu.xml',
         'views/region_views.xml',
-        'views/region_menu.xml',
         'views/res_users_views.xml',
         'views/res_partner_views.xml',
-        'views/res_users_menu.xml',
-        'views/signup_inherit_template.xml',
         'views/hr_department_views.xml',
-        'views/hr_department_menu.xml',
         'views/realty_assign_employee_wizard_views.xml',
         'views/res_company_views.xml',
-        'views/res_company_menu.xml',
-				'views/realty_Real_Estate_land_tittle_views.xml',
-				'views/realty_Real_Estate_land_tittle_menu.xml',
+				'views/realty_Real_Estate_land_title_views.xml',
 				'views/realty_Real_Estate_unit_price_views.xml',
-				'views/realty_Real_Estate_unit_price_menu.xml',
-        'data/unit_price.xml',
         'views/product_template_views.xml',
-        'views/product_template_menu.xml',
+				'views/realty_Report_client_feedback_views.xml',
+				'views/realty_Report_owner_feedback_views.xml',
+				'views/realty_Real_Estate_report_views.xml',
+				'views/realty_Notify_moderator_assignment_sequence_views.xml',
+				'views/realty_Notify_guideline_views.xml',
+				'views/realty_Notify_urgent_buying_views.xml',
+				'views/realty_Notify_congratulation_views.xml',
+				'views/realty_Notify_notification_views.xml',
+				'views/realty_Notify_wizard_views.xml',
+				'views/realty_Notify_moderator_guideline_views.xml',
+				'views/realty_Notify_reject_reason_views.xml',
+				'views/realty_Notify_remove_reason_views.xml',
+				'views/ir_attachment_views.xml',
+
+				# templates
+        'templates/signup_inherit_template.xml',
+				'templates/my_profile_template.xml',
+
+				# menu
+        'menu/menu.xml',
+				'menu/menu_address_root.xml',
+				'menu/menu_product_root.xml',
+				'menu/menu_user_root.xml',
+				'menu/menu_report_root.xml',
+				'menu/menu_notify_root.xml',
+				'menu/menu_more_root.xml',
+
+				# data
+        'data/res_groups.xml',
+        'data/ir_rule.xml',
+				'data/unit_price.xml',
 				'data/ir_config_parameter.xml',
-				'data/data_recycle.xml',
-				'views/my_profile_template.xml',
 				'data/hr_job.xml',
 				'data/res_users.xml',
-				'views/realty_Report_client_feedback_views.xml',
-				'views/realty_Report_client_feedback_menu.xml',
-				'views/realty_Report_owner_feedback_views.xml',
-				'views/realty_Report_owner_feedback_menu.xml',
-				'views/realty_Real_Estate_report_views.xml',
-				'views/realty_Real_Estate_report_menu.xml',
+				'data/data_recycle.xml', # comment this line before install module realty_bds, then uncomment it and upgrade module to have feature of auto clean orphaned attachments
+
+				# security
+				'security/ir.model.access.csv',
     ],
     'assets': {
         'web.assets_frontend': [
@@ -114,6 +120,31 @@
 						'realty_bds/static/src/many2many_image/js/many2many_image.js',    
 						# scss
             'realty_bds/static/src/many2many_image/scss/many2many_image.scss',
+
+						# realty_comment
+						# xml
+						'realty_bds/static/src/realty_comment/xml/comment_dialog.xml',
+						'realty_bds/static/src/realty_comment/xml/comment_item.xml',
+						# js
+						'realty_bds/static/src/realty_comment/js/realty_comment_action.js',
+						'realty_bds/static/src/realty_comment/js/realty_comment_dialog.js',
+						'realty_bds/static/src/realty_comment/js/realty_comment_item.js',
+						# scss
+						'realty_bds/static/src/realty_comment/scss/realty_comment_dialog.scss',
+
+						# realty_notify
+						# css
+						'realty_bds/static/src/realty_notify/css/notify_kanban.css',
+
+						# moderator_guideline
+						# xml
+						'realty_bds/static/src/moderator_guideline/xml/moderator_guideline_info.xml',
+						'realty_bds/static/src/moderator_guideline/xml/guideline_dialog.xml',
+						# js
+						'realty_bds/static/src/moderator_guideline/js/guideline_dialog.js',
+						'realty_bds/static/src/moderator_guideline/js/guideline_controller.js',
+						# scss
+						'realty_bds/static/src/moderator_guideline/scss/guideline_dialog.scss',
 				]
     },
     "installable": True,

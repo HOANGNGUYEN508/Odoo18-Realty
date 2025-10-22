@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+	<t t-name="web.KanbanView" t-inherit="web.KanbanView" t-inherit-mode="extension">
+		<!-- Guideline button -->
+		<xpath expr="//t[@t-set-slot='control-panel-always-buttons']" position="inside">
+			<t t-if="props.context &amp;&amp; props.context.show_guideline_button">
+				<button type="button" class="btn btn-primary" t-on-click="() =&gt; this.openGuidelineDialog()">
+					<i class="fa fa-info"/>
+				</button>
+			</t>
+		</xpath>
+	</t>
+</templates>

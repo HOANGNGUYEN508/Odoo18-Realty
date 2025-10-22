@@ -1,0 +1,96 @@
+<odoo>
+	<!-- Canned Responses -->
+	<menuitem 
+		id="menu_remove_reason_root" 
+		name="Remove Canned Responses" 
+		parent="menu_notify_root" 
+		action="action_remove_reason" 
+		sequence="0"
+	/>
+	
+	<menuitem 
+		id="menu_reject_reason_root" 
+		name="Reject Canned Responses" 
+		parent="menu_notify_root" 
+		action="action_reject_reason" 
+		sequence="1"
+	/>
+
+	<menuitem 
+		id="menu_moderator_guideline_root" 
+		name="Moderator Guideline" 
+		parent="menu_notify_root" 
+		action="action_moderator_guideline" 
+		sequence="2"
+	/>
+
+	<!-- Post -->
+	<menuitem 
+		id="menu_notification_root" 
+		name="Notification" 
+		parent="menu_notify_root" 
+		action="action_notification" 
+		sequence="20"
+	/>
+
+	<menuitem 
+		id="menu_congratulation_root" 
+		name="Congratulation" 
+		parent="menu_notify_root" 
+		action="action_congratulation" 
+		sequence="21"
+	/>
+
+	<menuitem 
+		id="menu_urgent_buying_root" 
+		name="Urgent Buying" 
+		parent="menu_notify_root" 
+		action="action_urgent_buying" 
+		sequence="22"
+	/>
+
+	<menuitem 
+		id="menu_guideline_root" 
+		name="Guideline" 
+		parent="menu_notify_root" 
+		action="action_guideline" 
+		sequence="23"
+	/>
+
+	<!-- Queue -->
+	<menuitem 
+		id="menu_notification_queue_root" 
+		name="[Queue] Notification" 
+		parent="menu_notify_root" 
+		action="action_notification_mod" 
+		sequence="40" 
+		groups="realty_bds.access_group_mod_notification,realty_bds.access_group_realty_notification"
+	/>
+
+	<menuitem 
+		id="menu_congratulation_queue_root" 
+		name="[Queue] Congratulation" 
+		parent="menu_notify_root" 
+		action="action_congratulation_mod" 
+		sequence="41" 
+		groups="realty_bds.access_group_mod_congratulation,realty_bds.access_group_realty_congratulation"
+	/>
+
+	<menuitem 
+		id="menu_urgent_buying_queue_root" 
+		name="[Queue] Urgent Buying" 
+		parent="menu_notify_root" 
+		action="action_urgent_buying_mod" 
+		sequence="42" 
+		groups="realty_bds.access_group_mod_urgent_buying,realty_bds.access_group_realty_urgent_buying"
+	/>
+
+	<menuitem 
+		id="menu_guideline_queue_root" 
+		name="[Queue] Guideline" 
+		parent="menu_notify_root" 
+		action="action_guideline_mod" 
+		sequence="43" 
+		groups="realty_bds.access_group_mod_guideline,realty_bds.access_group_realty_guideline"
+	/>
+</odoo>

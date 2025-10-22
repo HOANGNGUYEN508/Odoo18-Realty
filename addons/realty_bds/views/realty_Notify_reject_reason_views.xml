@@ -1,0 +1,35 @@
+<odoo>
+	<!-- List View -->
+	<record id="reject_reason_tree" model="ir.ui.view">
+		<field name="name">Reject Reason List</field>
+		<field name="model">reject_reason</field>
+		<field name="arch" type="xml">
+			<list>
+				<field name="name"/>
+			</list>
+		</field>
+	</record>
+
+	<!-- Form View -->
+	<record id="reject_reason_form" model="ir.ui.view">
+		<field name="name">Reject Reason Form</field>
+		<field name="model">reject_reason</field>
+		<field name="arch" type="xml">
+			<form>
+				<sheet>
+					<group>
+						<field id="reject_reason_name" name="name" placeholder="Enter a name" autocomplete="off"/>
+					</group>
+				</sheet>
+				<chatter/>
+			</form>
+		</field>
+	</record>
+
+	<!-- Action -->
+	<record id="action_reject_reason" model="ir.actions.act_window">
+		<field name="name">Reject Reason</field>
+		<field name="res_model">reject_reason</field>
+		<field name="view_mode">list,form</field>
+	</record>
+</odoo>
