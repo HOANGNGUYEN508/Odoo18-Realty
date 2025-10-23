@@ -25,6 +25,7 @@ access_unit_price_add,Unit Price Add,model_unit_price,access_group_full_unit_pri
 access_unit_price_realty,Unit Price Add,model_unit_price,access_group_realty_unit_price,1,1,1,1
 access_product_template_use,Real Estate Use,model_product_template,access_group_seen_product,1,0,0,0
 access_product_template_add,Real Estate Add,model_product_template,access_group_full_product,1,1,1,1
+access_product_template_mod,Real Estate Mod,model_product_template,access_group_mod_product,1,1,1,1
 access_product_template_realty,Real Estate Realty,model_product_template,access_group_realty_product,1,1,1,1
 access_tag_use,Tag Use,model_tag,access_group_seen_create_tag,1,0,1,0
 access_tag_add,Tag Add,model_tag,access_group_full_tag,1,1,1,1
@@ -108,3 +109,4 @@ access_congratulation_comment_realty,Congratulation Comment Realty,model_realty_
 access_guideline_comment_realty,Guideline Comment Realty,model_realty_comment,access_group_realty_guideline,1,1,1,1
 access_notification_comment_realty,Notification Comment Realty,model_realty_comment,access_group_realty_notification,1,1,1,1
 access_urgent_buying_comment_realty,Urgent Buying Comment Realty,model_realty_comment,access_group_realty_urgent_buying,1,1,1,1
+access_permission_tracker_realty,Permission Tracker Realty,model_permission_tracker,access_group_realty_permission_tracker,1,1,1,1

@@ -93,6 +93,12 @@
 			<field name="category_id" ref="base.module_category_realty"/>
 			<field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
 		</record>
+		<!-- mod -->
+		<record id="access_group_mod_product" model="res.groups">
+			<field name="name">[Company Restricted]Right be the moderator of the product.template</field>
+			<field name="category_id" ref="base.module_category_realty"/>
+			<field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+		</record>
 		<!-- realty -->
 		<record id="access_group_realty_product" model="res.groups">
 			<field name="name">[No Restricted]Right to CRUD the product.template</field>
@@ -500,8 +506,6 @@
 			<field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
 		</record>
 
-		<!-- realty_comment -->
-
 		<!-- reject_reason -->
 		<!-- seen -->
 		<record id="access_group_seen_reject_reason" model="res.groups">
@@ -570,5 +574,12 @@
 			<field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
 		</record>
 
+		<!-- permisson_tracker -->
+		<!-- realty -->
+		<record id="access_group_realty_permission_tracker" model="res.groups">
+			<field name="name">[No Restricted]Right to CRUD the permission_tracker</field>
+			<field name="category_id" ref="base.module_category_realty"/>
+			<field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+		</record>
 	</data>
 </odoo>

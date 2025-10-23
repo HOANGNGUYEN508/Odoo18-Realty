@@ -82,6 +82,7 @@
 					(4, ref('realty_bds.access_group_realty_remove_reason')),
 					(4, ref('realty_bds.access_group_realty_moderator_guideline')),
 					(4, ref('realty_bds.access_group_realty_moderator_assignment_sequence')),
+					(4, ref('realty_bds.access_group_realty_permission_tracker')),
 				]
 			"/>
 		</record>

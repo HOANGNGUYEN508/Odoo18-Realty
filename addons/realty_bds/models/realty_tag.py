@@ -2,6 +2,9 @@ from odoo import models, fields, api  # type: ignore
 from odoo.exceptions import ValidationError  # type: ignore
 from odoo.http import request  # type: ignore
 import re
+import logging
+
+_logger = logging.getLogger(__name__)
 
 
 class Tag(models.Model):
@@ -29,7 +32,7 @@ class Tag(models.Model):
         for vals in vals_list:
             vals['company_id'] = self.env.company.id
         return super().create(vals_list)
-
+    
     # Constrain
     _sql_constraints = [
         (
@@ -38,18 +41,22 @@ class Tag(models.Model):
             "This name already exists!",
         ),  # Ensure uniqueness
     ]
+    
 
     @api.constrains("name")
     def _check_tag_name(self):
-        # Must start with # and allow only letters, numbers, and underscores
+        # Allow only letters, numbers, and underscores and must start with #
         tag_pattern = r"^#[a-zA-Z0-9_]{1,29}$"
-        # Fetch reserved words dynamically from the policy model
-        reserved_words = request.env["policy"].sudo().search([]).mapped("name")
-        reserved_words = set(word.strip().lower()
-                             for word in reserved_words)  # Normalize
+        try:
+            reserved_words = self.env["policy"].get_reserved_words()
+        except KeyError:
+            reserved_words = frozenset()
+            _logger.warning(
+                "The 'policy' model is not available. No reserved words will be checked."
+            )
+            
         for record in self:
-            clean_name = (record.name.strip().lower()
-                          )  # Convert to lowercase to check correctly
+            clean_name = record.name.strip().lower() if record.name else ""
             if " " in record.name:  # Prevent spaces between multiple tags
                 raise ValidationError(
                     "❌ Error: Only one tag is allowed, no spaces permitted!")
@@ -64,18 +71,15 @@ class Tag(models.Model):
                    for char in r"@$%^&*()<>?/|{}[]\\!+-=`;:.,~"
                    ):  # Block special characters
                 raise ValidationError(
-                    "❌ Error: Name must not contain special characters!")
-            if clean_name in reserved_words:  # Prevent reserved words
-                raise ValidationError(
-                    f"❌ Error: The name '{record.name}' is not allowed!")
+                    f"❌ Error: Tag must not contain special characters ({r'@$%^&*()<>?/|{}[]\\!+-=`;:.,~'})!")
+            if record.name.count('#') != 1:
+                raise ValidationError("❌ Error: Only a single '#' allow at the start!")	
+            match = next((w for w in reserved_words if w in clean_name[1:]), None)
+            if match:
+                raise ValidationError(f"❌ Error: Tag contains reserved word: '{match}'!")
             if not re.match(
                     tag_pattern, record.name
             ):  # Enforce valid format: Must start with # and contain only letters, numbers, or _
                 raise ValidationError(
-                    "❌ Error: Tag must start with '#' and contain only letters, numbers, or underscores (_)!"
+                    "❌ Error: Tag must start with # and contain only letters, numbers, or underscores (_)!"
                 )
-            if (
-                    record.name.count("#") > 1
-            ):  # Prevent multiple hashtags in one tag (e.g., "#love#happy")
-                raise ValidationError(
-                    "❌ Error: Only one tag starting with '#' is allowed!")

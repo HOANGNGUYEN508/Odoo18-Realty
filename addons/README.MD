@@ -141,3 +141,7 @@ Hoàng: phân tích và thiết kế hệ thống.
           + Override unlink của product.template, product_report, notify để sau khi record bị delete thì tìm tất cả attachment (trong trường hợp này thì tất cả đều là img) được gán vào cùng với record sẽ set những trường được thêm mới của các attachment để sau này delete bằng model data_recycle.model.
 					+ Sửa file 'data_recycle': thêm 3 record mới và sửa 2 record cũ theo logic mới sửa của ir.attachment.
 					+ Thêm hướng dẫn vào file README.md: install module realty_bds xong tắt comment dòng 'data/data_recycle.xml', của 'data' trong file __manifest__.py rồi restart server và upgrade lại module để có tính năng tự động dọn các attachment không còn được dùng đến.
+					+ Thêm model permission_tracker để hỗ trợ cho model product.template, congratulation, guideline, notification, urgent_buying.
+					+ Thêm view (list, form), data file, menuitem cho permission_tracker.
+					+ Áp dụng @tools.ormcache vào những hàm return data cần dùng nhiều lần.
+					+ Update cách sử dụng model policy. 

@@ -1,6 +1,9 @@
 from odoo import models, fields, api  # type: ignore
 from odoo.exceptions import ValidationError  # type: ignore
 from odoo.http import request  # type: ignore
+import logging
+
+_logger = logging.getLogger(__name__)
 
 
 class RejectReason(models.Model):
@@ -40,13 +43,15 @@ class RejectReason(models.Model):
 
     @api.constrains("name")
     def _check_name(self):
-        # Fetch reserved words dynamically from the policy model
-        reserved_words = request.env["policy"].sudo().search([]).mapped("name")
-        reserved_words = set(word.strip().lower()
-                             for word in reserved_words)  # Normalize
+        try:
+            reserved_words = self.env["policy"].get_reserved_words()
+        except KeyError:
+            reserved_words = frozenset()
+            _logger.warning(
+                "The 'policy' model is not available. No reserved words will be checked."
+            )
         for record in self:
-            clean_name = (record.name.strip().lower()
-                          )  # Convert to lowercase to check correctly
+            clean_name = record.name.strip().lower() if record.name else ""
             if not record.name.strip():  # Prevent empty or spaces-only names
                 raise ValidationError(
                     "❌ Error: Name cannot be empty or contain only spaces!")
@@ -56,7 +61,7 @@ class RejectReason(models.Model):
             if any(char in record.name for char in
                    r"@#$%&*<>?/|{}[]\\!+=;:,"):  # Block special characters
                 raise ValidationError(
-                    "❌ Error: Name cannot contain special characters!")
-            if clean_name in reserved_words:  # Prevent reserved words
-                raise ValidationError(
-                    f"❌ Error: Name '{record.name}' is not allowed!")
+                    f"❌ Error: Name cannot contain special characters ({r'@#$%&*<>?/|{}[]\!+=;:,'})!")
+            match = next((w for w in reserved_words if w in clean_name), None)
+            if match:
+                raise ValidationError(f"❌ Error: Name contains reserved word: '{match}'!")

@@ -1,7 +1,7 @@
 <odoo>
 	<!-- Admin Tree View -->
 	<record id="unit_price_tree" model="ir.ui.view">
-		<field name="name">unit_price_tree</field>
+		<field name="name">Unit Price List</field>
 		<field name="model">unit_price</field>
 		<field name="arch" type="xml">
 			<list>
@@ -13,7 +13,7 @@
 
 	<!-- Admin Form View with Auto-Suggestion -->
 	<record id="unit_price_form" model="ir.ui.view">
-		<field name="name">unit_price_form</field>
+		<field name="name">Unit Price Form</field>
 		<field name="model">unit_price</field>
 		<field name="arch" type="xml">
 			<form>
@@ -30,7 +30,7 @@
 
 	<!-- Admin Menu -->
 	<record id="action_unit_price" model="ir.actions.act_window">
-		<field name="name">Unit Price</field>
+		<field name="name">Unit Price Action</field>
 		<field name="res_model">unit_price</field>
 		<field name="view_mode">list,form</field>
 	</record>

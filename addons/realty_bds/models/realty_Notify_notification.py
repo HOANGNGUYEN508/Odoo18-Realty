@@ -1,7 +1,6 @@
 from odoo import models, fields, api  # type: ignore
 from odoo.exceptions import AccessError  # type: ignore
 
-
 class Notification(models.Model):
     _name = "notification"
     _description = "Company Notification"
@@ -66,12 +65,13 @@ class Notification(models.Model):
         self.ensure_one()
 
         # Check if user has the group
-        if not (self.env.user.has_group(
-                "realty_bds.access_group_user_notification") or self.env.user.
-                has_group("realty_bds.access_group_realty_notification")):
+        group_dict = self.env["permission_tracker"]._get_permission_groups(self._name) or {}
+        user_group = group_dict.get("user_group")
+        realty_group = group_dict.get("realty_group")
+        if not (self.env.user.has_group(user_group) or self.env.user.has_group(realty_group)):
             raise AccessError(
-                "You don't have the necessary permissions to like posts.")
-
+                f"You don't have the necessary permissions to like posts.")
+        
         user_id = self.env.uid
 
         # Use toggle command - adds if not present, removes if present
@@ -80,41 +80,6 @@ class Notification(models.Model):
         ]
 
         return True
-
-    def action_toggle_like(self):
-        """Add/remove current user from like_user_ids"""
-        self.ensure_one()
-
-        # Check if user has the group
-        if not (self.env.user.has_group(
-                "realty_bds.access_group_user_notification") or self.env.user.
-                has_group("realty_bds.access_group_realty_notification")):
-            raise AccessError(
-                f"You don't have the necessary permissions to like posts.")
-
-        user_id = self.env.uid
-        liked_ids = set(self.like_user_ids.ids)
-        # If already liked: remove; otherwise add
-        if user_id in liked_ids:
-            self.sudo().write({"like_user_ids": [(3, user_id)]})
-        else:
-            self.sudo().write({"like_user_ids": [(4, user_id)]})
-        return True
-
-    # Helper method
-    def _get_permission_info(self):
-        # make a shallow copy to avoid accidentally mutating
-        # a dict returned by super() that some other code might rely on
-        base = dict(super()._get_permission_info() or {})
-
-        extra = {
-            # prefer resolving env.ref at runtime (not at module import time)
-            "moderator_group": "realty_bds.access_group_mod_notification",
-            "realty_group": "realty_bds.access_group_realty_notification",
-            "user_group": "realty_bds.access_group_user_notification",
-        }
-        base.update(extra)
-        return base
 
     # Constrains
     _sql_constraints = [

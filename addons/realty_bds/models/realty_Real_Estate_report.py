@@ -2,6 +2,9 @@ from odoo import models, fields, api  # type: ignore
 from odoo.exceptions import ValidationError  # type: ignore
 from odoo.http import request  # type: ignore
 import re
+import logging
+
+_logger = logging.getLogger(__name__)
 
 
 class ProductReport(models.Model):
@@ -199,7 +202,7 @@ class ProductReport(models.Model):
         for rec in self:
             if not pattern.match(rec.phone or ""):
                 raise ValidationError(
-                    "❌ Error: Phone must be 9–12 digits, numbers only.")
+                    "❌ Error: Phone must be 9-12 digits, numbers only.")
 
     @api.constrains("citizen_id")
     def _check_citizen_id(self):
@@ -207,7 +210,7 @@ class ProductReport(models.Model):
         for rec in self:
             if not pattern.match(rec.citizen_id or ""):
                 raise ValidationError(
-                    "❌ Error: Citizen ID must be 9–12 digits, numbers only.")
+                    "❌ Error: Citizen ID must be 9-12 digits, numbers only.")
 
     @api.constrains("email")
     def _check_email(self):
@@ -227,9 +230,13 @@ class ProductReport(models.Model):
         "client_feedback",
     )
     def _check_text_fields(self):
-        # Pull reserved words once
-        reserved = request.env["policy"].sudo().search([]).mapped("name")
-        reserved = {w.strip().lower() for w in reserved}
+        try:
+            reserved_words = self.env["policy"].get_reserved_words()
+        except KeyError:
+            reserved_words = frozenset()
+            _logger.warning(
+                "The 'policy' model is not available. No reserved words will be checked."
+            )
 
         # Define per-field requirements
         specs = {
@@ -263,7 +270,7 @@ class ProductReport(models.Model):
         for rec in self:
             for field_name, rules in specs.items():
                 val = getattr(rec, field_name) or ""
-                text = val.strip()
+                text = val.strip().lower()
                 # Empty check
                 if not text and not rules["allow_empty"]:
                     raise ValidationError(
@@ -272,15 +279,13 @@ class ProductReport(models.Model):
                 # Length check
                 if len(text) > rules["max_len"]:
                     raise ValidationError(
-                        f"❌ Error: {field_name.replace('_',' ').title()} "
-                        f"cannot exceed {rules['max_len']} characters.")
+                        f"❌ Error: {field_name.replace('_',' ').title()} cannot exceed {rules['max_len']} characters.")
                 # Special-character check
                 if any(ch in special_chars for ch in text):
                     raise ValidationError(
-                        f"❌ Error: {field_name.replace('_',' ').title()} "
-                        f"cannot contain special characters.")
+                        f"❌ Error: {field_name.replace('_',' ').title()} cannot contain special characters ({r'@#$%&*<>?/|{}[]\!+=;:,'}).")
                 # Reserved-word check
-                if text.lower() in reserved:
+                match = next((w for w in reserved_words if w in text), None)
+                if match:
                     raise ValidationError(
-                        f"❌ Error: {field_name.replace('_',' ').title()} "
-                        "contains a forbidden word.")
+                        f"❌ Error: {field_name.replace('_',' ').title()} contains reserved word: '{match}'!")

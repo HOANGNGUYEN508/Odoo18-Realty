@@ -53,6 +53,7 @@
 				'views/realty_Notify_reject_reason_views.xml',
 				'views/realty_Notify_remove_reason_views.xml',
 				'views/ir_attachment_views.xml',
+				'views/realty_permission_tracker_views.xml',
 
 				# templates
         'templates/signup_inherit_template.xml',
@@ -75,6 +76,7 @@
 				'data/hr_job.xml',
 				'data/res_users.xml',
 				'data/data_recycle.xml', # comment this line before install module realty_bds, then uncomment it and upgrade module to have feature of auto clean orphaned attachments
+				'data/permission_tracker.xml',
 
 				# security
 				'security/ir.model.access.csv',

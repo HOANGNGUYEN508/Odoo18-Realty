@@ -417,6 +417,8 @@
 			<field name="perm_unlink" eval="True"/>
 		</record>
 
+		<!-- 1c. Write access to records that have been assigned to own (moderator) -->
+
 		<!-- 2. Read-only access to base company (id=1) -->
 		<record id="product_template_base_company_read_rule" model="ir.rule">
 			<field name="name">Product: Access own or base company records</field>
@@ -432,7 +434,8 @@
 			</field>
 			<field name="groups" eval="[
 								(4, ref('realty_bds.access_group_seen_product')),
-								(4, ref('realty_bds.access_group_full_product'))
+								(4, ref('realty_bds.access_group_mod_product')),
+								(4, ref('realty_bds.access_group_full_product')),
 						]"/>
 			<field name="perm_read" eval="True"/>
 			<field name="perm_write" eval="False"/>

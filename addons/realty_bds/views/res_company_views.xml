@@ -41,7 +41,7 @@
 
 	<!-- Action-->
 	<record id="action_res_company" model="ir.actions.act_window">
-		<field name="name">Company</field>
+		<field name="name">Company Action</field>
 		<field name="res_model">res.company</field>
 		<field name="view_mode">list,form</field>
 	</record>

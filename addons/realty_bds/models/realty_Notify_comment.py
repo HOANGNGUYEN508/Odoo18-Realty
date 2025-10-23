@@ -89,18 +89,24 @@ class RealtyComment(models.Model):
                 # Handle cases where model doesn't exist or user can't access
                 continue
 
+
     # Actions
     @api.model
     def action_toggle_like(self, comment_id):
         rec = self.sudo().browse(int(comment_id))
         rec.ensure_one()
+        
+        # Check if user has the group
+        group_dict = self.env["permission_tracker"]._get_permission_groups(rec.res_model) or {}
+        user_group = group_dict.get("user_group")
+        realty_group = group_dict.get("realty_group")
+        if not (self.env.user.has_group(user_group) or self.env.user.has_group(realty_group)):
+            raise AccessError(
+                f"You don't have the necessary permissions to like comment.")
+        
         uid = self.env.uid
-        if uid in rec.like_user_ids.ids:
-            rec.sudo().write({"like_user_ids": [(3, uid)]})
-            liked = False
-        else:
-            rec.sudo().write({"like_user_ids": [(4, uid)]})
-            liked = True
+        currently_liked = uid in rec.like_user_ids.ids
+        rec.sudo().like_user_ids = [(3 if currently_liked else 4, uid)]
         rec._invalidate_cache(["like_user_ids", "like_count"])
 
         update_payload = {
@@ -118,11 +124,9 @@ class RealtyComment(models.Model):
         try:
             self._push_bus_notifications([update_payload])
         except Exception:
-            _logger.exception(
-                "Failed to send like update for realty_comment %s", rec.id
-            )
+            _logger.exception("Failed to send like update for realty_comment %s", rec.id)
 
-        return {"count": rec.like_count, "liked": liked}
+        return {"count": rec.like_count, "liked": not currently_liked}
 
     @api.model
     def action_edit_comment(self, comment_id, new_content):
@@ -239,22 +243,19 @@ class RealtyComment(models.Model):
         }
 
     # Helper method
-    def _raise_if_cant_modify(self):
-        """Raise AccessError if current env.user may not modify these records.
-        Allowed if owner (create_uid) or admin group (base.group_system)."""
-        for rec in self:
-            is_owner = rec.create_uid and rec.create_uid.id == self.env.uid
-            is_admin = self.env.user.has_group("base.group_system")
-            if not (is_owner or is_admin):
-                raise AccessError("You don't have permission to modify this comment.")
-
     def _normalize_for_bus(self, value):
         """Normalize common Odoo/Python objects into JSON-safe primitives."""
         # Record-like (res.users etc.)
         try:
-            if hasattr(value, "id") and (hasattr(value, "name") or hasattr(value, "display_name")):
+            if hasattr(value, "id") and (
+                hasattr(value, "name") or hasattr(value, "display_name")
+            ):
                 vid = int(value.id) if value.id is not None else None
-                vname = getattr(value, "name", None) or getattr(value, "display_name", None) or ""
+                vname = (
+                    getattr(value, "name", None)
+                    or getattr(value, "display_name", None)
+                    or ""
+                )
                 return [vid, str(vname)]
         except Exception:
             pass
@@ -302,7 +303,9 @@ class RealtyComment(models.Model):
             try:
                 # if p is not a dict, convert to dict form
                 if not isinstance(p, dict):
-                    _logger.warning("realty_comment: unexpected payload type %r", type(p))
+                    _logger.warning(
+                        "realty_comment: unexpected payload type %r", type(p)
+                    )
                     continue
 
                 normalized = {}
@@ -313,10 +316,15 @@ class RealtyComment(models.Model):
                         normalized[k] = None
 
                 # Send with the fixed notification type
-                bus._sendone(f"realty_comment_{normalized.get('res_model')}_{normalized.get('res_id')}", "realty_notify", normalized)
+                bus._sendone(
+                    f"realty_comment_{normalized.get('res_model')}_{normalized.get('res_id')}",
+                    "realty_notify",
+                    normalized,
+                )
             except Exception:
-                _logger.exception("Failed to send bus message for realty_comment: %r", p)
-
+                _logger.exception(
+                    "Failed to send bus message for realty_comment: %r", p
+                )
 
     # Model Method
     @api.model_create_multi
@@ -330,7 +338,7 @@ class RealtyComment(models.Model):
 
         # Extract client_tmp_id from context for deduplication
         ctx = dict(self.env.context or {})
-        client_tmp_id = ctx.get('client_tmp_id')
+        client_tmp_id = ctx.get("client_tmp_id")
 
         # normalize single vals dict
         vals = dict(vals_list[0])
@@ -411,20 +419,31 @@ class RealtyComment(models.Model):
 
     def write(self, vals):
         self.ensure_one()
-        self._raise_if_cant_modify()
         return super(RealtyComment, self).write(vals)
 
     def unlink(self):
         self.ensure_one()
-        self._raise_if_cant_modify()
         return super(RealtyComment, self).unlink()
 
     # Constrain
     @api.constrains("content")
     def _check_content(self):
+        try:
+            reserved_words = self.env["policy"].get_reserved_words()
+        except KeyError:
+            reserved_words = frozenset()
+            _logger.warning(
+                "The 'policy' model is not available. No reserved words will be checked."
+            )
         for record in self:
-            if not record.content or not record.content.strip():
+            clean_content = record.content.strip().lower() if record.content else ""
+            if not clean_content:
                 raise ValidationError("Comment cannot be empty!")
+            match = next((w for w in reserved_words if w in clean_content), None)
+            if match:
+                raise ValidationError(
+                    f"❌ Error: Name contains reserved word: '{match}'!"
+                )
             if len(record.content) > 500:
                 raise ValidationError("Comment cannot exceed 500 characters!")
 
@@ -460,20 +479,24 @@ class RealtyComment(models.Model):
         cr = self.env.cr
         try:
             cr.execute(
-            """
+                """
                 CREATE INDEX IF NOT EXISTS realty_comment_res_model_res_id_idx
                 ON realty_comment (res_model, res_id)
             """
             )
         except Exception:
-            _logger.exception("Failed to create index realty_comment_res_model_res_id_idx")
+            _logger.exception(
+                "Failed to create index realty_comment_res_model_res_id_idx"
+            )
 
         try:
             cr.execute(
-            """
+                """
                 CREATE UNIQUE INDEX IF NOT EXISTS comment_like_rel_unique_idx
                 ON comment_like_rel (comment_id, user_id)
             """
             )
         except Exception:
-            _logger.exception("Failed to create unique index comment_like_rel_unique_idx")
+            _logger.exception(
+                "Failed to create unique index comment_like_rel_unique_idx"
+            )

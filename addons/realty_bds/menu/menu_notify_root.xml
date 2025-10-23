@@ -1,29 +1,4 @@
 <odoo>
-	<!-- Canned Responses -->
-	<menuitem 
-		id="menu_remove_reason_root" 
-		name="Remove Canned Responses" 
-		parent="menu_notify_root" 
-		action="action_remove_reason" 
-		sequence="0"
-	/>
-	
-	<menuitem 
-		id="menu_reject_reason_root" 
-		name="Reject Canned Responses" 
-		parent="menu_notify_root" 
-		action="action_reject_reason" 
-		sequence="1"
-	/>
-
-	<menuitem 
-		id="menu_moderator_guideline_root" 
-		name="Moderator Guideline" 
-		parent="menu_notify_root" 
-		action="action_moderator_guideline" 
-		sequence="2"
-	/>
-
 	<!-- Post -->
 	<menuitem 
 		id="menu_notification_root" 

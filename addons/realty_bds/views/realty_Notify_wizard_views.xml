@@ -1,7 +1,7 @@
 <odoo>
 	<!-- Reject form -->
 	<record id="view_generic_wizard_form" model="ir.ui.view">
-		<field name="name">notify_wizard_form</field>
+		<field name="name">Notify Wizard Form</field>
 		<field name="model">notify_wizard</field>
 		<field name="arch" type="xml">
 			<form>

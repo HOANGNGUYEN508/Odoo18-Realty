@@ -1,7 +1,7 @@
 <odoo>
 	<!-- Tree View -->
 	<record id="product_template_list_view" model="ir.ui.view">
-		<field name="name">product_template_list</field>
+		<field name="name">Product List</field>
 		<field name="model">product.template</field>
 		<field name="arch" type="xml">
 			<list>
@@ -26,7 +26,7 @@
 
 	<!-- Form View -->
 	<record id="product_template_form_view" model="ir.ui.view">
-		<field name="name">product_template_form</field>
+		<field name="name">Product Form</field>
 		<field name="model">product.template</field>
 		<field name="arch" type="xml">
 			<form>
@@ -76,6 +76,13 @@
 								'is_public': True
 							}" />
 					</group>
+					<!-- <group>
+						<field name="approval" readonly="1" widget="statusbar" options="{'clickable': 0}"/>
+						<field name="moderator_id" string="Moderator" readonly="1" invisible="approval == 'draft'"/>
+						<button name="action_send" string="Send" type="object" class="btn-primary" invisible="edit_counter != -1 or approval != 'draft'"/>
+						<field name="edit_counter" readonly="1" invisible="edit_counter == -1"/>
+						<button name="action_resend" string="Resend" type="object" class="btn-primary" invisible="edit_counter == -1 or edit_counter == 0"/>
+					</group> -->
 				</sheet>
 				<chatter/>
 			</form>
@@ -84,7 +91,7 @@
 
 	<!-- Kanban View -->
 	<record id="product_template_kanban_view" model="ir.ui.view">
-		<field name="name">product_template_kanban</field>
+		<field name="name">Product Kanban</field>
 		<field name="model">product.template</field>
 		<field name="arch" type="xml">
 			<kanban template="card" class="o_kanban_view">
@@ -129,7 +136,7 @@
 
 	<!-- History View -->
 	<record id="view_product_history_tree" model="ir.ui.view">
-		<field name="name">product_template_mail_tracking_value</field>
+		<field name="name">Product History</field>
 		<field name="model">mail.tracking.value</field>
 		<field name="arch" type="xml">
 			<list string="Change History" create="false" edit="false" delete="false">

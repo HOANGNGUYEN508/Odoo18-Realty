@@ -1,0 +1,41 @@
+<odoo>
+	<!-- List View -->
+	<record id="permission_tracker_tree" model="ir.ui.view">
+		<field name="name">Permission Tracker List</field>
+		<field name="model">permission_tracker</field>
+		<field name="arch" type="xml">
+			<list>
+				<field name="model_name"/>
+				<field name="user_group"/>
+				<field name="moderator_group"/>
+				<field name="realty_group"/>
+			</list>
+		</field>
+	</record>
+
+	<!-- Form View -->
+	<record id="permission_tracker_form" model="ir.ui.view">
+		<field name="name">Permission Tracker Form</field>
+		<field name="model">permission_tracker</field>
+		<field name="arch" type="xml">
+			<form>
+				<sheet>
+					<group>
+						<field name="model_name" placeholder="Enter a name" autocomplete="off"/>
+						<field name="user_group" widget="selection"/>
+						<field name="moderator_group" widget="selection"/>
+						<field name="realty_group" widget="selection"/>
+					</group>
+				</sheet>
+				<chatter/>
+			</form>
+		</field>
+	</record>
+
+	<!-- Action -->
+	<record id="action_permission_tracker" model="ir.actions.act_window">
+		<field name="name">Permission Tracker Action</field>
+		<field name="res_model">permission_tracker</field>
+		<field name="view_mode">list,form</field>
+	</record>
+</odoo>

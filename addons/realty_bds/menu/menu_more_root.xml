@@ -22,4 +22,37 @@
     action="action_moderator_assignment_sequence"
     sequence="2"
 	/>
+
+	<menuitem 
+    id="menu_permission_tracker_root" 
+    name="Permission Configurations"
+    parent="menu_more_root" 
+    action="action_permission_tracker"
+    sequence="3"
+	/>
+
+	<!-- Canned Responses -->
+	<menuitem 
+		id="menu_remove_reason_root" 
+		name="Remove Canned Responses" 
+		parent="menu_more_root" 
+		action="action_remove_reason" 
+		sequence="4"
+	/>
+	
+	<menuitem 
+		id="menu_reject_reason_root" 
+		name="Reject Canned Responses" 
+		parent="menu_more_root" 
+		action="action_reject_reason" 
+		sequence="5"
+	/>
+
+	<menuitem 
+		id="menu_moderator_guideline_root" 
+		name="Moderator Guideline" 
+		parent="menu_more_root" 
+		action="action_moderator_guideline" 
+		sequence="6"
+	/>
 </odoo>

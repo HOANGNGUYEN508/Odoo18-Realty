@@ -1,7 +1,7 @@
 <odoo>
 	<!-- Form View -->
 	<record id="urgent_buying_form_view" model="ir.ui.view">
-		<field name="name">urgent_buying_form</field>
+		<field name="name">Urgent Buying Form</field>
 		<field name="model">urgent_buying</field>
 		<field name="arch" type="xml">
 			<form>
@@ -22,8 +22,8 @@
 
 					<group>
 						<field name="approval" readonly="1" widget="statusbar" options="{'clickable': 0}"/>
-						<field name="moderator_id" string="Moderator" readonly="1" invisible="approval == 'pending'"/>
-						<button name="action_send" string="Send" type="object" class="btn-primary" invisible="edit_counter != -1"/>
+						<field name="moderator_id" string="Moderator" readonly="1" invisible="approval == 'draft'"/>
+						<button name="action_send" string="Send" type="object" class="btn-primary" invisible="edit_counter != -1 or approval != 'draft'"/>
 						<field name="edit_counter" readonly="1" invisible="edit_counter == -1"/>
 						<button name="action_resend" string="Resend" type="object" class="btn-primary" invisible="edit_counter == -1 or edit_counter == 0"/>
 					</group>
@@ -35,7 +35,7 @@
 
 	<!-- Kanban View for user -->
 	<record id="urgent_buying_kanban_view" model="ir.ui.view">
-		<field name="name">urgent_buying_kanban</field>
+		<field name="name">Urgent Buying Kanban</field>
 		<field name="model">urgent_buying</field>
 		<field name="arch" type="xml">
 			<kanban class="two-per-row-kanban">
@@ -229,7 +229,7 @@
 
 	<!-- Kanban View -->
 	<record id="urgent_buying_kanban_view_mod" model="ir.ui.view">
-		<field name="name">urgent_buying_kanban_mod</field>
+		<field name="name">Urgent Buying Kanban Mod</field>
 		<field name="model">urgent_buying</field>
 		<field name="arch" type="xml">
 			<kanban class="two-per-row-kanban" js_class="info_kanban">
@@ -377,6 +377,6 @@
       })
     ]"/>
 		<field name="domain">[('approval', '=', 'pending')]</field>
-    <field name="context">{'create': False, 'show_guideline_button': True}</field>
+		<field name="context">{'create': False, 'show_guideline_button': True}</field>
 	</record>
 </odoo>

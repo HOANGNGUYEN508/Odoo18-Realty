@@ -1,0 +1,38 @@
+<odoo>
+	<data noupdate="1">
+		<record id="product_template_permission" model="permission_tracker">
+			<field name="model_name">product.template</field>
+			<field name="user_group" ref="realty_bds.access_group_full_product"/>
+			<field name="moderator_group" ref="realty_bds.access_group_mod_product"/>
+			<field name="realty_group" ref="realty_bds.access_group_realty_product"/>
+		</record>
+
+		<record id="congratulation_permission" model="permission_tracker">
+			<field name="model_name">congratulation</field>
+			<field name="user_group" ref="realty_bds.access_group_user_congratulation"/>
+			<field name="moderator_group" ref="realty_bds.access_group_mod_congratulation"/>
+			<field name="realty_group" ref="realty_bds.access_group_realty_congratulation"/>
+		</record>
+
+		<record id="guideline_permission" model="permission_tracker">
+			<field name="model_name">guideline</field>
+			<field name="user_group" ref="realty_bds.access_group_user_guideline"/>
+			<field name="moderator_group" ref="realty_bds.access_group_mod_guideline"/>
+			<field name="realty_group" ref="realty_bds.access_group_realty_guideline"/>
+		</record>
+
+		<record id="notification_permission" model="permission_tracker">
+			<field name="model_name">notification</field>
+			<field name="user_group" ref="realty_bds.access_group_user_notification"/>
+			<field name="moderator_group" ref="realty_bds.access_group_mod_notification"/>
+			<field name="realty_group" ref="realty_bds.access_group_realty_notification"/>
+		</record>
+
+		<record id="urgent_buying_permission" model="permission_tracker">
+			<field name="model_name">urgent_buying</field>
+			<field name="user_group" ref="realty_bds.access_group_user_urgent_buying"/>
+			<field name="moderator_group" ref="realty_bds.access_group_mod_urgent_buying"/>
+			<field name="realty_group" ref="realty_bds.access_group_realty_urgent_buying"/>
+		</record>
+	</data>
+</odoo>

@@ -1,7 +1,7 @@
 <odoo>
 	<!-- Admin Tree View -->
 	<record id="region_tree" model="ir.ui.view">
-		<field name="name">region_tree</field>
+		<field name="name">Region List</field>
 		<field name="model">region</field>
 		<field name="arch" type="xml">
 			<list>
@@ -12,7 +12,7 @@
 
 	<!-- Admin Form View with Auto-Suggestion -->
 	<record id="region_form" model="ir.ui.view">
-		<field name="name">region_form</field>
+		<field name="name">Region Form</field>
 		<field name="model">region</field>
 		<field name="arch" type="xml">
 			<form>
@@ -29,7 +29,7 @@
 
 	<!-- Admin Menu -->
 	<record id="action_region" model="ir.actions.act_window">
-		<field name="name">region List</field>
+		<field name="name">Region Action</field>
 		<field name="res_model">region</field>
 		<field name="view_mode">list,form</field>
 	</record>

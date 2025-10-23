@@ -539,6 +539,7 @@ export class RealtyCommentDialog extends Component {
 	createTopLevelComment = async () => {
 		const input = this.commentRef.el;
 		const content = input?.value?.trim();
+		
 		if (!content) return;
 
 		const client_tmp_id = this._makeTmpId(); // Generate for deduplication
