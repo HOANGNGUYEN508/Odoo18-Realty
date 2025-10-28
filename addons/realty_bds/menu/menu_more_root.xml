@@ -16,28 +16,11 @@
 	/>
 
 	<menuitem 
-    id="menu_moderator_assignment_sequence_root" 
-    name="Moderator Assignment Sequence"
-    parent="menu_more_root" 
-    action="action_moderator_assignment_sequence"
-    sequence="2"
-	/>
-
-	<menuitem 
-    id="menu_permission_tracker_root" 
-    name="Permission Configurations"
-    parent="menu_more_root" 
-    action="action_permission_tracker"
-    sequence="3"
-	/>
-
-	<!-- Canned Responses -->
-	<menuitem 
 		id="menu_remove_reason_root" 
 		name="Remove Canned Responses" 
 		parent="menu_more_root" 
 		action="action_remove_reason" 
-		sequence="4"
+		sequence="2"
 	/>
 	
 	<menuitem 
@@ -45,8 +28,23 @@
 		name="Reject Canned Responses" 
 		parent="menu_more_root" 
 		action="action_reject_reason" 
-		sequence="5"
+		sequence="3"
 	/>
+
+	<menuitem 
+		id="menu_client_feedback_root" 
+		name="Client Feedback Canned Responses" 
+		parent="menu_more_root" 
+		action="action_client_feedback"
+		sequence="4"
+	/>
+
+	<menuitem 
+		id="menu_owner_feedback_root" 
+		name="Owner Feedback Canned Responses" 
+		parent="menu_more_root" 
+		action="action_owner_feedback"
+		sequence="5"/>
 
 	<menuitem 
 		id="menu_moderator_guideline_root" 
@@ -54,5 +52,21 @@
 		parent="menu_more_root" 
 		action="action_moderator_guideline" 
 		sequence="6"
+	/>
+
+	<menuitem 
+    id="menu_moderator_assignment_sequence_root" 
+    name="Moderator Assignment Sequence"
+    parent="menu_more_root" 
+    action="action_moderator_assignment_sequence"
+    sequence="7"
+	/>
+
+	<menuitem 
+    id="menu_permission_tracker_root" 
+    name="Permission Configurations"
+    parent="menu_more_root" 
+    action="action_permission_tracker"
+    sequence="8"
 	/>
 </odoo>

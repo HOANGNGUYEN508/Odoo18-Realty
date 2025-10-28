@@ -111,7 +111,7 @@ Hoàng: phân tích và thiết kế hệ thống.
           + Thêm views và menu cho những model mới.
           + Hoàn thiện model action (xem lịch sử thay đổi, đặt lịch hẹn, làm report) của product.template.
           + Sửa override create tại res.users: khi tạo user mới sẽ block đi những quyền cơ bản mà odoo tự gán -> kiểm soát hoàn toàn thông qua hệ thống phân quyền ứng với chức danh của realty_bds.
-    				+ Thêm hướng dẫn archive record rule với tên là 'Job multi company rule' sau khi install module realty_bds: rule mặc định của odoo khiến cho user không tạo job title cho company khác company mặc định của mình. Do đã kiểm soát chặt chẽ thông qua cơ chế assign job_title để có quyền nên không cần thiết.
+            + Thêm hướng dẫn archive record rule với tên là 'Job multi company rule' sau khi install module realty_bds: rule mặc định của odoo khiến cho user không tạo job title cho company khác company mặc định của mình. Do đã kiểm soát chặt chẽ thông qua cơ chế assign job_title để có quyền nên không cần thiết.
           + Sửa lỗi chính tả.
           + Sửa sql_constraints khắp các model.
           + Cấu trúc lại folder: gộp các file ..._menu.xml lại với nhau. Tạo folder menu gồm các file là menu chính và các sub-menu của menu chính. Tạo folfer templates dành cho override templates của odoo.
@@ -137,11 +137,11 @@ Hoàng: phân tích và thiết kế hệ thống.
           + Fix bug tại filter: dùng sai trường unit_price_units -> unit_prices.
           + Thêm hướng dẫn archive record rule với tên là 'Product multi-company': phá vỡ logic xem record product xuyên company của realty_bds.
           + Tạo controller BinaryController sao chép dựa trên controler Binary của odoo 18: fetch img không cần thông qua có set up 'allow companies' (res.users) hoặc 'is public document' (ir.attachment) để có thể xem img được gán vào record qua trường many2many. Cơ chế hoạt động: Chỉ cần user có quyền read với record mà những img đó được gán vào thì sẽ có quyền xem những img ấy.
-					+ Inherit model ir.attachment để thêm các trường: orphaned_date, orphaned_from_model, orphaned_from_res_id.
+          + Inherit model ir.attachment để thêm các trường: orphaned_date, orphaned_from_model, orphaned_from_res_id.
           + Override unlink của product.template, product_report, notify để sau khi record bị delete thì tìm tất cả attachment (trong trường hợp này thì tất cả đều là img) được gán vào cùng với record sẽ set những trường được thêm mới của các attachment để sau này delete bằng model data_recycle.model.
-					+ Sửa file 'data_recycle': thêm 3 record mới và sửa 2 record cũ theo logic mới sửa của ir.attachment.
-					+ Thêm hướng dẫn vào file README.md: install module realty_bds xong tắt comment dòng 'data/data_recycle.xml', của 'data' trong file __manifest__.py rồi restart server và upgrade lại module để có tính năng tự động dọn các attachment không còn được dùng đến.
-					+ Thêm model permission_tracker để hỗ trợ cho model product.template, congratulation, guideline, notification, urgent_buying.
-					+ Thêm view (list, form), data file, menuitem cho permission_tracker.
-					+ Áp dụng @tools.ormcache vào những hàm return data cần dùng nhiều lần.
-					+ Update cách sử dụng model policy. 
+          + Sửa file 'data_recycle': thêm 3 record mới và sửa 2 record cũ theo logic mới sửa của ir.attachment.
+          + Thêm hướng dẫn vào file README.md: install module realty_bds xong tắt comment dòng 'data/data_recycle.xml', của 'data' trong file __manifest__.py rồi restart server và upgrade lại module để có tính năng tự động dọn các attachment không còn được dùng đến.
+          + Thêm model permission_tracker để hỗ trợ cho model product.template, congratulation, guideline, notification, urgent_buying.
+          + Thêm view (list, form), data file, menuitem cho permission_tracker.
+          + Áp dụng @tools.ormcache vào những hàm return data cần dùng nhiều lần.
+          + Update cách sử dụng model policy. 

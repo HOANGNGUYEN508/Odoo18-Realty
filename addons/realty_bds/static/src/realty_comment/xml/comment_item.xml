@@ -28,10 +28,10 @@
 					</div>
 
 					<div class="comment-content mt-1">
-						<t t-if="!local.editing">
+						<t t-if="!isEditing">
 							<t t-esc="commentData.content"/>
 						</t>
-						<t t-else="">
+						<t t-elif="isEditing">
 							<div class="d-flex">
 								<input t-ref="editInput" t-model="local.editingContent" class="form-control me-2" />
 								<button class="btn btn-sm btn-primary me-1" t-on-click="saveEdit">
@@ -89,7 +89,11 @@
 						loadMoreReplies="props.loadMoreReplies" 
 						toggleReplies="props.toggleReplies" 
 						getRepliesMeta="props.getRepliesMeta" 
-						isRepliesVisible="props.isRepliesVisible" 
+						isRepliesVisible="props.isRepliesVisible"
+						onEditStart="props.onEditStart" 
+						onEditCancel="props.onEditCancel" 
+						editingId="props.editingId" 
+						enqueueAction="props.enqueueAction"
 					/>
 				</t>
 

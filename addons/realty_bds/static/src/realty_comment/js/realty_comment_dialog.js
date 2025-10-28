@@ -51,14 +51,26 @@ export class RealtyCommentDialog extends Component {
 			repliesByParent: {},
 			repliesMeta: {},
 			showRepliesByParent: {},
-			// processedTmpIds: new Set(),
-			// tmpIdToRealId: new Map(),
+			editingId: null,
 		});
 
 		this._processedClientTmpIds = new Set(); // track client_tmp_id we've processed/registered
 		this._tmpIdToRealId = new Map(); // tmpId -> real numeric id
 		this._clientTmpIdToTmpId = new Map(); // client_tmp_id -> tmpId
 		this._tmpCounter = 0;
+
+		// Page cache: page -> { ts, ids: [], hasMore, comments: {id:rec} }
+		this._pageCache = new Map();
+		this._pageCacheTTL = 30 * 1000; // 30s TTL, tune if needed
+
+		// Undo map for optimistic operations (primarily create)
+		// key: tmpId -> { tmpId, client_tmp_id, parentId, insertedInto: 'top'|'replies', prevParentChildCount }
+		this._undoMap = new Map();
+
+		// Action queue for optimistic / pending records
+		this._actionQueue = new Map(); // tmpId -> [{type, payload, ts, ...}, ...]
+		this._actionQueueTTL = 2 * 60 * 1000; // 2 minutes TTL for queued actions (tunable)
+		this._queueTimers = new Map(); // tmpId -> timer id (for TTL cleanup)
 
 		// register bus channel
 		this._boundBusHandler = this._onBusNotification.bind(this);
@@ -85,49 +97,367 @@ export class RealtyCommentDialog extends Component {
 		return -(Date.now() * 1000 + this._tmpCounter);
 	};
 
-	_sortByDateDesc = (ids = []) => {
+	_sortByDate = (ids = []) => {
+		// sort by like_count DESC, then by create_date ASC (oldest first)
 		return ids.slice().sort((a, b) => {
 			const aRec = this.state.commentsById?.[a] || {};
 			const bRec = this.state.commentsById?.[b] || {};
 
-			// normalize like_count to integer (default 0)
 			const la = Number(aRec.like_count) || 0;
 			const lb = Number(bRec.like_count) || 0;
 			if (lb !== la) {
-				return lb - la; // higher like_count first
+				return lb - la; // higher likes first
 			}
 
-			// normalize create_date to timestamp (default 0)
 			const daRaw = aRec.create_date;
 			const dbRaw = bRec.create_date;
 			const da = daRaw ? Date.parse(daRaw) : 0;
 			const db = dbRaw ? Date.parse(dbRaw) : 0;
-			// Date.parse returns NaN for invalid dates -> treat as 0
 			const ta = isNaN(da) ? 0 : da;
 			const tb = isNaN(db) ? 0 : db;
 
-			return tb - ta; // newer first
+			// tie-breaker: oldest first -> earlier (smaller timestamp) should come first
+			return ta - tb;
 		});
 	};
 
 	_replaceIdInList = (list = [], tmpId, newId) =>
 		list.map((id) => (id === tmpId ? newId : id));
 
-	_onCommentUpdated = (updated) => {
-		if (!updated || !updated.id) return;
-		const prev = this.state.commentsById[updated.id] || {};
-		this.state.commentsById = {
-			...this.state.commentsById,
-			[updated.id]: { ...prev, ...updated },
-		};
+	// Page cache helpers
+	_isCacheValid = (meta) => meta && Date.now() - meta.ts < this._pageCacheTTL;
+
+	_cacheSet = (page, ids, comments, hasMore) => {
+		this._pageCache.set(page, {
+			ts: Date.now(),
+			ids: ids.slice(),
+			comments: { ...(comments || {}) },
+			hasMore: !!hasMore,
+		});
 	};
 
-	_onCommentDeleted = (id) => {
+	_cacheGet = (page) => {
+		const meta = this._pageCache.get(page);
+		if (!this._isCacheValid(meta)) return null;
+		return meta;
+	};
+
+	_clearPageCache = () => {
+		this._pageCache.clear();
+	};
+
+	_replaceTmpInCache = (tmpId, newId) => {
+		for (const [page, meta] of this._pageCache.entries()) {
+			if (!meta.ids) continue;
+			let changed = false;
+			meta.ids = meta.ids.map((id) => {
+				if (id === tmpId) {
+					changed = true;
+					return newId;
+				}
+				return id;
+			});
+			if (changed) {
+				// move comment record from tmp to new id in meta.comments
+				const comments = { ...(meta.comments || {}) };
+				if (comments[tmpId]) {
+					comments[newId] = { ...comments[tmpId], id: newId };
+					delete comments[tmpId];
+				}
+				this._pageCache.set(page, { ...meta, comments });
+			}
+		}
+	};
+
+	_removeIdFromCacheMeta = (id) => {
+		for (const [page, meta] of this._pageCache.entries()) {
+			if (!meta.ids) continue;
+			if (meta.ids.includes(id)) {
+				meta.ids = meta.ids.filter((x) => x !== id);
+				if (meta.comments && meta.comments[id]) delete meta.comments[id];
+				if (meta.ids.length === 0) {
+					this._pageCache.delete(page);
+				} else {
+					this._pageCache.set(page, meta);
+				}
+			}
+		}
+	};
+
+	_addOrUpdateCachedComment = (rec) => {
+		if (!rec || !rec.id) return;
+		this.state.commentsById = {
+			...this.state.commentsById,
+			[rec.id]: { ...(this.state.commentsById[rec.id] || {}), ...rec },
+		};
+
+		for (const [page, meta] of this._pageCache.entries()) {
+			if (meta.ids && meta.ids.includes(rec.id)) {
+				meta.comments = {
+					...(meta.comments || {}),
+					[rec.id]: this.state.commentsById[rec.id],
+				};
+				this._pageCache.set(page, meta);
+			}
+		}
+	};
+
+	_insertToPageCache = (rec) => {
+		if (!rec || !rec.id) return;
+		// update state
+		this.state.commentsById = { ...this.state.commentsById, [rec.id]: rec };
+		this.state.topLevel = this._sortByDate([
+			...(this.state.topLevel || []),
+			rec.id,
+		]);
+
+		const meta = this._pageCache.get(0);
+		if (meta) {
+			meta.ids = this._sortByDate([...(meta.ids || []), rec.id]);
+			meta.comments = { ...(meta.comments || {}), [rec.id]: rec };
+			this._pageCache.set(0, meta);
+		}
+	};
+
+	// Enqueue an action for a tmpId. Actions will be replayed on reconcile.
+	// action object shape (examples):
+	// { type: 'write', payload: { content: 'new text' } }
+	// { type: 'unlink', payload: { parentId: 123 } }
+	// { type: 'call', payload: { method: 'action_toggle_like', args: [], kwargs: {} } }
+	// { type: 'create_child', payload: { payload: { content, res_model, res_id, parent_id }, context: { client_tmp_id }, tmpChildId } }
+	_enqueueAction = (tmpId, action) => {
+		if (!tmpId || !action) return false;
+		if (!this._actionQueue.has(tmpId)) this._actionQueue.set(tmpId, []);
+		this._actionQueue.get(tmpId).push({ ...action, ts: Date.now() });
+
+		// refresh TTL timer
+		if (this._queueTimers.has(tmpId)) {
+			clearTimeout(this._queueTimers.get(tmpId));
+		}
+		const t = setTimeout(() => {
+			this._actionQueue.delete(tmpId);
+			this._queueTimers.delete(tmpId);
+		}, this._actionQueueTTL);
+		this._queueTimers.set(tmpId, t);
+		return true;
+	};
+
+	_cancelQueuedActions = (tmpId) => {
+		if (!tmpId) return;
+		if (this._queueTimers.has(tmpId)) {
+			clearTimeout(this._queueTimers.get(tmpId));
+			this._queueTimers.delete(tmpId);
+		}
+		this._actionQueue.delete(tmpId);
+	};
+
+	// Replay queued actions for a given tmpId after mapping to realId
+	_replayQueuedActions = async (tmpId, realId) => {
+		if (!tmpId || !realId) return;
+		const queue = this._actionQueue.get(tmpId);
+		if (!Array.isArray(queue) || queue.length === 0) {
+			// cleanup any timers
+			if (this._queueTimers.has(tmpId)) {
+				clearTimeout(this._queueTimers.get(tmpId));
+				this._queueTimers.delete(tmpId);
+			}
+			this._actionQueue.delete(tmpId);
+			return;
+		}
+
+		// Process actions sequentially — simpler and safer for ordering / cancels
+		for (const act of queue) {
+			try {
+				switch (act.type) {
+					case "write": {
+						// payload contains fields to write, e.g. { content: "..." }
+						await this.orm.write("realty_comment", [realId], act.payload, {});
+						// optimistic local update so UI doesn't wait for a push
+						this._onCommentUpdated({ id: realId, ...act.payload });
+						break;
+					}
+					case "unlink":
+					case "delete": {
+						// If caller provided parentId in payload (useful for UI update)
+						const res = await this.orm.unlink("realty_comment", [realId]);
+						const deletedId = res && res.deleted_id ? res.deleted_id : realId;
+						this._onCommentDeleted(
+							deletedId,
+							(act.payload && act.payload.parentId) || null
+						);
+						break;
+					}
+					case "call": {
+						// generic rpc call — payload must include method, args (optional), kwargs (optional)
+						const method = act.payload && act.payload.method;
+						const args =
+							act.payload && act.payload.args ? act.payload.args : [realId];
+						const kwargs =
+							act.payload && act.payload.kwargs ? act.payload.kwargs : {};
+						const res = await this.orm.call(
+							"realty_comment",
+							method,
+							args,
+							kwargs
+						);
+						// handle common method results (e.g. like toggle)
+						if (
+							method === "action_toggle_like" &&
+							res &&
+							typeof res.count === "number"
+						) {
+							this._onCommentUpdated({ id: realId, like_count: res.count });
+						}
+						break;
+					}
+					case "create_child": {
+						// payload.payload = child create payload; .tmpChildId optionally provided
+						const createdRaw = await this.orm.create(
+							"realty_comment",
+							[act.payload.payload],
+							{
+								context: act.payload.context || {},
+							}
+						);
+						// reconcile child tmp->real if tmpChildId present
+						if (act.payload && act.payload.tmpChildId) {
+							await this._reconcileCreated(createdRaw, act.payload.tmpChildId);
+						} else {
+							// ensure created comment is merged into state
+							await this._reconcileCreated(createdRaw, null);
+						}
+						break;
+					}
+					default:
+						console.warn(
+							"[comment-dialog] Unknown queued action type:",
+							act.type
+						);
+				}
+			} catch (e) {
+				console.error(
+					"[comment-dialog] Failed replaying queued action",
+					act,
+					e
+				);
+				// Best-effort: continue with other actions; consider surfacing error to user via dialog service
+			}
+		}
+
+		// cleanup after replay
+		if (this._queueTimers.has(tmpId)) {
+			clearTimeout(this._queueTimers.get(tmpId));
+			this._queueTimers.delete(tmpId);
+		}
+		this._actionQueue.delete(tmpId);
+	};
+
+	_onCommentUpdated = (updated) => {
+		if (!updated || !updated.id) return;
+		this.state.commentsById[updated.id] = {
+			...this.state.commentsById[updated.id],
+			...updated,
+		};
+		// update cache entries
+		this._addOrUpdateCachedComment(updated);
+	};
+
+	_onCommentDeleted = (id, parentId = null) => {
 		if (!id) return;
+
+		try {
+			const deletedIdNum = Number(id);
+
+			// If user was replying to the deleted comment, cancel reply UI
+			if (
+				this.state.replyingTo !== null &&
+				Number(this.state.replyingTo) === deletedIdNum
+			) {
+				// cancelReply clears replyingTo and highlightedComment
+				this.cancelReply();
+			}
+
+			// If highlightedComment itself points to the deleted comment, clear it
+			const highlightedId =
+				this.state.highlightedComment && this.state.highlightedComment.id;
+			if (highlightedId && Number(highlightedId) === deletedIdNum) {
+				this.state.highlightedComment = null;
+			}
+
+			// If we're editing the deleted comment, cancel editing
+			if (
+				this.state.editingId !== null &&
+				Number(this.state.editingId) === deletedIdNum
+			) {
+				this.cancelEditing();
+			}
+		} catch (e) {
+			// ignore coercion errors and continue with deletion logic
+			console.warn("[comment-dialog] cleanup during delete failed:", e);
+		}
+
+		// remove from comments map
 		const map = { ...this.state.commentsById };
 		delete map[id];
 		this.state.commentsById = map;
-		this.state.topLevel = this.state.topLevel.filter((tid) => tid !== id);
+
+		// If parentId provided -> remove from replies list and update parent meta
+		if (parentId) {
+			const pid = Number(parentId);
+			const cur = this.state.repliesByParent[pid] || [];
+			const updatedReplies = cur.filter((rid) => rid !== id);
+
+			this.state.repliesByParent = {
+				...this.state.repliesByParent,
+				[pid]: updatedReplies,
+			};
+
+			// If replies become empty, hide replies and reset basic meta
+			if (updatedReplies.length === 0) {
+				this.state.showRepliesByParent = {
+					...this.state.showRepliesByParent,
+					[pid]: false,
+				};
+				this.state.repliesMeta = {
+					...this.state.repliesMeta,
+					[pid]: {
+						...(this.state.repliesMeta[pid] || {}),
+						page: 0,
+						hasMore: false,
+						loading: false,
+					},
+				};
+			}
+
+			const prevParent = this.state.commentsById[pid] || {};
+			const newChildCount = Math.max((prevParent.child_count || 1) - 1, 0);
+			this.state.commentsById = {
+				...this.state.commentsById,
+				[pid]: { ...prevParent, child_count: newChildCount },
+			};
+
+			// remove id from page cache meta if present
+			this._removeIdFromCacheMeta(id);
+
+			return;
+		}
+
+		// Top-level removal
+		this.state.topLevel = (this.state.topLevel || []).filter(
+			(tid) => tid !== id
+		);
+
+		// keep cache in sync
+		this._removeIdFromCacheMeta(id);
+
+		// If current page becomes empty and we are not on first page -> load previous page
+		if ((this.state.topLevel || []).length === 0 && this.state.page > 0) {
+			// Fire-and-forget previous page load to avoid blocking UI
+			this.loadPage(Math.max(0, this.state.page - 1)).catch((e) =>
+				console.error("Failed to load previous page after delete:", e)
+			);
+			return;
+		}
 	};
 
 	_handleServerPushNew = (srv) => {
@@ -142,22 +472,27 @@ export class RealtyCommentDialog extends Component {
 				if (!cur.includes(srv.id)) {
 					this.state.repliesByParent = {
 						...this.state.repliesByParent,
-						[pid]: this._sortByDateDesc([srv.id, ...cur]),
+						[pid]: this._sortByDate([srv.id, ...cur]),
 					};
 				}
 			} else {
 				if (!this.state.topLevel.includes(srv.id)) {
-					this.state.topLevel = this._sortByDateDesc([
+					this.state.topLevel = this._sortByDate([
+						...(this.state.topLevel || []),
 						srv.id,
-						...this.state.topLevel,
 					]);
 				}
+				// update page0 cache conservatively
+				this._insertToPageCache(srv);
 			}
+			// ensure cache entries have the comment
+			this._addOrUpdateCachedComment(srv);
 		}
 	};
 
 	_onBusNotification = (payload, { id } = {}) => {
 		try {
+			console.log("[comment-dialog] Bus notification received:", payload, id);
 			if (!payload) {
 				console.warn("Empty payload received");
 				return;
@@ -219,22 +554,21 @@ export class RealtyCommentDialog extends Component {
 					break;
 				case "delete":
 					if (payload.id) {
-						this._onCommentDeleted(payload.id);
-						if (payload.parent_id) {
-							const pId = Number(payload.parent_id);
-							const prev = this.state.commentsById[pId] || {};
-							this.state.commentsById = {
-								...this.state.commentsById,
-								[pId]: {
-									...prev,
-									child_count:
-										payload.child_count ??
-										Math.max((prev.child_count || 1) - 1, 0),
-								},
-							};
-						}
+						this._onCommentDeleted(payload.id, payload.parent_id);
 					}
 					break;
+				case "like_toggle": {
+					if (payload.id) {
+						const id = Number(payload.id);
+						const prev = this.state.commentsById[id] || {};
+						this.state.commentsById = {
+							...this.state.commentsById,
+							[id]: { ...prev, like_count: payload.like_count || 0 },
+						};
+						this._addOrUpdateCachedComment(this.state.commentsById[id]);
+					}
+					break;
+				}
 				default:
 					console.error("Unknown message type:", payload.type, payload);
 			}
@@ -290,7 +624,7 @@ export class RealtyCommentDialog extends Component {
 			this.state.commentsById = nextMap;
 			this.state.repliesByParent = {
 				...this.state.repliesByParent,
-				[pid]: this._sortByDateDesc(newList),
+				[pid]: this._sortByDate(newList),
 			};
 			this.state.repliesMeta = {
 				...this.state.repliesMeta,
@@ -363,12 +697,25 @@ export class RealtyCommentDialog extends Component {
 			temp: true,
 		};
 
-		// insert into state
+		// always ensure the comment exists in the master map
 		this.state.commentsById = {
 			...this.state.commentsById,
 			[tmpId]: optimistic,
 		};
 
+		if (!this._actionQueue.has(tmpId)) {
+			this._actionQueue.set(tmpId, []);
+			// start TTL timer for the queue
+			if (this._queueTimers.has(tmpId))
+				clearTimeout(this._queueTimers.get(tmpId));
+			const t = setTimeout(() => {
+				this._actionQueue.delete(tmpId);
+				this._queueTimers.delete(tmpId);
+			}, this._actionQueueTTL);
+			this._queueTimers.set(tmpId, t);
+		}
+
+		// Replies branch
 		if (optimistic.parent_id) {
 			const pid = Number(optimistic.parent_id);
 			const prev = this.state.repliesByParent[pid] || [];
@@ -380,15 +727,124 @@ export class RealtyCommentDialog extends Component {
 				...this.state.showRepliesByParent,
 				[pid]: true,
 			};
+			// record undo info
+			this._undoMap.set(tmpId, {
+				tmpId,
+				client_tmp_id,
+				parentId: pid,
+				insertedInto: "replies",
+				prevParentChildCount:
+					(this.state.commentsById[pid] &&
+						this.state.commentsById[pid].child_count) ||
+					0,
+			});
+			return tmpId;
+		}
+
+		// Top-level branch
+		const PAGE_LIMIT = 10; // must match loadPage() limit
+		const page0 = this._pageCache.get(0);
+
+		// If we are on page 0 and page0 exists and is full, push optimistic into last page cache instead
+		if (
+			this.state.page === 0 &&
+			page0 &&
+			Array.isArray(page0.ids) &&
+			page0.ids.length >= PAGE_LIMIT
+		) {
+			// determine last page index (pick max numeric key)
+			const pages = Array.from(this._pageCache.keys()).filter(
+				(k) => typeof k === "number"
+			);
+			const lastPage = pages.length ? Math.max(...pages) : 1;
+			let lastMeta = this._pageCache.get(lastPage);
+			if (!lastMeta) {
+				lastMeta = { ts: Date.now(), ids: [], comments: {}, hasMore: true };
+			}
+			lastMeta.ids = [...(lastMeta.ids || []), tmpId];
+			lastMeta.comments = { ...(lastMeta.comments || {}), [tmpId]: optimistic };
+			this._pageCache.set(lastPage, lastMeta);
+
+			this._undoMap.set(tmpId, {
+				tmpId,
+				client_tmp_id,
+				parentId: null,
+				insertedInto: "page_cache",
+				page: lastPage,
+				prevParentChildCount: null,
+			});
 		} else {
-			this.state.topLevel = [tmpId, ...this.state.topLevel];
+			// safe to show on current page (append to visible list)
+			this.state.topLevel = [...(this.state.topLevel || []), tmpId];
+			this._undoMap.set(tmpId, {
+				tmpId,
+				client_tmp_id,
+				parentId: null,
+				insertedInto: "top",
+				prevParentChildCount: null,
+			});
+			// also keep page0 cache in sync if present
+			const meta0 = this._pageCache.get(0);
+			if (meta0 && Array.isArray(meta0.ids)) {
+				meta0.ids = [...(meta0.ids || []), tmpId];
+				meta0.comments = { ...(meta0.comments || {}), [tmpId]: optimistic };
+				this._pageCache.set(0, meta0);
+			}
 		}
 
 		return tmpId;
 	};
 
+	_rollbackOptimisticCreate = (tmpId, markFailed = true) => {
+		if (!tmpId) return;
+		const undo = this._undoMap.get(tmpId);
+		// remove from comments map
+		const map = { ...this.state.commentsById };
+		if (map[tmpId]) delete map[tmpId];
+		this.state.commentsById = map;
+
+		if (undo) {
+			if (undo.insertedInto === "replies" && undo.parentId != null) {
+				const pid = undo.parentId;
+				this.state.repliesByParent = {
+					...this.state.repliesByParent,
+					[pid]: (this.state.repliesByParent[pid] || []).filter(
+						(id) => id !== tmpId
+					),
+				};
+				// restore parent child_count
+				const prevParent = this.state.commentsById[pid] || {};
+				this.state.commentsById = {
+					...this.state.commentsById,
+					[pid]: {
+						...prevParent,
+						child_count:
+							undo.prevParentChildCount ||
+							Math.max((prevParent.child_count || 1) - 1, 0),
+					},
+				};
+			} else if (undo.insertedInto === "top") {
+				this.state.topLevel = (this.state.topLevel || []).filter(
+					(id) => id !== tmpId
+				);
+			}
+			// cleanup caches
+			this._removeIdFromCacheMeta(tmpId);
+			this._clientTmpIdToTmpId.delete(undo.client_tmp_id);
+			this._processedClientTmpIds.delete(undo.client_tmp_id);
+			this._undoMap.delete(tmpId);
+		} else {
+			// generic cleanup
+			this.state.topLevel = (this.state.topLevel || []).filter(
+				(id) => id !== tmpId
+			);
+			this._removeIdFromCacheMeta(tmpId);
+		}
+
+		// Optionally mark a transient failed indicator in UI elsewhere. For now we removed the tmp row.
+	};
+
 	_reconcileCreated = async (createdRaw, tmpId = null) => {
-		// normalize server returned id (server returns number or [number] or dict)
 		let newId = null;
 		if (typeof createdRaw === "number") {
 			newId = createdRaw;
@@ -404,7 +860,6 @@ export class RealtyCommentDialog extends Component {
 			return;
 		}
 
-		// If we have a temporary item locally, swap it to the real id
 		if (tmpId && this.state.commentsById[tmpId]) {
 			const tmpRec = this.state.commentsById[tmpId];
 
@@ -424,7 +879,6 @@ export class RealtyCommentDialog extends Component {
 			delete map[tmpId];
 			this.state.commentsById = map;
 
-			// Replace tmpId in topLevel or repliesByParent
 			const parentId = tmpRec.parent_id ? Number(tmpRec.parent_id) : null;
 			if (parentId) {
 				const current = this.state.repliesByParent[parentId] || [];
@@ -434,7 +888,7 @@ export class RealtyCommentDialog extends Component {
 					updated[index] = newId;
 					this.state.repliesByParent = {
 						...this.state.repliesByParent,
-						[parentId]: this._sortByDateDesc(updated),
+						[parentId]: this._sortByDate(updated),
 					};
 				}
 			} else {
@@ -442,22 +896,46 @@ export class RealtyCommentDialog extends Component {
 				if (index !== -1) {
 					const updated = [...this.state.topLevel];
 					updated[index] = newId;
-					this.state.topLevel = this._sortByDateDesc(updated);
+					this.state.topLevel = this._sortByDate(updated);
 				} else {
-					this.state.topLevel = this._sortByDateDesc([
-						newId,
-						...(this.state.topLevel || []),
-					]);
+					// Replace tmp in cache (if present) or append newId to last page.
+					this._replaceTmpInCache(tmpId, newId);
+
+					// if last page is currently visible, refresh topLevel from that page's ids
+					const pages = Array.from(this._pageCache.keys());
+					const lastPage = pages.length ? Math.max(...pages) : null;
+					if (lastPage !== null && this.state.page === lastPage) {
+						const meta = this._pageCache.get(lastPage) || { ids: [] };
+						this.state.topLevel = (meta.ids || []).slice();
+					}
 				}
 			}
 
-			// Track the mapping for short-term dedupe and cleanup
 			try {
 				this._tmpIdToRealId.set(tmpId, newId);
 				setTimeout(() => {
 					this._tmpIdToRealId.delete(tmpId);
 				}, 5000);
 			} catch (e) {}
+
+			// update caches: replace tmp with real id
+			this._replaceTmpInCache(tmpId, newId);
+			this._addOrUpdateCachedComment(this.state.commentsById[newId]);
+
+			try {
+				// ensure replay finishes (so queued writes/deletes happen right after reconcile)
+				await this._replayQueuedActions(tmpId, newId);
+			} catch (e) {
+				console.error("[comment-dialog] replay queued actions failed:", e);
+			}
+
+			// cleanup undo map and client mappings
+			const undo = this._undoMap.get(tmpId);
+			if (undo) {
+				this._undoMap.delete(tmpId);
+				this._clientTmpIdToTmpId.delete(undo.client_tmp_id);
+				this._processedClientTmpIds.delete(undo.client_tmp_id);
+			}
 
 			return;
 		}
@@ -535,11 +1013,19 @@ export class RealtyCommentDialog extends Component {
 		}
 	};
 
+	startEditing = (id) => {
+		this.state.editingId = id;
+	};
+
+	cancelEditing = () => {
+		this.state.editingId = null;
+	};
+
 	// create comment (optimistic + reconcile)
 	createTopLevelComment = async () => {
 		const input = this.commentRef.el;
 		const content = input?.value?.trim();
-		
+
 		if (!content) return;
 
 		const client_tmp_id = this._makeTmpId(); // Generate for deduplication
@@ -562,11 +1048,9 @@ export class RealtyCommentDialog extends Component {
 		// Insert optimistically and register the mapping for dedupe
 		const tmpId = this._optimisticInsert(payload, client_tmp_id);
 
-		// register mapping and mark client_tmp_id processed immediately so early bus pushes reconcile
 		try {
 			this._clientTmpIdToTmpId.set(client_tmp_id, tmpId);
 			this._processedClientTmpIds.add(client_tmp_id);
-			// auto-cleanup after 5 seconds
 			setTimeout(() => {
 				this._processedClientTmpIds.delete(client_tmp_id);
 				this._clientTmpIdToTmpId.delete(client_tmp_id);
@@ -585,22 +1069,20 @@ export class RealtyCommentDialog extends Component {
 			await this._reconcileCreated(createdRaw, tmpId);
 		} catch (e) {
 			console.error("Error creating comment:", e);
-			const map = { ...this.state.commentsById };
-			if (map[tmpId])
-				map[tmpId] = { ...map[tmpId], pending: false, failed: true };
-			this.state.commentsById = map;
+			// rollback optimistic insert (server denied or erred)
+			this._rollbackOptimisticCreate(tmpId);
+			// optional: show error to user via dialog service or toast (left to app integ)
 		}
 	};
 
 	// ---------- pagination / top-level loading ----------
-	async loadPage(page = 0) {
+	async loadPage(page = 0, { force = false } = {}) {
 		if (!this.resModel || !this.resId) return;
 		if (this.state.loading) return;
 
 		this.state.loading = true;
 		try {
 			const limit = 10;
-			const offset = page * limit;
 			const fields = [
 				"id",
 				"content",
@@ -612,12 +1094,40 @@ export class RealtyCommentDialog extends Component {
 				"res_id",
 			];
 
-			const records = await this.orm.call(
-				"realty_comment",
-				"search_read",
-				[this._topLevelDomain(), fields],
-				{ limit, offset, order: "create_date DESC" }
-			);
+			let tryPage = Number(page) || 0;
+
+			// If cache available and not forced, use it
+			if (!force) {
+				const cached = this._cacheGet(tryPage);
+				if (cached) {
+					// merge cached comments to state
+					this.state.commentsById = {
+						...this.state.commentsById,
+						...(cached.comments || {}),
+					};
+					this.state.topLevel = (cached.ids || []).slice();
+					this.state.page = tryPage;
+					this.state.hasMore = !!cached.hasMore;
+					this.state.loading = false;
+					return;
+				}
+			}
+
+			let records = [];
+
+			while (true) {
+				const offset = tryPage * limit;
+				records = await this.orm.call(
+					"realty_comment",
+					"search_read",
+					[this._topLevelDomain(), fields],
+					{ limit, offset, order: "create_date DESC" }
+				);
+
+				if (Array.isArray(records) && records.length > 0) break;
+				if (tryPage <= 0) break;
+				tryPage = Math.max(0, tryPage - 1);
+			}
 
 			const nextMap = { ...this.state.commentsById };
 			records.forEach((r) => {
@@ -635,8 +1145,18 @@ export class RealtyCommentDialog extends Component {
 
 			this.state.commentsById = nextMap;
 			this.state.topLevel = records.map((r) => r.id);
-			this.state.page = page;
+			this.state.page = tryPage;
 			this.state.hasMore = records.length === limit;
+
+			// cache this page
+			this._cacheSet(
+				tryPage,
+				this.state.topLevel,
+				Object.fromEntries(
+					this.state.topLevel.map((id) => [id, this.state.commentsById[id]])
+				),
+				this.state.hasMore
+			);
 		} catch (e) {
 			console.error("Failed to load comments", e);
 		} finally {

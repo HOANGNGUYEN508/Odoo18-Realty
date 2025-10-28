@@ -24,6 +24,10 @@ export class RealtyCommentItem extends Component {
 		toggleReplies: { type: Function, optional: true }, // asks dialog to toggle visibility
 		getRepliesMeta: { type: Function, optional: true }, // meta (loading/hasMore/page)
 		isRepliesVisible: { type: Function, optional: true }, // visibility flag
+		onEditStart: { type: Function, optional: true }, // (id) => void
+		onEditCancel: { type: Function, optional: true }, // () => void
+		editingId: { type: Number, optional: true }, // id of comment being edited
+		enqueueAction: { type: Function, optional: true },
 	};
 
 	setup() {
@@ -78,6 +82,13 @@ export class RealtyCommentItem extends Component {
 		}
 	}
 
+	// helper to detect pending/temp record
+	_isPendingRec() {
+		const rec = this.commentData || {};
+		// consider explicit flags or negative tmp ids
+		return !!(rec.temp || rec.pending || (rec.id && Number(rec.id) < 0));
+	}
+
 	startReply(ev) {
 		try {
 			if (ev && typeof ev.stopPropagation === "function") ev.stopPropagation();
@@ -118,6 +129,30 @@ export class RealtyCommentItem extends Component {
 			return;
 		}
 
+		// If comment is pending/temp and parent provided an enqueueAction, queue it instead
+		if (this._isPendingRec()) {
+			if (this.props.enqueueAction) {
+				// enqueue a generic call action for toggling like
+				this.props.enqueueAction(commentId, {
+					type: "call",
+					payload: { method: "action_toggle_like", args: [], kwargs: {} },
+				});
+				// optimistic local increment so UI feels responsive
+				const prev = this.commentData;
+				const optimisticCount = (prev.like_count || 0) + 1;
+				this.props.onUpdated &&
+					this.props.onUpdated({ id: commentId, like_count: optimisticCount });
+				// set throttle locally to avoid multiple queued toggles quickly
+				this._likeThrottleTimeouts.set(
+					commentId,
+					setTimeout(() => {
+						this._likeThrottleTimeouts.delete(commentId);
+					}, 500)
+				);
+			}
+			return;
+		}
+
 		this.local.togglingLike = true;
 
 		try {
@@ -130,7 +165,7 @@ export class RealtyCommentItem extends Component {
 
 			if (result && typeof result.count === "number") {
 				const updated = {
-					id: this.commentData.id,
+					id: commentId,
 					like_count: result.count,
 				};
 				this.props.onUpdated && this.props.onUpdated(updated);
@@ -153,8 +188,15 @@ export class RealtyCommentItem extends Component {
 
 	// ---------- Editing ----------
 	startEdit() {
-		this.local.editing = true;
-		this.local.editingContent = this.commentData.content || "";
+		// set the parent's editing id if callback provided, else fallback to local editing
+		const c = this.commentData;
+		this.local.editingContent = c.content || "";
+		if (this.props.onEditStart) {
+			this.props.onEditStart(c.id);
+		} else {
+			this.local.editing = true;
+		}
+		// focus managed in parent-based flow via lifecycle or small timeout
 		setTimeout(() => {
 			try {
 				this.editRef.el && this.editRef.el.focus();
@@ -163,7 +205,12 @@ export class RealtyCommentItem extends Component {
 	}
 
 	cancelEdit() {
-		this.local.editing = false;
+		// if parent controls editing, tell parent to cancel; else use local flag
+		if (this.props.onEditCancel) {
+			this.props.onEditCancel();
+		} else {
+			this.local.editing = false;
+		}
 		this.local.editingContent = "";
 	}
 
@@ -178,17 +225,38 @@ export class RealtyCommentItem extends Component {
 			const newContent = (this.local.editingContent || "").trim();
 			if (!newContent) return;
 
+			const id = this.commentData.id;
+
+			// If pending/temp: enqueue the write action
+			if (this._isPendingRec()) {
+				if (this.props.enqueueAction) {
+					this.props.enqueueAction(id, {
+						type: "write",
+						payload: { content: newContent },
+					});
+					// optimistic local update
+					this.props.onUpdated &&
+						this.props.onUpdated({ id, content: newContent });
+					this.props.onEditCancel && this.props.onEditCancel();
+					this.local.editingContent = "";
+				}
+				return;
+			}
+
 			try {
-				const result = await this.orm.call(
+				const result = await this.orm.write(
 					"realty_comment",
-					"action_edit_comment",
-					[this.commentData.id, newContent],
+					[id],
+					{ content: newContent },
 					{}
 				);
-				this.props.onUpdated && this.props.onUpdated(result);
-				this.local.editing = false;
+				// update UI optimistically (server typically pushes an update anyway)
+				this.props.onUpdated &&
+					this.props.onUpdated({ id, content: newContent });
+				this.props.onEditCancel && this.props.onEditCancel();
+				this.local.editingContent = "";
 			} catch (e) {
-				console.error("Edit failed", e);
+				console.error("Save edit failed", e);
 			}
 		}, 1000);
 	}
@@ -201,14 +269,29 @@ export class RealtyCommentItem extends Component {
 			confirmLabel: "Delete",
 			confirm: async () => {
 				try {
-					const result = await this.orm.call(
-						"realty_comment",
-						"action_delete_comment",
-						[this.commentData.id],
-						{}
-					);
-					if (result && result.deleted_id) {
-						this.props.onDeleted && this.props.onDeleted(result.deleted_id);
+					const id = this.commentData.id;
+					const parentId = this.commentData.parent_id || null;
+
+					// If pending/temp: prefer cancelling queued create (if parent provided hook)
+					if (this._isPendingRec()) {
+						// remove optimistic UI immediately
+						this.props.onDeleted && this.props.onDeleted(id, parentId);
+						// ask parent to cancel queued actions (if available)
+						if (this.props.enqueueAction) {
+							// we use a special action type 'cancel_create' which the parent queue handler should treat as canceling the pending create and clearing queue
+							this.props.enqueueAction(id, { type: "cancel_create" });
+						}
+						return;
+					}
+
+					// Normal flow: call unlink on server
+					const result = await this.orm.unlink("realty_comment", [id]);
+					// if server returns deleted id, pass it along; otherwise fall back to id
+					const deletedId =
+						result && result.deleted_id ? result.deleted_id : id;
+					if (deletedId) {
+						const pid = parentId;
+						this.props.onDeleted && this.props.onDeleted(deletedId, pid);
 					}
 				} catch (e) {
 					console.error("Delete failed", e);
@@ -216,5 +299,19 @@ export class RealtyCommentItem extends Component {
 			},
 			cancel: () => {},
 		});
+	}
+
+	get isEditing() {
+		const data = this.commentData || {};
+		const id = data.id ?? this.props.id ?? null;
+		// if parent passes editingId, use that; else fallback to local.editing
+		if (this.props.editingId !== undefined && this.props.editingId !== null) {
+			try {
+				return Number(this.props.editingId) === Number(id);
+			} catch (e) {
+				return this.props.editingId === id;
+			}
+		}
+		return !!this.local.editing;
 	}
 }

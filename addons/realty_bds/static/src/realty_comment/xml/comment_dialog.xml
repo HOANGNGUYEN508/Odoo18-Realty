@@ -9,30 +9,36 @@
 				<div class="o_comment_scroll">
 					<div class="o_pager mb-2 d-flex align-items-center">
 						<div class="ms-auto d-flex align-items-center gap-2">
+							<span>
+								<t t-esc="state.page + 1"/>
+							</span>
 							<button type="button" class="btn btn-sm btn-light" t-att-disabled="state.loading || state.page == 0" t-on-click="loadPrevPage">&#10094;</button>
-							<span>Page <t t-esc="state.page + 1"/></span>
 							<button type="button" class="btn btn-sm btn-light" t-att-disabled="state.loading || !state.hasMore" t-on-click="loadNextPage">&#10095;</button>
 						</div>
 					</div>
 
 					<div class="o_comment_list">
 						<t t-foreach="state.topLevel" t-as="cid" t-key="cid">
-							<RealtyCommentItem
-								id="cid"
-								getComment="(id) =&gt; state.commentsById[id]"
-								level="0"
-								onReply="startReply"
-								onUpdated="_onCommentUpdated"
-								onDeleted="_onCommentDeleted"
-								replyingTo="state.replyingTo"
-								isModerator="isModerator"
-								isUser="isUser"
-								getReplies="(pid) =&gt; state.repliesByParent[pid] || []"
-								loadReplies="(pid, page) =&gt; loadRepliesFor(pid, page)"
-								loadMoreReplies="(pid) =&gt; loadMoreRepliesFor(pid)"
-								toggleReplies="(pid) =&gt; toggleRepliesFor(pid)"
-								getRepliesMeta="(pid) =&gt; state.repliesMeta[pid] || {}"
-								isRepliesVisible="(pid) =&gt; !!state.showRepliesByParent[pid]"
+							<RealtyCommentItem 
+								id="cid" 
+								getComment="(id) =&gt; state.commentsById[id]" 
+								level="0" 
+								onReply="startReply" 
+								onUpdated="_onCommentUpdated" 
+								onDeleted="_onCommentDeleted" 
+								replyingTo="state.replyingTo" 
+								isModerator="isModerator" 
+								isUser="isUser" 
+								getReplies="(pid) =&gt; state.repliesByParent[pid] || []" 
+								loadReplies="(pid, page) =&gt; loadRepliesFor(pid, page)" 
+								loadMoreReplies="(pid) =&gt; loadMoreRepliesFor(pid)" 
+								toggleReplies="(pid) =&gt; toggleRepliesFor(pid)" 
+								getRepliesMeta="(pid) =&gt; state.repliesMeta[pid] || {}" 
+								isRepliesVisible="(pid) =&gt; !!state.showRepliesByParent[pid]" 
+								onEditStart="(id) =&gt; startEditing(id)" 
+								onEditCancel="() =&gt; cancelEditing()" 
+								editingId="state.editingId" 
+								enqueueAction="(tmpId, action) =&gt; _enqueueAction(tmpId, action)"
 							/>
 						</t>
 					</div>
