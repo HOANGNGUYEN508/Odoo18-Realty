@@ -39,6 +39,8 @@ export class RealtyCommentDialog extends Component {
 		this.isUser = this.hasUserAccess || this.hasRealtyAccess;
 
 		this.commentRef = useRef("commentInput");
+		this.pageAnchorRef = useRef("pageAnchor");
+		this.jumpInputRef = useRef("jumpInput");
 
 		this.state = useState({
 			commentsById: {},
@@ -52,6 +54,8 @@ export class RealtyCommentDialog extends Component {
 			repliesMeta: {},
 			showRepliesByParent: {},
 			editingId: null,
+			maxPage: 1,
+			jumpDialog: { visible: false, input: "", style: "", error: null },
 		});
 
 		this._processedClientTmpIds = new Set(); // track client_tmp_id we've processed/registered
@@ -92,13 +96,134 @@ export class RealtyCommentDialog extends Component {
 	}
 
 	// ---------- Helpers & handlers ----------
+	// compute bubble style and tail offset for the anchor element
+	_getBubbleStyleForAnchor = (anchorEl) => {
+		if (!anchorEl || typeof anchorEl.getBoundingClientRect !== "function") {
+			return "position:fixed; left:20px; top:80px; z-index:1060;";
+		}
+		const rect = anchorEl.getBoundingClientRect();
+		const anchorCenterX = rect.left + rect.width / 2 + (window.scrollX || 0);
+
+		const viewportPadding = 12;
+		const maxWidth = Math.min(420, window.innerWidth - viewportPadding * 2);
+		// place bubble left near anchor but clamp inside viewport
+		let bubbleLeft = Math.max(
+			viewportPadding,
+			Math.min(
+				rect.left + (window.scrollX || 0),
+				window.innerWidth - viewportPadding - maxWidth
+			)
+		);
+		const bubbleTop = Math.round(rect.bottom + (window.scrollY || 0) + 8);
+
+		let tailLeft = Math.round(anchorCenterX - bubbleLeft);
+		const tailMin = 12;
+		const tailMax = Math.round(maxWidth - 12);
+		if (tailLeft < tailMin) tailLeft = tailMin;
+		if (tailLeft > tailMax) tailLeft = tailMax;
+
+		return `position:fixed; left:${bubbleLeft}px; top:${bubbleTop}px; z-index:1060; width:auto; max-width:${maxWidth}px; --jump-tail-left:${tailLeft}px;`;
+	};
+
+	openJumpDialog = (ev) => {
+		const maxP = Number(this.state.maxPage) || 1;
+		if (maxP <= 4) {
+			// disabled when <= 4 pages; early exit (could add a tiny flash here)
+			return;
+		}
+
+		const anchor = this.pageAnchorRef && this.pageAnchorRef.el;
+		const style = this._getBubbleStyleForAnchor(anchor);
+		this.state.jumpDialog = {
+			visible: true,
+			input: String(this.state.page + 1),
+			style,
+			error: null,
+		};
+
+		// focus input after render
+		requestAnimationFrame(() => {
+			try {
+				const inp = this.jumpInputRef && this.jumpInputRef.el;
+				if (inp && typeof inp.focus === "function") {
+					inp.focus();
+					if (typeof inp.select === "function") inp.select();
+				}
+			} catch (e) {}
+		});
+
+		if (ev && typeof ev.stopPropagation === "function") ev.stopPropagation();
+	};
+
+	closeJumpDialog = () => {
+		this.state.jumpDialog = {
+			visible: false,
+			input: "",
+			style: "",
+			error: null,
+		};
+	};
+
+	onJumpKeydown = (ev) => {
+		if (ev.key === "Enter") {
+			ev.preventDefault();
+			this.confirmJump();
+		} else if (ev.key === "Escape") {
+			ev.preventDefault();
+			this.closeJumpDialog();
+		}
+	};
+
+	confirmJump = async () => {
+		const valRaw = (this.state.jumpDialog && this.state.jumpDialog.input) || "";
+		const parsed = Number(valRaw);
+		const maxP = Number(this.state.maxPage) || 1;
+
+		if (!valRaw || Number.isNaN(parsed) || !Number.isInteger(parsed)) {
+			this.state.jumpDialog = {
+				...this.state.jumpDialog,
+				error: "Please enter a whole number.",
+			};
+			return;
+		}
+		if (parsed < 1 || parsed > maxP) {
+			this.state.jumpDialog = {
+				...this.state.jumpDialog,
+				error: `Please enter a number between 1 and ${maxP}.`,
+			};
+			return;
+		}
+
+		const pageToLoad = parsed - 1;
+		this.closeJumpDialog();
+		try {
+			await this.loadPage(pageToLoad, { force: true });
+			// scroll list into view
+			requestAnimationFrame(() => {
+				const scrollEl = document.querySelector(".o_comment_scroll");
+				if (scrollEl && typeof scrollEl.scrollIntoView === "function") {
+					scrollEl.scrollIntoView({ behavior: "smooth", block: "start" });
+				}
+			});
+		} catch (e) {
+			console.error("[comment-dialog] failed to jump to page", e);
+			// reopen bubble with error (reuse previous style)
+			this.state.jumpDialog = {
+				visible: true,
+				input: String(parsed),
+				style: this.state.jumpDialog.style,
+				error: "Failed to load page. Try again.",
+			};
+		}
+	};
+
 	_makeTmpId = () => {
 		this._tmpCounter += 1;
 		return -(Date.now() * 1000 + this._tmpCounter);
 	};
 
 	_sortByDate = (ids = []) => {
-		// sort by like_count DESC, then by create_date ASC (oldest first)
+		// sort by like_count DESC, then by create_date DESC (newest first)
 		return ids.slice().sort((a, b) => {
 			const aRec = this.state.commentsById?.[a] || {};
 			const bRec = this.state.commentsById?.[b] || {};
@@ -116,9 +241,51 @@ export class RealtyCommentDialog extends Component {
 			const ta = isNaN(da) ? 0 : da;
 			const tb = isNaN(db) ? 0 : db;
 
-			// tie-breaker: oldest first -> earlier (smaller timestamp) should come first
-			return ta - tb;
+			// tie-breaker: newest first -> later timestamp should come first
+			return tb - ta;
 		});
+	};
+
+	// shallow compare arrays
+	_arraysEqual = (a = [], b = []) =>
+		a.length === b.length && a.every((v, i) => b[i] === v);
+
+	// call this to reorder a visible list (ids array) with safeguards
+	_maybeResortVisibleList = (ids = [], idChanged = null, debounceMs = 2000) => {
+		// update the comment map must already be applied before calling this
+		// we debounce to collapse bursts
+		if (!this._resortTimer) this._resortTimer = new Map();
+
+		const key =
+			ids === this.state.topLevel ? "top" : `replies_${idChanged || ""}`;
+		if (this._resortTimer.has(key)) clearTimeout(this._resortTimer.get(key));
+
+		const t = setTimeout(() => {
+			this._resortTimer.delete(key);
+
+			// compute new ordering from current commentsById
+			const newOrder = this._sortByDate(ids);
+
+			// only apply if order changed (or idMoved across page boundary if you prefer)
+			if (!this._arraysEqual(newOrder, ids)) {
+				// replace appropriate state (topLevel or repliesByParent)
+				if (ids === this.state.topLevel) {
+					this.state.topLevel = newOrder;
+				} else {
+					// caller must handle repliesByParent separately; this is just a helper example
+				}
+
+				// update cache meta for pages that include these ids (optional)
+				for (const [page, meta] of this._pageCache.entries()) {
+					if (meta.ids && meta.ids.some((x) => ids.includes(x))) {
+						meta.ids = this._sortByDate(meta.ids);
+						this._pageCache.set(page, meta);
+					}
+				}
+			}
+		}, debounceMs);
+
+		this._resortTimer.set(key, t);
 	};
 
 	_replaceIdInList = (list = [], tmpId, newId) =>
@@ -560,15 +727,39 @@ export class RealtyCommentDialog extends Component {
 				case "like_toggle": {
 					if (payload.id) {
 						const id = Number(payload.id);
+
+						// 1) update comment map first
 						const prev = this.state.commentsById[id] || {};
 						this.state.commentsById = {
 							...this.state.commentsById,
 							[id]: { ...prev, like_count: payload.like_count || 0 },
 						};
+
+						// 2) keep cached comment entry up-to-date
 						this._addOrUpdateCachedComment(this.state.commentsById[id]);
+
+						// 3) Only re-sort visible lists (debounced & only if ordering changes).
+						// Top-level page visible?
+						if ((this.state.topLevel || []).includes(id)) {
+							// pass current topLevel snapshot; helper will re-read state when firing
+							this._maybeResortVisibleList(this.state.topLevel, id);
+						}
+
+						// Replies visible for parent?
+						if (payload.parent_id) {
+							const pid = Number(payload.parent_id);
+							if (
+								Array.isArray(this.state.repliesByParent[pid]) &&
+								this.state.showRepliesByParent[pid]
+							) 
+								this._maybeResortVisibleList(this.state.repliesByParent[pid],id);						
+						}
+
+						// (No global full re-sort; list order will update only when necessary)
 					}
 					break;
 				}
+
 				default:
 					console.error("Unknown message type:", payload.type, payload);
 			}
@@ -969,12 +1160,6 @@ export class RealtyCommentDialog extends Component {
 		);
 	}
 
-	_topLevelDomain = () => [
-		["res_model", "=", this.resModel],
-		["res_id", "=", this.resId],
-		["comment_level", "=", 0],
-	];
-
 	// startReply handles either (ev, comment) or (comment)
 	startReply = (evOrComment, maybeComment) => {
 		let ev = null,
@@ -1082,18 +1267,7 @@ export class RealtyCommentDialog extends Component {
 
 		this.state.loading = true;
 		try {
-			const limit = 10;
-			const fields = [
-				"id",
-				"content",
-				"create_uid",
-				"create_date",
-				"like_count",
-				"child_count",
-				"res_model",
-				"res_id",
-			];
-
+			const limit = 10; // must match server page size
 			let tryPage = Number(page) || 0;
 
 			// If cache available and not forced, use it
@@ -1114,41 +1288,74 @@ export class RealtyCommentDialog extends Component {
 			}
 
 			let records = [];
+			let res = null;
 
+			// Try pages downward until we find some records or reach page 0
 			while (true) {
 				const offset = tryPage * limit;
-				records = await this.orm.call(
-					"realty_comment",
-					"search_read",
-					[this._topLevelDomain(), fields],
-					{ limit, offset, order: "create_date DESC" }
-				);
+				try {
+					// call server-side method that returns { comments: [...], hasMore: bool, page: int }
+					res = await this.orm.call(
+						"realty_comment",
+						"get_top_level_page",
+						[this.resModel, this.resId, limit, offset],
+						{}
+					);
+				} catch (e) {
+					// server call failed for this page — if we're not at page 0, try previous page
+					console.error("[comment-dialog] get_top_level_page failed:", e, {
+						tryPage,
+					});
+					if (tryPage <= 0) {
+						records = [];
+						break;
+					}
+					tryPage = Math.max(0, tryPage - 1);
+					continue;
+				}
 
+				records = Array.isArray(res && res.comments) ? res.comments : [];
+
+				// break if we found results or we are at page 0 (to avoid infinite loop)
 				if (Array.isArray(records) && records.length > 0) break;
 				if (tryPage <= 0) break;
 				tryPage = Math.max(0, tryPage - 1);
 			}
 
+			// Merge records into commentsById and normalize shape
 			const nextMap = { ...this.state.commentsById };
 			records.forEach((r) => {
 				nextMap[r.id] = {
 					id: r.id,
 					content: r.content,
 					create_uid: r.create_uid,
+					create_date: r.create_date,
 					like_count: r.like_count || 0,
 					child_count: r.child_count || 0,
 					res_model: r.res_model,
 					res_id: r.res_id,
-					create_date: r.create_date,
 				};
 			});
 
 			this.state.commentsById = nextMap;
-			this.state.topLevel = records.map((r) => r.id);
-			this.state.page = tryPage;
-			this.state.hasMore = records.length === limit;
 
-			// cache this page
+			const totalCount =
+				res && typeof res.total_count === "number"
+					? Number(res.total_count)
+					: null;
+			if (totalCount !== null) {
+				this.state.maxPage = Math.max(1, Math.ceil(totalCount / limit));
+			} else {
+				this.state.maxPage = 1;
+			}
+
+			// Derive topLevel from returned records but defensively re-sort with comparator
+			const ids = records.map((r) => r.id);
+			this.state.topLevel = this._sortByDate(ids);
+			this.state.page = tryPage;
+			this.state.hasMore = !!(res && res.hasMore);
+
+			// cache this page (store actual comment objects for quick reuse)
 			this._cacheSet(
 				tryPage,
 				this.state.topLevel,

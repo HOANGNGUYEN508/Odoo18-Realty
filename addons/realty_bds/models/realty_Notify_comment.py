@@ -217,6 +217,49 @@ class RealtyComment(models.Model):
 
     # Model Method
     @api.model
+    def get_top_level_page(self, res_model, res_id, limit=10, offset=0):
+        """Return a page of top-level comments (with total_count for paging)."""
+        try:
+            res_id = int(res_id)
+        except Exception:
+            return {"comments": [], "hasMore": False, "page": 0, "total_count": 0}
+
+        domain = [
+            ("res_model", "=", res_model),
+            ("res_id", "=", res_id),
+            ("parent_id", "=", False)
+        ]
+
+        total_count = self.search_count(domain)
+
+        comments = self.search(
+            domain,
+            limit=int(limit),
+            offset=int(offset),
+            order="like_count DESC, create_date DESC",
+        )
+
+        data = comments.read(
+            [
+                "id",
+                "content",
+                "create_uid",
+                "create_date",
+                "like_count",
+                "child_count",
+                "res_model",
+                "res_id",
+            ]
+        )
+
+        return {
+            "comments": data,
+            "hasMore": len(comments) == int(limit),
+            "page": (int(offset) // int(limit)),
+            "total_count": int(total_count),
+        }
+
+    @api.model
     def get_replies_page(self, comment_id, limit=5, offset=0):
         """Get paginated replies for a comment"""
         comment = self.browse(comment_id)
@@ -227,7 +270,7 @@ class RealtyComment(models.Model):
             [("parent_id", "=", comment_id)],
             limit=limit,
             offset=offset,
-            order="like_count DESC, create_date ASC",
+            order="like_count DESC, create_date DESC",
         )
 
         return {

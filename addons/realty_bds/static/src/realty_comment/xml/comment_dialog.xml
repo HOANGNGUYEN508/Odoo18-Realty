@@ -7,39 +7,45 @@
 			</t>
 			<t t-else="">
 				<div class="o_comment_scroll">
-					<div class="o_pager mb-2 d-flex align-items-center">
-						<div class="ms-auto d-flex align-items-center gap-2">
-							<span>
-								<t t-esc="state.page + 1"/>
-							</span>
-							<button type="button" class="btn btn-sm btn-light" t-att-disabled="state.loading || state.page == 0" t-on-click="loadPrevPage">&#10094;</button>
-							<button type="button" class="btn btn-sm btn-light" t-att-disabled="state.loading || !state.hasMore" t-on-click="loadNextPage">&#10095;</button>
-						</div>
+					<div class="ms-auto d-flex align-items-center gap-2">
+						<span t-ref="pageAnchor" t-on-click="openJumpDialog" style="cursor: pointer; user-select:none;">
+							<t t-esc="state.page + 1"/>
+							<t t-if="state.maxPage">
+								/	<t t-esc="state.maxPage"/>
+							</t>
+						</span>
+
+						<!-- Jump bubble -->
+						<t t-if="state.jumpDialog.visible">
+							<div class="jump-bubble" t-att-style="state.jumpDialog.style" role="dialog" aria-label="Jump to page">
+								<div class="jump-bubble__tail" aria-hidden="true"></div>
+
+								<div class="jump-bubble__content">
+									<div style="font-size:0.85rem;">
+        						Jump to page ...? (1-<t t-esc="state.maxPage"/>)
+									</div>
+
+									<input t-ref="jumpInput" class="form-control form-control-sm jump-bubble__input" type="text" t-att-value="state.jumpDialog.input" t-on-input="(ev) =&gt; state.jumpDialog.input = ev.target.value" t-on-keydown="onJumpKeydown" aria-label="Page number" />
+
+									<div class="jump-bubble__error" t-if="state.jumpDialog.error">
+										<t t-esc="state.jumpDialog.error"/>
+									</div>
+
+									<div class="jump-bubble__actions">
+										<button type="button" class="btn btn-sm btn-outline-secondary ms-auto" t-on-click="closeJumpDialog">✕</button>
+										<button type="button" class="btn btn-sm btn-primary" t-on-click="confirmJump">Go</button>
+									</div>
+								</div>
+							</div>
+						</t>
+						<button type="button" class="btn btn-sm btn-light" t-att-disabled="state.loading || state.page == 0" t-on-click="loadPrevPage">&#10094;</button>
+						<button type="button" class="btn btn-sm btn-light" t-att-disabled="state.loading || !state.hasMore" t-on-click="loadNextPage">&#10095;</button>
 					</div>
+
 
 					<div class="o_comment_list">
 						<t t-foreach="state.topLevel" t-as="cid" t-key="cid">
-							<RealtyCommentItem 
-								id="cid" 
-								getComment="(id) =&gt; state.commentsById[id]" 
-								level="0" 
-								onReply="startReply" 
-								onUpdated="_onCommentUpdated" 
-								onDeleted="_onCommentDeleted" 
-								replyingTo="state.replyingTo" 
-								isModerator="isModerator" 
-								isUser="isUser" 
-								getReplies="(pid) =&gt; state.repliesByParent[pid] || []" 
-								loadReplies="(pid, page) =&gt; loadRepliesFor(pid, page)" 
-								loadMoreReplies="(pid) =&gt; loadMoreRepliesFor(pid)" 
-								toggleReplies="(pid) =&gt; toggleRepliesFor(pid)" 
-								getRepliesMeta="(pid) =&gt; state.repliesMeta[pid] || {}" 
-								isRepliesVisible="(pid) =&gt; !!state.showRepliesByParent[pid]" 
-								onEditStart="(id) =&gt; startEditing(id)" 
-								onEditCancel="() =&gt; cancelEditing()" 
-								editingId="state.editingId" 
-								enqueueAction="(tmpId, action) =&gt; _enqueueAction(tmpId, action)"
-							/>
+							<RealtyCommentItem id="cid" getComment="(id) =&gt; state.commentsById[id]" level="0" onReply="startReply" onUpdated="_onCommentUpdated" onDeleted="_onCommentDeleted" replyingTo="state.replyingTo" isModerator="isModerator" isUser="isUser" getReplies="(pid) =&gt; state.repliesByParent[pid] || []" loadReplies="(pid, page) =&gt; loadRepliesFor(pid, page)" loadMoreReplies="(pid) =&gt; loadMoreRepliesFor(pid)" toggleReplies="(pid) =&gt; toggleRepliesFor(pid)" getRepliesMeta="(pid) =&gt; state.repliesMeta[pid] || {}" isRepliesVisible="(pid) =&gt; !!state.showRepliesByParent[pid]" onEditStart="(id) =&gt; startEditing(id)" onEditCancel="() =&gt; cancelEditing()" editingId="state.editingId" enqueueAction="(tmpId, action) =&gt; _enqueueAction(tmpId, action)" />
 						</t>
 					</div>
 				</div>

@@ -245,3 +245,91 @@ textarea:focus {
   margin-top: 8px;
 }
 
+/* ---------------------------
+   Jump-to-page speech bubble
+   --------------------------- */
+
+.jump-bubble {
+  position: fixed; /* positioned by JS via inline style (left/top) */
+  z-index: 1060;
+  display: block;
+  pointer-events: auto;
+  min-width: 180px;
+  max-width: 90%;
+  background: #fff;
+  border-radius: 12px;
+  padding: 10px;
+  box-shadow: $shadow-strong;
+  border: 1px solid $muted-border;
+  color: $text-color;
+  transform-origin: top left;
+  /* CSS var provided by JS: --jump-tail-left (px from left edge of bubble) */
+}
+
+/* top-pointing tail: sits above the bubble and looks like a speech-tail */
+.jump-bubble__tail {
+  position: absolute;
+  top: -8px; /* above the bubble */
+  left: var(--jump-tail-left, 16px); /* controlled by JS */
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 8px solid #fff; /* same as bubble background */
+  filter: drop-shadow(0 -2px 0 rgba(0,0,0,0.02));
+  pointer-events: none;
+}
+
+/* small subtle border-shadow for the tail to match bubble border */
+.jump-bubble__tail::after {
+  content: "";
+  position: absolute;
+  top: -9px;
+  left: -8px;
+  width: 16px;
+  height: 8px;
+  background: transparent;
+  border-bottom: 1px solid $muted-border;
+  border-left: none;
+  border-right: none;
+  pointer-events: none;
+}
+
+/* content inside the bubble */
+.jump-bubble__content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 160px;
+}
+
+/* input + error */
+.jump-bubble__input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.jump-bubble__error {
+  color: #c23030;
+  font-size: 0.82rem;
+  line-height: 1.1;
+  margin-top: 2px;
+}
+
+/* buttons row */
+.jump-bubble__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* small responsive adjustments */
+@media (max-width: 520px) {
+  .jump-bubble {
+    left: 8px !important; /* JS will set top, but force left to stay inside viewport */
+    right: 8px !important;
+    min-width: auto;
+  }
+  .jump-bubble__tail { display: none; } /* don't show tail on very small screens */
+}
+
