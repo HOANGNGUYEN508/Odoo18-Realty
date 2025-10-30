@@ -1,6 +1,5 @@
 import { Component, useState, useRef } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
-import { user } from "@web/core/user";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 
 export class RealtyCommentItem extends Component {
@@ -15,8 +14,7 @@ export class RealtyCommentItem extends Component {
 		onUpdated: { type: Function, optional: true },
 		onDeleted: { type: Function, optional: true },
 		level: { type: Number, optional: true },
-		isModerator: { type: Boolean, optional: true },
-		isUser: { type: Boolean, optional: true },
+		ctx: { type: Object, optional: true },
 		replyingTo: { type: Number, optional: true },
 		getReplies: { type: Function, optional: true }, // reads replies array from dialog
 		loadReplies: { type: Function, optional: true }, // asks dialog to load replies
@@ -28,6 +26,7 @@ export class RealtyCommentItem extends Component {
 		onEditCancel: { type: Function, optional: true }, // () => void
 		editingId: { type: Number, optional: true }, // id of comment being edited
 		enqueueAction: { type: Function, optional: true },
+		validateContent: { type: Function, optional: true },
 	};
 
 	setup() {
@@ -65,7 +64,7 @@ export class RealtyCommentItem extends Component {
 	get isCommentAuthor() {
 		return (
 			this.commentData.create_uid &&
-			this.commentData.create_uid[0] === user.userId
+			this.commentData.create_uid[0] === this.props.ctx.user.id
 		);
 	}
 
@@ -215,6 +214,16 @@ export class RealtyCommentItem extends Component {
 	}
 
 	async saveEdit() {
+		const newContent = (this.local.editingContent || "").trim();
+		const comment = this.commentData;
+
+		if (this.props.validateContent) {
+			const isValid = this.props.validateContent(newContent, "edit", comment);
+			if (!isValid) {
+				return;
+			}
+		}
+
 		// Clear any pending save
 		if (this._editThrottleTimeout) {
 			clearTimeout(this._editThrottleTimeout);
@@ -222,10 +231,7 @@ export class RealtyCommentItem extends Component {
 
 		// Throttle edit saves
 		this._editThrottleTimeout = setTimeout(async () => {
-			const newContent = (this.local.editingContent || "").trim();
-			if (!newContent) return;
-
-			const id = this.commentData.id;
+			const id = comment.id;
 
 			// If pending/temp: enqueue the write action
 			if (this._isPendingRec()) {
@@ -263,14 +269,19 @@ export class RealtyCommentItem extends Component {
 
 	// ---------- Delete ----------
 	async deleteComment() {
+		const comment = this.commentData;
+		if (this.props.validateContent) {
+			const isValid = this.props.validateContent(null, "delete", comment);
+			if (!isValid) return;
+		}
 		this.dialogService.add(ConfirmationDialog, {
 			title: "Confirm Deletion",
 			body: "Are you sure you want to delete your comment?",
 			confirmLabel: "Delete",
 			confirm: async () => {
 				try {
-					const id = this.commentData.id;
-					const parentId = this.commentData.parent_id || null;
+					const id = comment.id;
+					const parentId = comment.parent_id || null;
 
 					// If pending/temp: prefer cancelling queued create (if parent provided hook)
 					if (this._isPendingRec()) {

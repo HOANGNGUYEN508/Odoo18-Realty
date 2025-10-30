@@ -21,22 +21,11 @@ export class RealtyCommentDialog extends Component {
 	setup() {
 		this.orm = useService("orm");
 		this.busService = useService("bus_service");
+		this.notification = useService("notification");
 
 		const p = this.props.params || {};
-		this.resModel = p.res_model ?? null;
-		this.resId = p.res_id != null ? Number(p.res_id) : null;
-
-		this.hasModeratorAccess = p.group?.moderator_group
-			? user.hasGroup(p.group.moderator_group)
-			: false;
-		this.hasRealtyAccess = p.group?.realty_group
-			? user.hasGroup(p.group.realty_group)
-			: false;
-		this.hasUserAccess = p.group?.user_group
-			? user.hasGroup(p.group.user_group)
-			: false;
-		this.isModerator = this.hasModeratorAccess || this.hasRealtyAccess;
-		this.isUser = this.hasUserAccess || this.hasRealtyAccess;
+		const { res_model: resModel = null, res_id } = p;
+		const numericResId = res_id != null ? Number(res_id) : null;
 
 		this.commentRef = useRef("commentInput");
 		this.pageAnchorRef = useRef("pageAnchor");
@@ -56,46 +45,97 @@ export class RealtyCommentDialog extends Component {
 			editingId: null,
 			maxPage: 1,
 			jumpDialog: { visible: false, input: "", style: "", error: null },
+			sortMode: "like",
 		});
 
-		this._processedClientTmpIds = new Set(); // track client_tmp_id we've processed/registered
-		this._tmpIdToRealId = new Map(); // tmpId -> real numeric id
-		this._clientTmpIdToTmpId = new Map(); // client_tmp_id -> tmpId
+		// internal maps / counters / caches
+		this._processedClientTmpIds = new Set();
+		this._tmpIdToRealId = new Map();
+		this._clientTmpIdToTmpId = new Map();
 		this._tmpCounter = 0;
 
-		// Page cache: page -> { ts, ids: [], hasMore, comments: {id:rec} }
 		this._pageCache = new Map();
-		this._pageCacheTTL = 30 * 1000; // 30s TTL, tune if needed
+		this._pageCacheTTL = 30 * 1000;
 
-		// Undo map for optimistic operations (primarily create)
-		// key: tmpId -> { tmpId, client_tmp_id, parentId, insertedInto: 'top'|'replies', prevParentChildCount }
 		this._undoMap = new Map();
 
-		// Action queue for optimistic / pending records
-		this._actionQueue = new Map(); // tmpId -> [{type, payload, ts, ...}, ...]
-		this._actionQueueTTL = 2 * 60 * 1000; // 2 minutes TTL for queued actions (tunable)
-		this._queueTimers = new Map(); // tmpId -> timer id (for TTL cleanup)
+		this._actionQueue = new Map();
+		this._actionQueueTTL = 2 * 60 * 1000;
+		this._queueTimers = new Map();
 
-		// register bus channel
+		let channel = null;
 		this._boundBusHandler = this._onBusNotification.bind(this);
-		const channel = `realty_comment_${this.resModel}_${this.resId}`;
-		this.busService.addChannel(channel);
-		this.busService.subscribe("realty_notify", this._boundBusHandler);
 
 		onWillStart(async () => {
-			if (this.resModel && this.resId) {
+			const reservedWords = await this._fetchReservedWords();
+
+			const hasGroup = (g) => !!(g && user.hasGroup(g));
+			const userSimple = Object.freeze({
+				id: user.id ?? null,
+				name: user.name ?? null,
+				isUser:
+					hasGroup(p.group?.user_group) || hasGroup(p.group?.realty_group),
+				isModerator:
+					hasGroup(p.group?.moderator_group) || hasGroup(p.group?.realty_group),
+			});
+
+			const ctxProps = {
+				user: userSimple,
+				resModel,
+				resId: numericResId,
+				reservedWords,
+			};
+			
+			this.ctx = {};
+
+			Object.defineProperties(
+				this.ctx,
+				Object.fromEntries(
+					Object.entries(ctxProps).map(([k, v]) => [
+						k,
+						{
+							value: v,
+							writable: false,
+							configurable: false,
+							enumerable: true,
+						},
+					])
+				)
+			);
+
+			channel = `realty_comment_${this.ctx.resModel}_${this.ctx.resId}`;
+			this.busService.addChannel(channel);
+			this.busService.subscribe("realty_notify", this._boundBusHandler);
+
+			if (this.ctx.resModel && this.ctx.resId) {
 				await this.busService.start();
 				await this.loadPage(0);
 			}
 		});
-
 		onWillUnmount(() => {
-			this.busService.unsubscribe("realty_notify", this._boundBusHandler);
-			this.busService.deleteChannel(channel);
+			if (channel) {
+				this.busService.unsubscribe("realty_notify", this._boundBusHandler);
+				this.busService.deleteChannel(channel);
+			}
 		});
 	}
 
 	// ---------- Helpers & handlers ----------
+	_fetchReservedWords = async () => {
+		let reservedWords = [];
+		try {
+			const result = await this.orm.call("policy", "get_reserved_words");
+			reservedWords = Array.isArray(result) ? result.map(String) : [];
+		} catch (e) {
+			console.warn(
+				"Failed to load reserved words from policy.get_reserved_words:",
+				e
+			);
+			reservedWords = [];
+		}
+		return reservedWords;
+	};
+
 	// compute bubble style and tail offset for the anchor element
 	_getBubbleStyleForAnchor = (anchorEl) => {
 		if (!anchorEl || typeof anchorEl.getBoundingClientRect !== "function") {
@@ -222,28 +262,103 @@ export class RealtyCommentDialog extends Component {
 		return -(Date.now() * 1000 + this._tmpCounter);
 	};
 
-	_sortByDate = (ids = []) => {
+	// helper: parse timestamp for a comment id (0 fallback)
+	_getTimeForId = (id) => {
+		const rec = this.state.commentsById?.[id] || {};
+		const d = rec.create_date ? Date.parse(rec.create_date) : NaN;
+		return isNaN(d) ? 0 : d;
+	};
+
+	// sort: date newest -> oldest, tie-breaker: like_count desc
+	_sortByDateLatest = (ids = []) => {
+		return ids.slice().sort((a, b) => {
+			const ta = this._getTimeForId(a);
+			const tb = this._getTimeForId(b);
+			if (tb !== ta) return tb - ta; // newer first
+			// tie-breaker: likes desc
+			const la = Number(this.state.commentsById?.[a]?.like_count) || 0;
+			const lb = Number(this.state.commentsById?.[b]?.like_count) || 0;
+			if (lb !== la) return lb - la;
+			// final stable tie-breaker by id descending (newer ids first)
+			return Number(b) - Number(a);
+		});
+	};
+
+	// sort: date oldest -> newest, tie-breaker: like_count desc
+	_sortByDateOldest = (ids = []) => {
+		return ids.slice().sort((a, b) => {
+			const ta = this._getTimeForId(a);
+			const tb = this._getTimeForId(b);
+			if (ta !== tb) return ta - tb; // older first
+			// tie-breaker: likes desc
+			const la = Number(this.state.commentsById?.[a]?.like_count) || 0;
+			const lb = Number(this.state.commentsById?.[b]?.like_count) || 0;
+			if (lb !== la) return lb - la;
+			// stable tie-breaker by id asc (smaller id first)
+			return Number(a) - Number(b);
+		});
+	};
+
+	// sort: like_count desc, tie-breaker: date newest desc
+	_sortByLike = (ids = []) => {
 		// sort by like_count DESC, then by create_date DESC (newest first)
 		return ids.slice().sort((a, b) => {
 			const aRec = this.state.commentsById?.[a] || {};
 			const bRec = this.state.commentsById?.[b] || {};
-
 			const la = Number(aRec.like_count) || 0;
 			const lb = Number(bRec.like_count) || 0;
 			if (lb !== la) {
 				return lb - la; // higher likes first
 			}
 
-			const daRaw = aRec.create_date;
-			const dbRaw = bRec.create_date;
-			const da = daRaw ? Date.parse(daRaw) : 0;
-			const db = dbRaw ? Date.parse(dbRaw) : 0;
-			const ta = isNaN(da) ? 0 : da;
-			const tb = isNaN(db) ? 0 : db;
-
+			const ta = this._getTimeForId(a);
+			const tb = this._getTimeForId(b);
 			// tie-breaker: newest first -> later timestamp should come first
 			return tb - ta;
 		});
+	};
+
+	// mode-aware sorter: picks comparator based on current state.sortMode
+	_sortByMode = (ids = []) => {
+		const mode = this.state?.sortMode || "like";
+		switch (mode) {
+			case "date_desc":
+				return this._sortByDateLatest(ids);
+			case "date_asc":
+				return this._sortByDateOldest(ids);
+			case "like":
+			default:
+				return this._sortByLike(ids);
+		}
+	};
+
+	// expose setter for select change
+	setSortMode = (mode) => {
+		const allowed = new Set(["like", "date_desc", "date_asc"]);
+		if (!allowed.has(mode)) mode = "like";
+		// update state
+		this.state.sortMode = mode;
+
+		// reorder visible topLevel
+		this.state.topLevel = this._sortByMode(this.state.topLevel);
+
+		// update cache metas to keep consistency
+		for (const [page, meta] of this._pageCache.entries()) {
+			if (meta && Array.isArray(meta.ids)) {
+				meta.ids = this._sortByMode(meta.ids);
+				this._pageCache.set(page, meta);
+			}
+		}
+
+		// reorder replies lists too
+		for (const pidStr of Object.keys(this.state.repliesByParent || {})) {
+			const pid = Number(pidStr);
+			const list = this.state.repliesByParent[pid] || [];
+			this.state.repliesByParent = {
+				...this.state.repliesByParent,
+				[pid]: this._sortByMode(list),
+			};
+		}
 	};
 
 	// shallow compare arrays
@@ -264,7 +379,7 @@ export class RealtyCommentDialog extends Component {
 			this._resortTimer.delete(key);
 
 			// compute new ordering from current commentsById
-			const newOrder = this._sortByDate(ids);
+			const newOrder = this._sortByMode(ids);
 
 			// only apply if order changed (or idMoved across page boundary if you prefer)
 			if (!this._arraysEqual(newOrder, ids)) {
@@ -278,7 +393,7 @@ export class RealtyCommentDialog extends Component {
 				// update cache meta for pages that include these ids (optional)
 				for (const [page, meta] of this._pageCache.entries()) {
 					if (meta.ids && meta.ids.some((x) => ids.includes(x))) {
-						meta.ids = this._sortByDate(meta.ids);
+						meta.ids = this._sortByMode(meta.ids);
 						this._pageCache.set(page, meta);
 					}
 				}
@@ -373,14 +488,14 @@ export class RealtyCommentDialog extends Component {
 		if (!rec || !rec.id) return;
 		// update state
 		this.state.commentsById = { ...this.state.commentsById, [rec.id]: rec };
-		this.state.topLevel = this._sortByDate([
+		this.state.topLevel = this._sortByMode([
 			...(this.state.topLevel || []),
 			rec.id,
 		]);
 
 		const meta = this._pageCache.get(0);
 		if (meta) {
-			meta.ids = this._sortByDate([...(meta.ids || []), rec.id]);
+			meta.ids = this._sortByMode([...(meta.ids || []), rec.id]);
 			meta.comments = { ...(meta.comments || {}), [rec.id]: rec };
 			this._pageCache.set(0, meta);
 		}
@@ -639,12 +754,12 @@ export class RealtyCommentDialog extends Component {
 				if (!cur.includes(srv.id)) {
 					this.state.repliesByParent = {
 						...this.state.repliesByParent,
-						[pid]: this._sortByDate([srv.id, ...cur]),
+						[pid]: this._sortByMode([srv.id, ...cur]),
 					};
 				}
 			} else {
 				if (!this.state.topLevel.includes(srv.id)) {
-					this.state.topLevel = this._sortByDate([
+					this.state.topLevel = this._sortByMode([
 						...(this.state.topLevel || []),
 						srv.id,
 					]);
@@ -751,8 +866,11 @@ export class RealtyCommentDialog extends Component {
 							if (
 								Array.isArray(this.state.repliesByParent[pid]) &&
 								this.state.showRepliesByParent[pid]
-							) 
-								this._maybeResortVisibleList(this.state.repliesByParent[pid],id);						
+							)
+								this._maybeResortVisibleList(
+									this.state.repliesByParent[pid],
+									id
+								);
 						}
 
 						// (No global full re-sort; list order will update only when necessary)
@@ -815,7 +933,7 @@ export class RealtyCommentDialog extends Component {
 			this.state.commentsById = nextMap;
 			this.state.repliesByParent = {
 				...this.state.repliesByParent,
-				[pid]: this._sortByDate(newList),
+				[pid]: this._sortByMode(newList),
 			};
 			this.state.repliesMeta = {
 				...this.state.repliesMeta,
@@ -877,7 +995,7 @@ export class RealtyCommentDialog extends Component {
 			id: tmpId,
 			client_tmp_id: client_tmp_id,
 			content: payload.content,
-			create_uid: [user.userId, user.name || "You"],
+			create_uid: [this.ctx.user.id, this.ctx.user.name || "You"],
 			like_count: 0,
 			child_count: 0,
 			res_model: payload.res_model,
@@ -1079,7 +1197,7 @@ export class RealtyCommentDialog extends Component {
 					updated[index] = newId;
 					this.state.repliesByParent = {
 						...this.state.repliesByParent,
-						[parentId]: this._sortByDate(updated),
+						[parentId]: this._sortByMode(updated),
 					};
 				}
 			} else {
@@ -1087,7 +1205,7 @@ export class RealtyCommentDialog extends Component {
 				if (index !== -1) {
 					const updated = [...this.state.topLevel];
 					updated[index] = newId;
-					this.state.topLevel = this._sortByDate(updated);
+					this.state.topLevel = this._sortByMode(updated);
 				} else {
 					// Replace tmp in cache (if present) or append newId to last page.
 					this._replaceTmpInCache(tmpId, newId);
@@ -1141,8 +1259,8 @@ export class RealtyCommentDialog extends Component {
 					create_uid: false,
 					like_count: 0,
 					child_count: 0,
-					res_model: this.resModel,
-					res_id: this.resId,
+					res_model: this.ctx.resModel,
+					res_id: this.ctx.resId,
 					create_date: new Date().toISOString(),
 				},
 			};
@@ -1206,19 +1324,104 @@ export class RealtyCommentDialog extends Component {
 		this.state.editingId = null;
 	};
 
+	_errorHandler = (e, ms) => {
+		this.notification.add(`❌ Error: ${ms}`, {
+			title: `${e} Error`,
+			type: "danger",
+		});
+	};
+
+	_validationRules = (content) => {
+		const txt = (content || "").toLowerCase();
+		if (!txt) {
+			// empty content not allowed to foward but silently ignore since user may accidentally hit enter
+			return false;
+		}
+		if (txt.length > 500) {
+			this._errorHandler("Content", "Content must be under 500 characters.");
+			return false;
+		}
+		if (this.ctx.reservedWords && this.ctx.reservedWords.size > 0) {
+			const match = Array.from(this._reservedWords).find(
+				(w) => w && txt.includes(w)
+			);
+			if (match) {
+				this._errorHandler(
+					"Content",
+					`Content contains reserved word: '${match}'`
+				);
+				return false;
+			}
+		}
+		return true;
+	};
+
+	_contentValidation = (content, type, comment) => {
+		const txt = (content || "").toLowerCase();
+		switch (type) {
+			case "create": {
+				if (!this.ctx.user.isUser) {
+					this._errorHandler(
+						"Authentication",
+						`You must be a user of ${this.ctx.resModel} to post a comment.`
+					);
+					return false;
+				}
+				const result = this._validateRules(content);
+				return result;
+			}
+			case "edit": {
+				if (
+					!comment ||
+					!comment.create_uid ||
+					comment.create_uid[0] !== this.ctx.user.id
+				) {
+					this._errorHandler(
+						"Authentication",
+						"You can only edit your own comments."
+					);
+					return false;
+				}
+				const result = this._validateRules(content);
+				return result;
+			}
+			case "delete": {
+				if (!comment) {
+					this._errorHandler("Content", "Comment not found.");
+					return false;
+				}
+				const isOwner =
+					comment.create_uid && comment.create_uid[0] === this.ctx.user.id;
+				const isModerator = this.ctx.user.isModerator;
+				if (!isOwner && !isModerator) {
+					this._errorHandler(
+						"Authentication",
+						"You can only delete your own comments or must be a moderator."
+					);
+					return false;
+				}
+				return true;
+			}
+			default:
+				return false;
+		}
+	};
+
 	// create comment (optimistic + reconcile)
 	createTopLevelComment = async () => {
 		const input = this.commentRef.el;
 		const content = input?.value?.trim();
 
-		if (!content) return;
+		const validation = this._contentValidation(content, "create");
+
+		if (!validation) return;
 
 		const client_tmp_id = this._makeTmpId(); // Generate for deduplication
 
 		const payload = {
 			content: content,
-			res_model: this.resModel,
-			res_id: this.resId,
+			res_model: this.ctx.resModel,
+			res_id: this.ctx.resId,
 		};
 		if (this.state.replyingTo) {
 			payload.parent_id = this.state.replyingTo;
@@ -1256,13 +1459,13 @@ export class RealtyCommentDialog extends Component {
 			console.error("Error creating comment:", e);
 			// rollback optimistic insert (server denied or erred)
 			this._rollbackOptimisticCreate(tmpId);
-			// optional: show error to user via dialog service or toast (left to app integ)
+			this._errorHandler("Roll Back", e);
 		}
 	};
 
 	// ---------- pagination / top-level loading ----------
 	async loadPage(page = 0, { force = false } = {}) {
-		if (!this.resModel || !this.resId) return;
+		if (!this.ctx.resModel || !this.ctx.resId) return;
 		if (this.state.loading) return;
 
 		this.state.loading = true;
@@ -1298,7 +1501,7 @@ export class RealtyCommentDialog extends Component {
 					res = await this.orm.call(
 						"realty_comment",
 						"get_top_level_page",
-						[this.resModel, this.resId, limit, offset],
+						[this.ctx.resModel, this.ctx.resId, limit, offset],
 						{}
 					);
 				} catch (e) {
@@ -1351,7 +1554,7 @@ export class RealtyCommentDialog extends Component {
 
 			// Derive topLevel from returned records but defensively re-sort with comparator
 			const ids = records.map((r) => r.id);
-			this.state.topLevel = this._sortByDate(ids);
+			this.state.topLevel = this._sortByMode(ids);
 			this.state.page = tryPage;
 			this.state.hasMore = !!(res && res.hasMore);
 

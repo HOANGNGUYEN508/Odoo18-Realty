@@ -21,7 +21,7 @@
 								<i class="fa fa-pencil" aria-hidden="true"/>
 							</button>
 
-							<button type="button" class="btn btn-sm btn-outline-danger" t-if="isCommentAuthor || props.isModerator" t-on-click="deleteComment" title="Delete">
+							<button type="button" class="btn btn-sm btn-outline-danger" t-if="isCommentAuthor || props.ctx.user.isModerator" t-on-click="deleteComment" title="Delete">
 								<i class="fa fa-trash" aria-hidden="true"/>
 							</button>
 						</div>
@@ -42,7 +42,7 @@
 						</t>
 					</div>
 
-					<div class="comment-actions d-flex align-items-center mt-2" t-if="props.isUser">
+					<div class="comment-actions d-flex align-items-center mt-2" t-if="props.ctx.user.isUser">
 						<button type="button" class="btn btn-sm btn-outline-secondary me-2" t-att-disabled="local.togglingLike" t-on-click="toggleLike">
 							<i class="fa fa-thumbs-up me-1" t-att-class="local.togglingLike ? 'text-muted' : ''"/>
 							<span t-esc="commentData.like_count || 0"/>
@@ -81,8 +81,7 @@
 						onReply="props.onReply" 
 						onUpdated="props.onUpdated" 
 						onDeleted="props.onDeleted" 
-						isModerator="props.isModerator" 
-						isUser="props.isUser" 
+						ctx="props.ctx"
 						replyingTo="props.replyingTo" 
 						getReplies="props.getReplies" 
 						loadReplies="props.loadReplies" 
@@ -94,6 +93,7 @@
 						onEditCancel="props.onEditCancel" 
 						editingId="props.editingId" 
 						enqueueAction="props.enqueueAction"
+						validateContent="props.validateContent"
 					/>
 				</t>
 

@@ -245,6 +245,36 @@ textarea:focus {
   margin-top: 8px;
 }
 
+/* header layout: sort select left, pager right */
+.o_comment_scroll_header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 4px;
+}
+
+/* ensure sort select doesn't grow too big */
+.o_comment_sort {
+  flex: 0 0 auto;
+  min-width: 180px;
+}
+
+/* pager container sits at the right via ms-auto, keep it tight */
+.o_comment_pager {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+/* responsive: shrink select on small screens */
+@media (max-width: 520px) {
+  .o_comment_sort {
+    min-width: 110px;
+  }
+}
+
+
 /* ---------------------------
    Jump-to-page speech bubble
    --------------------------- */
