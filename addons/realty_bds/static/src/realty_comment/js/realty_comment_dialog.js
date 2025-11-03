@@ -10,6 +10,14 @@ import { RealtyCommentItem } from "./realty_comment_item";
 import { useService } from "@web/core/utils/hooks";
 import { user } from "@web/core/user";
 
+const _sanitizeRegex = {
+	script: /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+	tags: /<[^>]*>/g,
+	javascriptProto: /javascript:/gi,
+	inlineEvent: /\bon\w+\s*=/gi,
+	whitespace: /\s+/g,
+};
+
 export class RealtyCommentDialog extends Component {
 	static template = "realty_bds.comment_dialog";
 	static components = { RealtyCommentItem, Dialog };
@@ -85,7 +93,7 @@ export class RealtyCommentDialog extends Component {
 				resId: numericResId,
 				reservedWords,
 			};
-			
+
 			this.ctx = {};
 
 			Object.defineProperties(
@@ -1331,33 +1339,49 @@ export class RealtyCommentDialog extends Component {
 		});
 	};
 
+	_sanitizeContent = (content) => {
+		// basic sanitization to prevent XSS / unwanted HTML in comments
+		if (typeof content !== "string" || !content) return "";
+		const r = _sanitizeRegex;
+		let sanitized = content
+			.replace(r.script, "")
+			.replace(r.tags, "")
+			.replace(r.javascriptProto, "")
+			.replace(r.inlineEvent, "")
+			.replace(r.whitespace, " ")
+			.trim();
+
+		return sanitized;
+	};
+
 	_validationRules = (content) => {
-		const txt = (content || "").toLowerCase();
-		if (!txt) {
+		if (!content) {
 			// empty content not allowed to foward but silently ignore since user may accidentally hit enter
-			return false;
+			return { valid: false };
 		}
-		if (txt.length > 500) {
+		if (content.length > 500) {
 			this._errorHandler("Content", "Content must be under 500 characters.");
-			return false;
+			return { valid: false };
 		}
+		const sanitized = this._sanitizeContent(content);
+		const check = sanitized.toLowerCase();
 		if (this.ctx.reservedWords && this.ctx.reservedWords.size > 0) {
-			const match = Array.from(this._reservedWords).find(
-				(w) => w && txt.includes(w)
+			const match = Array.from(this.ctx.reservedWords).find(
+				(w) => w && check.includes(w)
 			);
 			if (match) {
 				this._errorHandler(
 					"Content",
 					`Content contains reserved word: '${match}'`
 				);
-				return false;
+				return { valid: false };
 			}
 		}
-		return true;
+		return { valid: true, content: sanitized };
 	};
 
 	_contentValidation = (content, type, comment) => {
-		const txt = (content || "").toLowerCase();
+		const txt = content || "";
 		switch (type) {
 			case "create": {
 				if (!this.ctx.user.isUser) {
@@ -1365,10 +1389,9 @@ export class RealtyCommentDialog extends Component {
 						"Authentication",
 						`You must be a user of ${this.ctx.resModel} to post a comment.`
 					);
-					return false;
+					return { valid: false };
 				}
-				const result = this._validateRules(content);
-				return result;
+				return { ...this._validationRules(txt) };
 			}
 			case "edit": {
 				if (
@@ -1380,15 +1403,14 @@ export class RealtyCommentDialog extends Component {
 						"Authentication",
 						"You can only edit your own comments."
 					);
-					return false;
+					return { valid: false };
 				}
-				const result = this._validateRules(content);
-				return result;
+				return { ...this._validationRules(txt) };
 			}
 			case "delete": {
 				if (!comment) {
 					this._errorHandler("Content", "Comment not found.");
-					return false;
+					return { valid: false };
 				}
 				const isOwner =
 					comment.create_uid && comment.create_uid[0] === this.ctx.user.id;
@@ -1398,28 +1420,28 @@ export class RealtyCommentDialog extends Component {
 						"Authentication",
 						"You can only delete your own comments or must be a moderator."
 					);
-					return false;
+					return { valid: false };
 				}
-				return true;
+				return { valid: true };
 			}
 			default:
-				return false;
+				return { valid: false };
 		}
 	};
 
 	// create comment (optimistic + reconcile)
 	createTopLevelComment = async () => {
 		const input = this.commentRef.el;
-		const content = input?.value?.trim();
+		const content = input?.value;
 
 		const validation = this._contentValidation(content, "create");
 
-		if (!validation) return;
+		if (!validation.valid) return;
 
 		const client_tmp_id = this._makeTmpId(); // Generate for deduplication
 
 		const payload = {
-			content: content,
+			content: validation.content,
 			res_model: this.ctx.resModel,
 			res_id: this.ctx.resId,
 		};
@@ -1451,8 +1473,9 @@ export class RealtyCommentDialog extends Component {
 		this.cancelReply();
 
 		try {
+			const create_or_reply = this.state.replyingTo ? "reply" : "create";
 			const createdRaw = await this.orm.create("realty_comment", [payload], {
-				context: { client_tmp_id },
+				context: { client_tmp_id, "create_or_reply": create_or_reply },
 			});
 			await this._reconcileCreated(createdRaw, tmpId);
 		} catch (e) {

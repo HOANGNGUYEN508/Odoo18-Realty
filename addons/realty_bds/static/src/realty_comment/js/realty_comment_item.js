@@ -214,15 +214,12 @@ export class RealtyCommentItem extends Component {
 	}
 
 	async saveEdit() {
-		const newContent = (this.local.editingContent || "").trim();
+		if (this.props.validateContent) return;
+		const newContent = this.local.editingContent || "";
 		const comment = this.commentData;
 
-		if (this.props.validateContent) {
-			const isValid = this.props.validateContent(newContent, "edit", comment);
-			if (!isValid) {
-				return;
-			}
-		}
+		const validation = this.props.validateContent(newContent, "edit", comment);
+		if (!validation.valid) return;
 
 		// Clear any pending save
 		if (this._editThrottleTimeout) {
@@ -238,11 +235,11 @@ export class RealtyCommentItem extends Component {
 				if (this.props.enqueueAction) {
 					this.props.enqueueAction(id, {
 						type: "write",
-						payload: { content: newContent },
+						payload: { content: validation.content },
 					});
 					// optimistic local update
 					this.props.onUpdated &&
-						this.props.onUpdated({ id, content: newContent });
+						this.props.onUpdated({ id, content: validation.content });
 					this.props.onEditCancel && this.props.onEditCancel();
 					this.local.editingContent = "";
 				}
@@ -253,12 +250,12 @@ export class RealtyCommentItem extends Component {
 				const result = await this.orm.write(
 					"realty_comment",
 					[id],
-					{ content: newContent },
+					{ content: validation.content },
 					{}
 				);
 				// update UI optimistically (server typically pushes an update anyway)
 				this.props.onUpdated &&
-					this.props.onUpdated({ id, content: newContent });
+					this.props.onUpdated({ id, content: validation.content });
 				this.props.onEditCancel && this.props.onEditCancel();
 				this.local.editingContent = "";
 			} catch (e) {
@@ -271,8 +268,8 @@ export class RealtyCommentItem extends Component {
 	async deleteComment() {
 		const comment = this.commentData;
 		if (this.props.validateContent) {
-			const isValid = this.props.validateContent(null, "delete", comment);
-			if (!isValid) return;
+			const validation = this.props.validateContent(null, "delete", comment);
+			if (!validation.valid) return;
 		}
 		this.dialogService.add(ConfirmationDialog, {
 			title: "Confirm Deletion",

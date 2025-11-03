@@ -1,5 +1,5 @@
 <odoo>
-	<!-- Tree View -->
+	<!-- Tree View User -->
 	<record id="product_template_list_view" model="ir.ui.view">
 		<field name="name">Product List</field>
 		<field name="model">product.template</field>
@@ -16,7 +16,6 @@
 				<field name="display_price" string="Price" optional="show"/>
 				<field name="price_per_sqm" string="Million/m²" optional="show"/>
 				<field name="create_uid" string="Real Estate Owner" optional="show"/>
-				<!-- <field name="contact" string="Owner Contact" optional="show"/>  -->
 				<field name="feature_ids" string="Feature" widget="many2many_chip" options="{'maxVisible':3}" optional="show"/>
 				<button name="action_make_report" title="Make Report" type="object" icon="fa-file-text-o"/>
 				<field name="company_id"/>
@@ -24,7 +23,7 @@
 		</field>
 	</record>
 
-	<!-- Form View -->
+	<!-- Form View User -->
 	<record id="product_template_form_view" model="ir.ui.view">
 		<field name="name">Product Form</field>
 		<field name="model">product.template</field>
@@ -89,16 +88,21 @@
 		</field>
 	</record>
 
-	<!-- Kanban View -->
-	<record id="product_template_kanban_view" model="ir.ui.view">
-		<field name="name">Product Kanban</field>
+	<!-- Kanban View User -->
+	<record id="product_template_kanban_view_user" model="ir.ui.view">
+		<field name="name">Product Kanban User</field>
 		<field name="model">product.template</field>
 		<field name="arch" type="xml">
 			<kanban template="card" class="o_kanban_view">
-				<!-- Fields to load -->
 				<field name="name"/>
 				<field name="presentation_image_id"/>
 				<field name="is_favorite"/>
+				<field name="create_uid"/>
+				<field name="create_date"/>
+				<field name="approval"/>
+				<field name="moderated_on"/>
+				<field name="moderator_id"/>
+				<field name="reason"/>
 				<templates>
 					<t t-name="card">
 						<div class="oe_product_kanban d-flex flex-column align-items-center justify-content-center">
@@ -106,11 +110,27 @@
 							<div class="d-flex justify-content-between align-items-center w-100 mb2">
 								<!-- Favorite star -->
 								<field name="is_favorite" widget="boolean_favorite" nolabel="1" t-att-style="'color: #7e6dae;'" />
-								<!-- Your three action buttons -->
+								<!-- Action buttons -->
 								<div class="o_kanban_action_buttons">
 									<button name="action_view_history" type="object" icon="fa-history" title="View Update History" class="btn btn-sm" t-att-style="'color: #7e6dae;'" />
 									<button name="action_schedule" type="object" icon="fa-calendar" title="Schedule" class="btn btn-sm" t-att-style="'color: #7e6dae;'" />
 									<button name="action_make_report" type="object" icon="fa-file-text-o" title="Make Report" class="btn btn-sm" t-att-style="'color: #7e6dae;'" />
+								</div>
+							</div>
+
+							<!-- Header: avatar + name + datetime -->
+							<div class="d-flex align-items-center mb-2 header_notify" t-att-data-approval="record.approval.raw_value or ''">
+								<!-- Avatar -->
+								<t t-if="record.create_uid">
+									<img t-att-src="'/web/image_protected?model=res.users&amp;id=' + record.create_uid.raw_value + '&amp;field=avatar_128'" alt="avatar" class="o_post_avatar avatar_notify" />
+								</t>
+								<div class="flex-grow-1 d-flex flex-column">
+									<div class="fw-bold">
+										<t t-esc="record.create_uid and record.create_uid.value or '—'"/>
+									</div>
+									<div class="small text-muted">
+										<t t-esc="record.create_date and record.create_date.value or '—'"/>
+									</div>
 								</div>
 							</div>
 
@@ -134,18 +154,7 @@
 		</field>
 	</record>
 
-	<!-- History View -->
-	<record id="view_product_history_tree" model="ir.ui.view">
-		<field name="name">Product History</field>
-		<field name="model">mail.tracking.value</field>
-		<field name="arch" type="xml">
-			<list string="Change History" create="false" edit="false" delete="false">
-				<field name="display_history" string="History" widget="text"/>
-			</list>
-		</field>
-	</record>
-
-	<!-- Menu -->
+	<!-- Menu User -->
 	<record id="action_product_template" model="ir.actions.act_window">
 		<field name="name">Ware House</field>
 		<field name="res_model">product.template</field>
@@ -154,7 +163,7 @@
       (5, 0, 0),
       (0, 0, {
         'view_mode': 'kanban',
-        'view_id': ref('realty_bds.product_template_kanban_view')
+        'view_id': ref('realty_bds.product_template_kanban_view_user')
       }),
       (0, 0, {
         'view_mode': 'list',
@@ -165,5 +174,168 @@
         'view_id': ref('realty_bds.product_template_form_view')
       })
     ]"/>
+	</record>
+
+	<!-- Form View Mod -->
+	<record id="product_template_form_mod" model="ir.ui.view">
+		<field name="name">Product Form</field>
+		<field name="model">product.template</field>
+		<field name="arch" type="xml">
+			<form>
+				<sheet>
+					<field name="currency_id" invisible="1"/>
+					<group>
+						<group string="Address">
+							<!-- <div class="o_form_label fw-bold text-black text-center">Address</div> -->
+							<field id="field_province" name="province_id" widget="selection" autocomplete="off" domain="[('country_id.code', '=', 'VN')]"/>
+							<field id="field_district" name="district_id" widget="selection" domain="[('province_id', '=', province_id)]" autocomplete="off"/>
+							<field id="field_commune" name="commune_id" widget="selection" domain="[('district_id', '=', district_id)]" autocomplete="off"/>
+							<field id="field_house_number" name="house_number" autocomplete="off"/>
+							<field id="field_street" name="street" autocomplete="off"/>
+							<field id="field_region" name="region_id" widget="selection" domain="[('province_ids', 'in', province_id)]" autocomplete="off"/>
+						</group>
+						<group string="Information">
+							<!-- <div class="o_form_label fw-bold text-black text-center">Information</div> -->
+							<div class="o_row">
+								<div class="o_form_label fw-bold text-black">Price</div>
+								<field id="field_list_price" name="list_price" widget="monetary" options="{'currency_field': 'currency_id'}" autocomplete="off"/>
+								<div class="o_form_label fw-bold text-black">Unit</div>
+								<field name="unit_price_id" widget="selection" required="1"/>
+							</div>
+							<field id="field_status" name="status_id" widget="selection" autocomplete="off"/>
+							<field id="field_type" name="type_id" widget="selection" autocomplete="off"/>
+							<field id="field_land_title" name="land_title_id" widget="selection" autocomplete="off"/>
+							<field id="field_feature" name="feature_ids" widget="many2many_tags" autocomplete="off" options="{'no_create': True}"/>
+						</group>
+						<group string="Attributes">
+							<!-- <div class="o_form_label fw-bold text-black text-center">Attributes</div> -->
+							<field id="field_real_estate_area" name="real_estate_area" autocomplete="off"/>
+							<field id="usable_area" name="usable_area" autocomplete="off"/>
+							<field id="field_number_of_floors" name="number_of_floors" autocomplete="off"/>
+							<field id="field_frontage" name="frontage" autocomplete="off"/>
+							<field id="field_home_direction" name="home_direction_id" widget="selection" autocomplete="off"/>
+						</group>
+						<group string="Additional Information">
+							<field name="shared_user_ids" widget="many2many_tags" options="{'no_create': True}"/>
+							<field name="shared_company_ids" widget="many2many_tags" options="{'no_create': True}"/>
+						</group>
+					</group>
+					<group string="Public Images">
+						<field name="img_ids" widget="many2many_image" options="{
+								'number_of_files': 5, 
+								'accepted_file_extensions': '.png,.jpg,.jpeg,.gif,.webp', 
+								'presentation_image': True,
+								'is_public': True
+							}" />
+					</group>
+					<!-- <group>
+						<field name="approval" readonly="1" widget="statusbar" options="{'clickable': 0}"/>
+						<field name="moderator_id" string="Moderator" readonly="1" invisible="approval == 'draft'"/>
+						<button name="action_send" string="Send" type="object" class="btn-primary" invisible="edit_counter != -1 or approval != 'draft'"/>
+						<field name="edit_counter" readonly="1" invisible="edit_counter == -1"/>
+						<button name="action_resend" string="Resend" type="object" class="btn-primary" invisible="edit_counter == -1 or edit_counter == 0"/>
+					</group> -->
+				</sheet>
+				<chatter/>
+			</form>
+		</field>
+	</record>
+
+	<!-- Kanban View Mod -->
+	<record id="product_template_kanban_view_mod" model="ir.ui.view">
+		<field name="name">Product Kanban Mod</field>
+		<field name="model">product.template</field>
+		<field name="arch" type="xml">
+			<kanban template="card" class="o_kanban_view">
+				<field name="name"/>
+				<field name="presentation_image_id"/>
+				<field name="is_favorite"/>
+				<field name="create_uid"/>
+				<field name="create_date"/>
+				<field name="approval"/>
+				<field name="moderated_on"/>
+				<field name="moderator_id"/>
+				<field name="reason"/>
+				<templates>
+					<t t-name="card">
+						<div class="oe_product_kanban d-flex flex-column align-items-center justify-content-center">
+							<!-- Header row: star on left, buttons on right -->
+							<div class="d-flex justify-content-between align-items-center w-100 mb2">
+								<!-- Favorite star -->
+								<field name="is_favorite" widget="boolean_favorite" nolabel="1" t-att-style="'color: #7e6dae;'" />
+								<!-- Action buttons -->
+								<div class="o_kanban_action_buttons">
+									<button name="action_view_history" type="object" icon="fa-history" title="View Update History" class="btn btn-sm" t-att-style="'color: #7e6dae;'" />
+
+								</div>
+							</div>
+
+							<!-- Header: avatar + name + datetime -->
+							<div class="d-flex align-items-center mb-2 header_notify" t-att-data-approval="record.approval.raw_value or ''">
+								<!-- Avatar -->
+								<t t-if="record.create_uid">
+									<img t-att-src="'/web/image_protected?model=res.users&amp;id=' + record.create_uid.raw_value + '&amp;field=avatar_128'" alt="avatar" class="o_post_avatar avatar_notify" />
+								</t>
+								<div class="flex-grow-1 d-flex flex-column">
+									<div class="fw-bold">
+										<t t-esc="record.create_uid and record.create_uid.value or '—'"/>
+									</div>
+									<div class="small text-muted">
+										<t t-esc="record.create_date and record.create_date.value or '—'"/>
+									</div>
+								</div>
+							</div>
+
+							<!-- Title row -->
+							<div class="o_kanban_record_title mb4 w-100 align-items-center" style="word-wrap: break-word; text-align: left;">
+								<field name="name"/>
+							</div>
+
+							<!-- Image container -->
+							<div class="d-flex justify-content-center align-items-center" style="width: 100%; height: 150px; aspect-ratio: 16/9;">
+								<img t-att-src="
+                    record.presentation_image_id.raw_value 
+                    ? '/web/content_protected/' + record.presentation_image_id.raw_value + '?model=product.template&amp;field=img_ids'
+                    : '/web/static/img/placeholder.png'
+									" class="img-fluid" style="max-height: 100%; object-fit: contain;" alt="Product Image" />
+							</div>
+						</div>
+					</t>
+				</templates>
+			</kanban>
+		</field>
+	</record>
+
+	<!-- Menu Mod -->
+	<record id="action_product_template_queue" model="ir.actions.act_window">
+		<field name="name">Ware House [Quesue]</field>
+		<field name="res_model">product.template</field>
+		<field name="view_mode">form,kanban</field>
+		<field name="view_ids" eval="[
+      (5, 0, 0),
+      (0, 0, {
+        'view_mode': 'kanban',
+        'view_id': ref('realty_bds.product_template_kanban_view_user')
+      }),
+      (0, 0, {
+        'view_mode': 'list',
+        'view_id': ref('realty_bds.product_template_list_view')
+      }),
+      (0, 0, {
+        'view_mode': 'form',
+        'view_id': ref('realty_bds.product_template_form_view')
+      })
+    ]"/>
+	</record>
+
+	<!-- History View -->
+	<record id="view_product_history_tree" model="ir.ui.view">
+		<field name="name">Product History</field>
+		<field name="model">mail.tracking.value</field>
+		<field name="arch" type="xml">
+			<list string="Change History" create="false" edit="false" delete="false">
+				<field name="display_history" string="History" widget="text"/>
+			</list>
+		</field>
 	</record>
 </odoo>

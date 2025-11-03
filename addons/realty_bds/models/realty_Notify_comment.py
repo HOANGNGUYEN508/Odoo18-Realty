@@ -3,8 +3,14 @@ from odoo.exceptions import ValidationError, AccessError, UserError  # type: ign
 from odoo.http import request  # type: ignore
 import datetime
 import logging
+import re
+import html
+import unicodedata
+from typing import Optional
 
 _logger = logging.getLogger(__name__)
+_WHITESPACE_RE = re.compile(r'\s+')
+_ALLOWED_PUNCT = set(".,!?:;\"'`-+()[]{}@#$%&*=/|\\^~<>")
 
 
 class RealtyComment(models.Model):
@@ -118,16 +124,11 @@ class RealtyComment(models.Model):
         rec._invalidate_cache(["like_user_ids", "like_count"])
 
         like_payload = {
-            "type":
-            "like_toggle",
-            "id":
-            rec.id,
-            "like_count":
-            rec.like_count or 0,
-            "res_model":
-            rec.res_model,
-            "res_id":
-            rec.res_id,
+            "type": "like_toggle",
+            "id": rec.id,
+            "like_count": rec.like_count or 0,
+            "res_model": rec.res_model,
+            "res_id": rec.res_id,
         }
         try:
             self._push_bus_notifications([like_payload])
@@ -135,9 +136,64 @@ class RealtyComment(models.Model):
             _logger.exception(
                 "Failed to send like update for realty_comment %s", rec.id)
 
-        return {"count": rec.like_count }
+        return {"count": rec.like_count}
 
     # Helper method
+    def _sanitize_content(self, content: Optional[str]) -> str:
+        """
+        Sanitize comment content while preserving multilingual text and emojis.
+
+        - Escapes HTML to avoid injected tags.
+        - Keeps Unicode letters, numbers, most punctuation, symbols and emojis.
+        - Removes control characters and unusual symbols.
+        - Collapses whitespace to a single space.
+        """
+        if not content or not isinstance(content, str):
+            return content or ""
+
+        # 1) Make HTML-safe first
+        s = html.escape(content)
+
+        # 2) Normalize Unicode to a stable form
+        s = unicodedata.normalize("NFC", s)
+
+        # 3) Build output by inspecting Unicode categories (very fast)
+        out_chars = []
+        append = out_chars.append
+        for ch in s:
+            # keep whitespace as a single space (will be collapsed later)
+            if ch.isspace():
+                append(" ")
+                continue
+
+            cat = unicodedata.category(ch)  # e.g. 'Lu', 'Ll', 'Nd', 'So', 'Cc', ...
+
+            # Allow letters (L*), numbers (N*)
+            if cat[0] in ("L", "N"):
+                append(ch)
+                continue
+
+            # Allow common punctuation/symbol categories and emojis (So)
+            if cat in ("Pc", "Pd", "Po", "Ps", "Pe", "Sm", "Sc", "Sk", "So"):
+                append(ch)
+                continue
+
+            # Allow selected ASCII punctuation not covered above
+            if ch in _ALLOWED_PUNCT:
+                append(ch)
+                continue
+
+            # otherwise: skip character (control chars, private-use, etc.)
+            # This removes potentially surprising control / invis chars
+            # and any other characters we don't want to allow.
+            # (No action needed here.)
+            continue
+
+        # 4) Collapse whitespace runs and trim
+        sanitized = _WHITESPACE_RE.sub(" ", "".join(out_chars)).strip()
+
+        return sanitized
+
     def _normalize_for_bus(self, value):
         """Normalize common Odoo/Python objects into JSON-safe primitives."""
         # Record-like (res.users etc.)
@@ -222,13 +278,15 @@ class RealtyComment(models.Model):
         try:
             res_id = int(res_id)
         except Exception:
-            return {"comments": [], "hasMore": False, "page": 0, "total_count": 0}
+            return {
+                "comments": [],
+                "hasMore": False,
+                "page": 0,
+                "total_count": 0
+            }
 
-        domain = [
-            ("res_model", "=", res_model),
-            ("res_id", "=", res_id),
-            ("parent_id", "=", False)
-        ]
+        domain = [("res_model", "=", res_model), ("res_id", "=", res_id),
+                  ("parent_id", "=", False)]
 
         total_count = self.search_count(domain)
 
@@ -239,18 +297,16 @@ class RealtyComment(models.Model):
             order="like_count DESC, create_date DESC",
         )
 
-        data = comments.read(
-            [
-                "id",
-                "content",
-                "create_uid",
-                "create_date",
-                "like_count",
-                "child_count",
-                "res_model",
-                "res_id",
-            ]
-        )
+        data = comments.read([
+            "id",
+            "content",
+            "create_uid",
+            "create_date",
+            "like_count",
+            "child_count",
+            "res_model",
+            "res_id",
+        ])
 
         return {
             "comments": data,
@@ -289,7 +345,7 @@ class RealtyComment(models.Model):
             "page":
             offset // limit,
         }
-    
+
     @api.model_create_multi
     def create(self, vals_list):
         if not isinstance(vals_list, list) or len(vals_list) == 0:
@@ -301,13 +357,26 @@ class RealtyComment(models.Model):
         # Extract client_tmp_id from context for deduplication
         ctx = dict(self.env.context or {})
         client_tmp_id = ctx.get("client_tmp_id")
+        create_or_reply = ctx.get("create_or_reply")
+        if not client_tmp_id or not create_or_reply:
+            raise ValidationError("Context is required.")
 
         # normalize single vals dict
         vals = dict(vals_list[0])
         ctx = dict(self.env.context or {})
         
+        required_keys = {"res_model", "res_id", "contnent", "parent_id"}
+        if create_or_reply == "reply":
+            required_keys.add("parent_id")
+        missing = [k for k in required_keys if k not in vals]
+        if missing:
+            raise ValidationError(f"Missing required keys on create: {', '.join(missing)}")
+        
         if not vals.get("res_model") or not vals.get("res_id"):
-            raise ValidationError("res_model and res_id are required to create a comment.")
+            raise ValidationError(
+                "res_model and res_id are required to create a comment.")
+        
+        vals["content"] = self._sanitize_content(vals.get("content"))
 
         parent_id = vals.get("parent_id")
         if parent_id:
@@ -391,6 +460,7 @@ class RealtyComment(models.Model):
         content_only = set(vals.keys()) == {'content'} and 'content' in vals
         if not content_only:
             raise UserError("Only content field can be updated.")
+        vals['content'] = self._sanitize_content(vals.get('content'))
         result = super(RealtyComment, self).write(vals)
 
         if result:
@@ -406,17 +476,17 @@ class RealtyComment(models.Model):
             try:
                 self._push_bus_notifications([update_payload])
             except Exception:
-                _logger.exception("Failed to send update payload for realty_comment %s", rec.id)
+                _logger.exception(
+                    "Failed to send update payload for realty_comment %s",
+                    rec.id)
 
             return {
-                "id":
-                rec.id,
-                "content":
-                rec.content,
-                "write_date":
-                rec.write_date,
+                "id": rec.id,
+                "content": rec.content,
+                "write_date": rec.write_date,
             }
-        else: return { "id": False }
+        else:
+            return {"id": False}
 
     def unlink(self):
         self.ensure_one()
@@ -455,7 +525,8 @@ class RealtyComment(models.Model):
                     deleted_id,
                 )
             return {"deleted_id": deleted_id, "parent_id": parent_id}
-        else: return {"deleted_id": False, "parent_id": False}
+        else:
+            return {"deleted_id": False, "parent_id": False}
 
     # Constrain
     @api.constrains("content")

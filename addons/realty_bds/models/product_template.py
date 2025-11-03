@@ -270,159 +270,159 @@ class ProductTemplate(models.Model):
             "target": "new",
         }
 
-    # def action_send(self):
-    #     self.ensure_one()
-    #     if self.approval == "pending":
-    #         raise ValidationError("❌ Error: Wait for approval.")
-    #     if self.approval != "draft":
-    #         raise ValidationError(
-    #             "❌ Error: Only posts in 'Draft' state can be send for approval."
-    #         )
-    #     if self.edit_counter != -1:
-    #         raise ValidationError("❌ Error: This is not the first time you send this.")
-    #     self.approval = "pending"
-    #     self._assign_moderator_after_send()
+    def action_send(self):
+        self.ensure_one()
+        if self.approval == "pending":
+            raise ValidationError("❌ Error: Wait for approval.")
+        if self.approval != "draft":
+            raise ValidationError(
+                "❌ Error: Only posts in 'Draft' state can be send for approval."
+            )
+        if self.edit_counter != -1:
+            raise ValidationError("❌ Error: This is not the first time you send this.")
+        self.approval = "pending"
+        self._assign_moderator_after_send()
 
-    # def action_resend(self):
-    #     self.ensure_one()
-    #     if self.approval == "pending":
-    #         raise ValidationError("❌ Error: Wait for approval.")
-    #     if self.approval != "rejected":
-    #         raise ValidationError(
-    #             "❌ Error: Only posts in 'Rejected' state can be resend for approval."
-    #         )
-    #     if self.edit_counter == 0:
-    #         raise ValidationError("❌ Error: You have exhausted your edit attempts.")
-    #     self.approval = "pending"
-    #     self._assign_moderator_after_send()
+    def action_resend(self):
+        self.ensure_one()
+        if self.approval == "pending":
+            raise ValidationError("❌ Error: Wait for approval.")
+        if self.approval != "rejected":
+            raise ValidationError(
+                "❌ Error: Only posts in 'Rejected' state can be resend for approval."
+            )
+        if self.edit_counter == 0:
+            raise ValidationError("❌ Error: You have exhausted your edit attempts.")
+        self.approval = "pending"
+        self._assign_moderator_after_send()
 
-    # def action_approve(self):
-    #     self.check_action("approve")
+    def action_approve(self):
+        self.check_action("approve")
 
-    #     for post in self:
-    #         post.approval = "approved"
-    #         post.moderator_id = self.env.user
-    #         post.moderated_on = fields.Datetime.now()
+        for post in self:
+            post.approval = "approved"
+            post.moderator_id = self.env.user
+            post.moderated_on = fields.Datetime.now()
 
-    # def action_reject(self):
-    #     self.check_action("reject")
+    def action_reject(self):
+        self.check_action("reject")
 
-    #     # Return action to open the reject wizard
-    #     return {
-    #         "name": "Reject Post",
-    #         "type": "ir.actions.act_window",
-    #         "res_model": "notify_wizard",
-    #         "view_mode": "form",
-    #         "views": [(self.env.ref("realty_bds.view_generic_wizard_form").id, "form")],
-    #         "target": "new",
-    #         "context": {
-    #             "default_action_type": "reject",
-    #             "default_model_name": self._name,  # Pass the model name
-    #             "default_record_id": self.id,  # Pass the record ID
-    #         },
-    #     }
+        # Return action to open the reject wizard
+        return {
+            "name": "Reject Post",
+            "type": "ir.actions.act_window",
+            "res_model": "notify_wizard",
+            "view_mode": "form",
+            "views": [(self.env.ref("realty_bds.view_generic_wizard_form").id, "form")],
+            "target": "new",
+            "context": {
+                "default_action_type": "reject",
+                "default_model_name": self._name,  # Pass the model name
+                "default_record_id": self.id,  # Pass the record ID
+            },
+        }
 
-    # def action_remove(self):
-    #     self.check_action("remove")
+    def action_remove(self):
+        self.check_action("remove")
 
-    #     # Return action to open the remove wizard
-    #     return {
-    #         "name": "Remove Post",
-    #         "type": "ir.actions.act_window",
-    #         "res_model": "notify_wizard",
-    #         "view_mode": "form",
-    #         "views": [(self.env.ref("realty_bds.view_generic_wizard_form").id, "form")],
-    #         "target": "new",
-    #         "context": {
-    #             "default_action_type": "remove",
-    #             "default_model_name": self._name,  # Pass the model name
-    #             "default_record_id": self.id,  # Pass the record ID
-    #         },
-    #     }
+        # Return action to open the remove wizard
+        return {
+            "name": "Remove Post",
+            "type": "ir.actions.act_window",
+            "res_model": "notify_wizard",
+            "view_mode": "form",
+            "views": [(self.env.ref("realty_bds.view_generic_wizard_form").id, "form")],
+            "target": "new",
+            "context": {
+                "default_action_type": "remove",
+                "default_model_name": self._name,  # Pass the model name
+                "default_record_id": self.id,  # Pass the record ID
+            },
+        }
 
     # Helper Method
-    # def check_action(self, action):
-    #     # will later override in child models to use action
-    #     self.ensure_one()
+    def check_action(self, action):
+        # will later override in child models to use action
+        self.ensure_one()
 
-    #     permission_info = self._get_permission_info()
-    #     moderator_group = permission_info["moderator_group"]
-    #     realty_group = permission_info["realty_group"]
+        group_dict = self.env["permission_tracker"]._get_permission_groups(self._name) or {}
+        moderator_group = group_dict.get("moderator_group")
+        realty_group = group_dict.get("realty_group")
 
-    #     # Check if user has the moderator group
-    #     if not (
-    #         self.env.user.has_group(moderator_group)
-    #         or self.env.user.has_group(realty_group)
-    #     ):
-    #         raise AccessError(
-    #             f"You don't have the necessary permissions to {action} posts."
-    #         )
+        # Check if user has the moderator group
+        if not (
+            self.env.user.has_group(moderator_group)
+            or self.env.user.has_group(realty_group)
+        ):
+            raise AccessError(
+                f"You don't have the necessary permissions to {action} posts."
+            )
 
-    #     # Check company permission (pass if user is in access_group_realty_urgent_buying)
-    #     if not self.env.user.has_group(realty_group):
-    #         if self.company_id != self.env.user.company_id and self.company_id.id != 1:
-    #             raise AccessError(f"You can only {action} posts from your own company.")
+        # Check company permission (pass if user is in access_group_realty_urgent_buying)
+        if not self.env.user.has_group(realty_group):
+            if self.company_id != self.env.user.company_id and self.company_id.id != 1:
+                raise AccessError(f"You can only {action} posts from your own company.")
 
-    # def _assign_moderator(self):
-    #     """Assign a moderator using round-robin distribution"""
-    #     company_id = self.env.company.id
+    def _assign_moderator(self):
+        """Assign a moderator using round-robin distribution"""
+        company_id = self.env.company.id
 
-    #     permission_info = self._get_permission_info()
-    #     moderator_group = permission_info["moderator_group"]
+        group_dict = self.env["permission_tracker"]._get_permission_groups(self._name) or {}
+        moderator_group = group_dict.get("moderator_group")
 
-    #     # Get the moderator group
-    #     group = self.env.ref(moderator_group, raise_if_not_found=False)
-    #     if not group:
-    #         _logger.error(f"Moderator group {moderator_group} not found")
-    #         return None
+        # Get the moderator group
+        group = self.env.ref(moderator_group, raise_if_not_found=False)
+        if not group:
+            _logger.error(f"Moderator group {moderator_group} not found")
+            return None
 
-    #     # Get moderators for the company and group
-    #     moderators = (
-    #         self.env["res.users"]
-    #         .sudo()
-    #         .search(
-    #             [("groups_id", "in", group.id), ("company_id", "=", company_id)],
-    #             order="id",
-    #         )
-    #     )
+        # Get moderators for the company and group
+        moderators = (
+            self.env["res.users"]
+            .sudo()
+            .search(
+                [("groups_id", "in", group.id), ("company_id", "=", company_id)],
+                order="id",
+            )
+        )
 
-    #     if not moderators:
-    #         _logger.warning(
-    #             f"No moderators found for group {group.name} in company {company_id}"
-    #         )
-    #         return None
+        if not moderators:
+            _logger.warning(
+                f"No moderators found for group {group.name} in company {company_id}"
+            )
+            return None
 
-    #     # Use advisory lock to prevent race conditions
-    #     lock_key = f"moderator_assignment_{company_id}_{group.id}_{self._name}"
-    #     try:
-    #         self.env.cr.execute(
-    #             "SELECT pg_advisory_xact_lock(hashtext(%s))", (lock_key,)
-    #         )
-    #     except Exception:
-    #         _logger.exception("Failed to acquire advisory lock for %s", lock_key)
-    #         raise UserError("Could not acquire database lock, try again.")
+        # Use advisory lock to prevent race conditions
+        lock_key = f"moderator_assignment_{company_id}_{group.id}_{self._name}"
+        try:
+            self.env.cr.execute(
+                "SELECT pg_advisory_xact_lock(hashtext(%s))", (lock_key,)
+            )
+        except Exception:
+            _logger.exception("Failed to acquire advisory lock for %s", lock_key)
+            raise UserError("Could not acquire database lock, try again.")
 
-    #     # Get or create sequence record for this company, group, and model
-    #     sequence_model = self.env["moderator_assignment_sequence"]
-    #     sequence = sequence_model.get_or_create_sequence(
-    #         company_id, group.id, self._name
-    #     )
+        # Get or create sequence record for this company, group, and model
+        sequence_model = self.env["moderator_assignment_sequence"]
+        sequence = sequence_model.get_or_create_sequence(
+            company_id, group.id, self._name
+        )
 
-    #     # Get next moderator
-    #     next_moderator = sequence.get_next_moderator(moderators)
-    #     if next_moderator:
-    #         sequence.update_sequence(next_moderator)
-    #         return next_moderator.id
+        # Get next moderator
+        next_moderator = sequence.get_next_moderator(moderators)
+        if next_moderator:
+            sequence.update_sequence(next_moderator)
+            return next_moderator.id
 
-    #     return None
+        return None
 
-    # def _assign_moderator_after_send(self):
-    #     """Assign moderator after send/resend - common logic for all child models"""
-    #     moderator_id = self._assign_moderator()
-    #     if moderator_id:
-    #         self.moderator_id = moderator_id
-    #     else:
-    #         _logger.warning(f"No moderator assigned for {self._name} post ID {self.id}")
+    def _assign_moderator_after_send(self):
+        """Assign moderator after send/resend - common logic for all child models"""
+        moderator_id = self._assign_moderator()
+        if moderator_id:
+            self.moderator_id = moderator_id
+        else:
+            _logger.warning(f"No moderator assigned for {self._name} post ID {self.id}")
             
     def format_number(self, value):
         return str(int(value)) if value == int(value) else f"{value:.2f}"
@@ -439,7 +439,6 @@ class ProductTemplate(models.Model):
         frontage,
         list_price,
         unit_price_id,
-        create_uid,
     ):
         parts = []
         if house_number:
@@ -469,19 +468,14 @@ class ProductTemplate(models.Model):
                 parts.append(
                     f"{self.format_number(list_price)}{self.env['unit_price'].browse(unit_price_id).name}"
                 )
-        if create_uid:
-            user = self.env["res.users"].browse(create_uid)
-            if user.phone:
-                parts.append(f"{user.name}, {user.phone}")
-            elif user.mobile:
-                parts.append(f"{user.name}, {user.mobile}")
-            else:
-                parts.append(f"{user.name}")
         return " ".join(parts)
 
     # Model Method
     @api.model_create_multi
     def create(self, vals_list):
+        # Enforce single record creation since this model work with moderator assignment
+        if len(vals_list) > 1:
+            raise UserError("Only one record can be created at a time.")
         for vals in vals_list:
             vals["name"] = self._build_address_name(
                 vals.get("house_number"),
@@ -494,13 +488,15 @@ class ProductTemplate(models.Model):
                 vals.get("frontage"),
                 vals.get("list_price"),
                 vals.get("unit_price_id"),
-                self.env.uid,
-            ) or vals.get("name")
+            )
             vals["company_id"] = self.env.company.id
         records = super().create(vals_list)
         return records
 
     def write(self, vals):
+        self.ensure_one()
+        if "name" in vals:
+            raise UserError("❌ Error: Direct modification of the 'name' field is not allowed.")
         address_keys = {
             "house_number",
             "street",
@@ -513,35 +509,21 @@ class ProductTemplate(models.Model):
             "list_price",
             "unit_price_id",
         }
-        if address_keys & set(vals):
-            for rec in self:
-                house_number = vals.get("house_number", rec.house_number)
-                street = vals.get("street", rec.street)
-                commune = vals.get("commune_id", rec.commune_id.id)
-                district = vals.get("district_id", rec.district_id.id)
-                vals.setdefault("name", False)
-                real_estate_area = vals.get("real_estate_area", rec.real_estate_area)
-                usable_area = vals.get("usable_area", rec.usable_area)
-                number_of_floors = vals.get("number_of_floors", rec.number_of_floors)
-                frontage = vals.get("frontage", rec.frontage)
-                list_price = vals.get("list_price", rec.list_price)
-                unit_price_id = vals.get("unit_price_id", rec.unit_price_id.id)
-                create_uid = rec.create_uid.id
-                break
+        if not (address_keys & set(vals.keys())):
+            return super().write(vals)
 
-            vals["name"] = self._build_address_name(
-                house_number,
-                street,
-                commune,
-                district,
-                real_estate_area,
-                usable_area,
-                number_of_floors,
-                frontage,
-                list_price,
-                unit_price_id,
-                create_uid,
-            )
+        vals["name"] = self._build_address_name(
+            vals.get("house_number"),
+            vals.get("street"),
+            vals.get("commune_id"),
+            vals.get("district_id"),
+            vals.get("real_estate_area"),
+            vals.get("usable_area"),
+            vals.get("number_of_floors"),
+            vals.get("frontage"),
+            vals.get("list_price"),
+            vals.get("unit_price_id"),
+        )
         return super().write(vals)
 
     def unlink(self):
@@ -590,7 +572,7 @@ class ProductTemplate(models.Model):
                 )
 
     @api.constrains("real_estate_area", "usable_area", "frontage", "number_of_floors")
-    def _check_valid_values(self):
+    def _check_numeric_values(self):
         for rec in self:
             if any(
                 value < 0
