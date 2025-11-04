@@ -393,35 +393,47 @@
 		</record>
 
 		<!-- Rules for product.template -->
-		<!-- 1a. Divide full CRUD for user's own company into 2 rules: one for create and another for write & unlink -->
+		<!-- 1a. Create for user's own company records-->
 		<record id="product_template_company_rule" model="ir.rule">
-			<field name="name">Product: Full access to own company</field>
+			<field name="name">Product: Create own company's records</field>
 			<field name="model_id" ref="product.model_product_template"/>
 			<field name="domain_force">[('company_id', '=', user.company_id.id)]</field>
 			<field name="groups" eval="[(4, ref('realty_bds.access_group_full_product'))]"/>
-			<field name="perm_read" eval="True"/>
+			<field name="perm_read" eval="False"/>
 			<field name="perm_write" eval="False"/>
 			<field name="perm_create" eval="True"/>
 			<field name="perm_unlink" eval="False"/>
 		</record>
 
-		<!-- 1b. Write & unlink access to own records (create_uid=user.id) -->
-		<record id="product_template_own_rule" model="ir.rule">
-			<field name="name">Product: Edit/Delete only own records</field>
+		<!-- 1b. Write access to own records (create_uid=user.id) -->
+		<record id="product_template_own_rule_write" model="ir.rule">
+			<field name="name">Product: Edit only own records only when you still have edit count or not in approval process</field>
 			<field name="model_id" ref="product.model_product_template"/>
-			<field name="domain_force">[('create_uid', '=', user.id)]</field>
+			<field name="domain_force">['&amp;','&amp;','&amp;',('create_uid','=', user.id),('edit_counter','!=',0),('approval','!=','pending'),('company_id','=',user.company_id.id)]</field>
 			<field name="groups" eval="[(4, ref('realty_bds.access_group_full_product'))]"/>
 			<field name="perm_read" eval="False"/>
 			<field name="perm_write" eval="True"/>
 			<field name="perm_create" eval="False"/>
+			<field name="perm_unlink" eval="False"/>
+		</record>
+
+		<!-- 1c. Unlink access to own records (create_uid=user.id) -->
+		<record id="product_template_own_rule_unlink" model="ir.rule">
+			<field name="name">Product: Edit only own records</field>
+			<field name="model_id" ref="product.model_product_template"/>
+			<field name="domain_force">['&amp;',('create_uid', '=', user.id),('company_id','=',user.company_id.id)]</field>
+			<field name="groups" eval="[(4, ref('realty_bds.access_group_full_product'))]"/>
+			<field name="perm_read" eval="False"/>
+			<field name="perm_write" eval="False"/>
+			<field name="perm_create" eval="False"/>
 			<field name="perm_unlink" eval="True"/>
 		</record>
 
-		<!-- 1c. Write access to records that have been assigned to own (moderator) -->
+		<!-- 1d. Write access to records that have been assigned to own (moderator) -->
 		<record id="product_template_mod_rule" model="ir.rule">
 			<field name="name">Product: Moderate records that have been assigned to self (moderator)</field>
 			<field name="model_id" ref="product.model_product_template"/>
-			<field name="domain_force">[('moderator_id', '=', user.id)]</field>
+			<field name="domain_force">['&amp;',('moderator_id', '=', user.id),('edit_counter','!=',0)]</field>
 			<field name="groups" eval="[(4, ref('realty_bds.access_group_mod_product'))]"/>
 			<field name="perm_read" eval="False"/>
 			<field name="perm_write" eval="True"/>
@@ -429,7 +441,7 @@
 			<field name="perm_unlink" eval="False"/>
 		</record>
 
-		<!-- 2. Read-only access to base company (id=1) -->
+		<!-- 2a. Read-only access to base company (id=1) -->
 		<record id="product_template_base_company_read_rule" model="ir.rule">
 			<field name="name">Product: Access own or base company records</field>
 			<field name="model_id" ref="product.model_product_template"/>
@@ -453,6 +465,18 @@
 			<field name="perm_unlink" eval="False"/>
 		</record>
 
+		<!-- 2b. Read-only access to own company's records that have been assigned to self (moderator) -->
+		<record id="product_template_company_read_rule_mod" model="ir.rule">
+			<field name="name">Product: Mod Read pending own company post that get assign to</field>
+			<field name="model_id" ref="realty_bds.model_urgent_buying"/>
+			<field name="domain_force">['&amp;','&amp;',('company_id','=', user.company_id.id),('approval','=','pending'),('moderator_id','=',user.id)]</field>
+			<field name="groups" eval="[(4, ref('realty_bds.access_group_mod_product'))]"/>
+			<field name="perm_read" eval="True"/>
+			<field name="perm_write" eval="False"/>
+			<field name="perm_create" eval="False"/>
+			<field name="perm_unlink" eval="False"/>
+		</record>
+		
 		<!-- Rules for res.partner -->
 		<!-- 1. Users are only allowed to view and edit their own partner. -->
 		<record id="res_partner_own" model="ir.rule">
@@ -839,9 +863,9 @@
 			<field name="domain_force">['&amp;', ('company_id','=', user.company_id.id), ('edit_counter','!=',0)]</field>
 			<field name="groups" eval="[(4, ref('realty_bds.access_group_mod_guideline'))]"/>
 			<field name="perm_read" eval="False"/>
-			<field name="perm_write" eval="False"/>
+			<field name="perm_write" eval="True"/>
 			<field name="perm_create" eval="False"/>
-			<field name="perm_unlink" eval="True"/>
+			<field name="perm_unlink" eval="False"/>
 		</record>
 
 		<!-- Rules for notification -->
@@ -934,9 +958,9 @@
 			<field name="domain_force">['&amp;', ('company_id','=', user.company_id.id), ('edit_counter','!=',0)]</field>
 			<field name="groups" eval="[(4, ref('realty_bds.access_group_mod_notification'))]"/>
 			<field name="perm_read" eval="False"/>
-			<field name="perm_write" eval="False"/>
+			<field name="perm_write" eval="True"/>
 			<field name="perm_create" eval="False"/>
-			<field name="perm_unlink" eval="True"/>
+			<field name="perm_unlink" eval="False"/>
 		</record>
 
 		<!-- Rules for urgent_buying -->
@@ -1029,9 +1053,9 @@
 			<field name="domain_force">['&amp;', ('company_id','=', user.company_id.id), ('edit_counter','!=',0)]</field>
 			<field name="groups" eval="[(4, ref('realty_bds.access_group_mod_urgent_buying'))]"/>
 			<field name="perm_read" eval="False"/>
-			<field name="perm_write" eval="False"/>
+			<field name="perm_write" eval="True"/>
 			<field name="perm_create" eval="False"/>
-			<field name="perm_unlink" eval="True"/>
+			<field name="perm_unlink" eval="False"/>
 		</record>
 
 		<!-- Rules for reject_reason -->

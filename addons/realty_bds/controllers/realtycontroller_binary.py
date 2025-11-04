@@ -13,6 +13,7 @@ _logger = logging.getLogger(__name__)
 
 ALLOWED_ATTACHMENT_FIELDS = {
     "product.template": ["img_ids"],
+    "product.template": ["private_img_ids"],
     "res.users": ["avatar_128"],
     "notification": ["img_ids"],
     "guideline": ["img_ids"],
@@ -387,8 +388,20 @@ class BinaryController(http.Controller):
                     model_env = request.env[model].sudo()
                 except Exception:
                     raise request.not_found()
-                record = model_env.browse(int(id))
-
+                if id is None:
+                    raise request.not_found()
+                try:
+                    record = model_env.browse(int(id))
+                except Exception:
+                    raise request.not_found()
+                    # Normalize id to int with explicit check to avoid type-checker/runtime errors
+                try:
+                    id_int = int(id) if id is not None else None
+                except Exception:
+                  raise request.not_found()
+                if id_int is None:
+                    raise request.not_found()
+                record = model_env.browse(id_int)
                 if record._name == "ir.attachment":
                     self._ensure_user_can_read_linked_record(record)
                 else:

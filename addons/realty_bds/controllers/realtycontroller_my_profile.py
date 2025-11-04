@@ -38,7 +38,7 @@ class InheritCustomerPortal(CustomerPortal):
         """
         return {}
 
-    def get_error(e, path=""):
+    def get_error(self, e, path=""):
         """Recursively dereferences `path` (a period-separated sequence of dict
         keys) in `e` (an error dict or value), returns the final resolution IIF it's
         an str, otherwise returns None

@@ -20,12 +20,16 @@
 						<field name="tag_ids" widget="many2many_tags" options="{'no_create': True}" readonly="approval == 'pending'"/>
 					</group>
 
-					<group>
+					<group string="Actions">
 						<field name="approval" readonly="1" widget="statusbar" options="{'clickable': 0}"/>
 						<field name="moderator_id" string="Moderator" readonly="1" invisible="approval == 'draft'"/>
-						<button name="action_send" string="Send" type="object" class="btn-primary" invisible="edit_counter != -1 or approval != 'draft'"/>
+						<button name="action_remove" type="object" class="btn btn-sm btn-outline-danger d-flex align-items-center" invisible="approval != 'approved'" groups="realty_bds.access_group_mod_urgent_buying,realty_bds.access_group_realty_urgent_buying">
+							<i class="fa fa-times me-1" aria-hidden="true"/>
+							<span>Remove</span>
+						</button>
+						<button name="action_send" string="Send" type="object" class="btn-primary" invisible="edit_counter != -1 or approval != 'draft'" groups="realty_bds.access_group_user_urgent_buying,realty_bds.access_group_realty_urgent_buying"/>
 						<field name="edit_counter" readonly="1" invisible="edit_counter == -1"/>
-						<button name="action_resend" string="Resend" type="object" class="btn-primary" invisible="edit_counter == -1 or edit_counter == 0"/>
+						<button name="action_resend" string="Resend" type="object" class="btn-primary" invisible="edit_counter == -1 or edit_counter == 0" groups="realty_bds.access_group_user_urgent_buying,realty_bds.access_group_realty_urgent_buying"/>
 					</group>
 				</sheet>
 				<chatter/>

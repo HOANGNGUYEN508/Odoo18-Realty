@@ -70,6 +70,16 @@
 		name="Ware House" 
 		parent="menu_product_root" 
 		action="action_product_template"
+		groups="realty_bds.access_group_realty_product,realty_bds.access_group_full_product,realty_bds.access_group_seen_product"
 		sequence="20"
+	/>
+
+	<menuitem 
+		id="menu_product_template_root_queue" 
+		name="Ware House [Queue]" 
+		parent="menu_product_root" 
+		action="action_product_template_queue"
+		groups="realty_bds.access_group_realty_product,realty_bds.access_group_mod_product"
+		sequence="21"
 	/>
 </odoo>

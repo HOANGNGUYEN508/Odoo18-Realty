@@ -38,21 +38,6 @@ class Notification(models.Model):
     like_count = fields.Integer(string="Like Count",
                                 compute="_compute_like_count",
                                 store=True)
-    image_urls = fields.Text(string="Image URLs",
-                             compute="_compute_image_urls",
-                             store=True)
-
-    @api.depends("img_ids")
-    def _compute_image_urls(self):
-        for rec in self:
-            if rec.img_ids:
-                urls = []
-                for att in rec.img_ids:
-                    # Use /web/content_protected endpoint which respects access rights but avoids set public on attachment
-                    urls.append("/web/content_protected/%s" % (att.id, ))
-                rec.image_urls = ",".join(urls)
-            else:
-                rec.image_urls = ""
 
     @api.depends("like_user_ids")
     def _compute_like_count(self):

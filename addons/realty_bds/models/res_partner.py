@@ -47,6 +47,13 @@ class ResPartner(models.Model):
         ondelete="restrict",
         tracking=True,
     )
+    subscribed_partner_ids = fields.Many2many(
+        comodel_name='res.partner',
+        relation='partner_subscribe_rel',
+        column1='partner_id',
+        column2='subscribed_partner_id',
+        string='Subscribed Partners'
+    )
 
     # Constrains
     _sql_constraints = [
@@ -117,75 +124,70 @@ class ResPartner(models.Model):
                 )
 
     # Onchange
-    @api.onchange("province_id")
+    @api.onchange('province_id')
     def _onchange_province_id(self):
-        if self.province_id:
-            if self.district_id and self.district_id.province_id != self.province_id:
-                self.district_id = False
-            if self.commune_id:
-                self.commune_id = False
-            return {
-                "domain": {"district_id": [("province_id", "=", self.province_id.id)]}
-            }
-        else:
-            self.district_id = False
-            self.commune_id = False
-        return {"domain": {"district_id": []}}
+        """Reset district and commune when province changes"""
+        for record in self:
+            if record.province_id:
+                # Check if current district belongs to new province
+                if record.district_id and record.district_id.province_id != record.province_id:
+                    record.district_id = False
+                # Always reset commune when province changes
+                record.commune_id = False
+            else:
+                # If province is cleared, clear district and commune
+                record.district_id = False
+                record.commune_id = False
 
-    @api.onchange("district_id")
+    @api.onchange('district_id')
     def _onchange_district_id(self):
-        if self.district_id:
-            if self.commune_id and self.commune_id.district_id != self.district_id:
-                self.commune_id = False
-            return {
-                "domain": {"commune_id": [("district_id", "=", self.district_id.id)]}
-            }
-        else:
-            self.commune_id = False
-        return {"domain": {"commune_id": []}}
+        """Reset commune when district changes"""
+        for record in self:
+            if record.district_id:
+                # Check if current commune belongs to new district
+                if record.commune_id and record.commune_id.district_id != record.district_id:
+                    record.commune_id = False
+            else:
+                # If district is cleared, clear commune
+                record.commune_id = False
 
-    @api.onchange("province_resident_id")
+    @api.onchange('province_resident_id')
     def _onchange_province_resident_id(self):
-        if self.province_resident_id:
-            if (
-                self.district_resident_id
-                and self.district_resident_id.province_id != self.province_resident_id
-            ):
-                self.district_resident_id = False
-            if self.commune_resident_id:
-                self.commune_resident_id = False
-            return {
-                "domain": {
-                    "district_resident_id": [
-                        ("province_id", "=", self.province_resident_id.id)
-                    ]
-                }
-            }
-        else:
-            self.district_resident_id = False
-            self.commune_resident_id = False
-        return {"domain": {"district_resident_id": []}}
+        """Reset resident district and commune when resident province changes"""
+        for record in self:
+            if record.province_resident_id:
+                # Check if current resident district belongs to new resident province
+                if (record.district_resident_id and 
+                    record.district_resident_id.province_id != record.province_resident_id):
+                    record.district_resident_id = False
+                # Always reset resident commune when resident province changes
+                record.commune_resident_id = False
+            else:
+                # If resident province is cleared, clear resident district and commune
+                record.district_resident_id = False
+                record.commune_resident_id = False
 
-    @api.onchange("district_resident_id")
+    @api.onchange('district_resident_id')
     def _onchange_district_resident_id(self):
-        if self.district_resident_id:
-            if (
-                self.commune_resident_id
-                and self.commune_resident_id.district_id != self.district_resident_id
-            ):
-                self.commune_resident_id = False
-            return {
-                "domain": {
-                    "commune_resident_id": [
-                        ("district_id", "=", self.district_resident_id.id)
-                    ]
-                }
-            }
-        else:
-            self.commune_resident_id = False
-        return {"domain": {"commune_resident_id": []}}
+        """Reset resident commune when resident district changes"""
+        for record in self:
+            if record.district_resident_id:
+                # Check if current resident commune belongs to new resident district
+                if (record.commune_resident_id and 
+                    record.commune_resident_id.district_id != record.district_resident_id):
+                    record.commune_resident_id = False
+            else:
+                # If resident district is cleared, clear resident commune
+                record.commune_resident_id = False
 
     # Action
+    def action_toggle_subscribe(self, target_partner):
+        """Toggle subscription of `self` to `target_partner` (add/remove)."""
+        self.ensure_one()
+        self.sudo().subscribed_partner_ids = [
+            (3 if target_partner in self.subscribed_partner_id.ids else 4, target_partner)
+        ]
+
     def action_notify_admin_new_partner(self, partner):
         """Notify users with 'realty_bds.access_group_full_users' access when a new partner is created"""
         group_xml_id = "realty_bds.access_group_full_users"
@@ -232,6 +234,8 @@ class ResPartner(models.Model):
     def action_create_user(self):
         """Open a wizard to select a job title before creating a user from the partner"""
         self.ensure_one()
+        # if self.user_ids:
+        #     raise ValidationError("❌ This partner already has user account(s)!")
         if not self.env.user.has_group("realty_bds.access_group_full_users"):
             raise AccessError("You are not allowed to create a user from the partner!")
         if not self.password:
@@ -283,3 +287,8 @@ class ResPartner(models.Model):
             }
         except Exception as e:
             raise ValidationError(f"Error: Delete partner: {str(e)}")
+
+    # Helper method
+    def is_subscribed_to(self, target_partner):
+        """Return True if current partner subscribes to target_partner."""
+        return target_partner.id in self.subscribed_partner_ids.ids

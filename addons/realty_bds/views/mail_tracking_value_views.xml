@@ -1,0 +1,12 @@
+<odoo>
+	<!-- History View -->
+	<record id="view_product_history_tree" model="ir.ui.view">
+		<field name="name">Product History</field>
+		<field name="model">mail.tracking.value</field>
+		<field name="arch" type="xml">
+			<list string="Change History" create="false" edit="false" delete="false">
+				<field name="display_history" string="History" widget="text"/>
+			</list>
+		</field>
+	</record>
+</odoo>

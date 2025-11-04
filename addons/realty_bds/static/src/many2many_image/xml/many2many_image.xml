@@ -23,7 +23,7 @@
 
 				<t t-if="files.length &gt; 0">
 					<t t-foreach="files" t-as="file" t-key="file.id">
-						<div t-att-class="'photo-tile ' + (file.id === state.presentationId ? 'presentation-outline' : '')" draggable="false" t-on-dragstart.stop="" role="button" aria-label="View full image" t-on-click="() =&gt; openLightbox(file.id)" t-attf-style="
+						<div t-att-class="'photo-tile ' + (file.id === state.presentationId ? 'presentation-outline' : '')" draggable="false" t-on-dragstart.stop="" role="button" aria-label="View full image" t-on-click.stop="() =&gt; openLightbox(file.id)" t-attf-style="
                 height: {{props.rowHeight}}px;
                 flex: 0 1 auto;
 								min-width: {{9/16 * props.rowHeight}}px;
