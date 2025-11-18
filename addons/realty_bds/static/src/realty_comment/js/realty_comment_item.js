@@ -27,11 +27,14 @@ export class RealtyCommentItem extends Component {
 		editingId: { type: Number, optional: true }, // id of comment being edited
 		enqueueAction: { type: Function, optional: true },
 		validateContent: { type: Function, optional: true },
+		enterExcessiveMode: { type: Function, optional: true },
+		excessiveMode: { type: Boolean, optional: true },
 	};
 
 	setup() {
 		this.orm = useService("orm");
 		this.dialogService = useService("dialog");
+		this.actionService = useService("action");
 
 		this.local = useState({
 			togglingLike: false,
@@ -70,10 +73,10 @@ export class RealtyCommentItem extends Component {
 
 	// compute highlight from replyingTo id and own id
 	get isHighlighted() {
-		const replyingTo = this.props.replyingTo ?? null;
+		const replyingTo = this.props.replyingTo ?? 0;
 		const data = this.commentData || {};
 		const id = data.id ?? this.props.id ?? null;
-		if (replyingTo == null || id == null) return false;
+		if (replyingTo == 0 || id == null) return false;
 		try {
 			return Number(replyingTo) === Number(id);
 		} catch (e) {
@@ -82,19 +85,38 @@ export class RealtyCommentItem extends Component {
 	}
 
 	// helper to detect pending/temp record
-	_isPendingRec() {
+	get _isPendingRec() {
 		const rec = this.commentData || {};
 		// consider explicit flags or negative tmp ids
 		return !!(rec.temp || rec.pending || (rec.id && Number(rec.id) < 0));
 	}
 
-	startReply(ev) {
+	get _isExcessiveNesting() {
+		const level = this.props.level ?? 0;
+		const childCount = this.commentData.child_count || 0;
+		// Level 4 comments with children = excessive nesting
+		return level === 4 && childCount > 0;
+	}
+
+	get _toggleRepliesButtonText() {
+		if (this._isExcessiveNesting) {
+			return "Load more separately?";
+		}
+		const visible =
+			this.props.isRepliesVisible && this.props.isRepliesVisible(this.props.id);
+		const childCount = this.commentData.child_count || 0;
+		const prefix = visible ? "Hide " : "Show ";
+		const suffix = childCount === 1 ? " reply" : " replies";
+		return prefix + childCount + suffix;
+	}
+
+	startReply = (ev) => {
 		try {
 			if (ev && typeof ev.stopPropagation === "function") ev.stopPropagation();
 		} catch (e) {}
 		const c = this.commentData;
 		this.props.onReply && this.props.onReply(ev, c);
-	}
+	};
 
 	async loadReplies(page = 0) {
 		const id = this.commentData && this.commentData.id;
@@ -104,23 +126,31 @@ export class RealtyCommentItem extends Component {
 		}
 	}
 
-	async loadNextReplies() {
+	loadNextReplies = async () => {
 		const id = this.commentData && this.commentData.id;
 		if (!id) return;
 		if (this.props.loadMoreReplies) {
 			await this.props.loadMoreReplies(id);
 		}
-	}
+	};
 
-	async toggleReplies() {
+	toggleReplies = async () => {
 		const id = this.commentData && this.commentData.id;
 		if (!id) return;
+
+		// If this is excessive nesting (level 4 with children), enter excessive mode
+		if (this._isExcessiveNesting && this.props.enterExcessiveMode) {
+			await this.props.enterExcessiveMode(id);
+			return;
+		}
+
+		// Otherwise normal toggle
 		if (this.props.toggleReplies) {
 			await this.props.toggleReplies(id);
 		}
-	}
+	};
 
-	async toggleLike() {
+	toggleLike = async () => {
 		const commentId = this.commentData.id;
 
 		// Throttle check
@@ -129,7 +159,7 @@ export class RealtyCommentItem extends Component {
 		}
 
 		// If comment is pending/temp and parent provided an enqueueAction, queue it instead
-		if (this._isPendingRec()) {
+		if (this._isPendingRec) {
 			if (this.props.enqueueAction) {
 				// enqueue a generic call action for toggling like
 				this.props.enqueueAction(commentId, {
@@ -183,10 +213,10 @@ export class RealtyCommentItem extends Component {
 		} finally {
 			this.local.togglingLike = false;
 		}
-	}
+	};
 
 	// ---------- Editing ----------
-	startEdit() {
+	startEdit = () => {
 		// set the parent's editing id if callback provided, else fallback to local editing
 		const c = this.commentData;
 		this.local.editingContent = c.content || "";
@@ -201,9 +231,9 @@ export class RealtyCommentItem extends Component {
 				this.editRef.el && this.editRef.el.focus();
 			} catch (e) {}
 		}, 0);
-	}
+	};
 
-	cancelEdit() {
+	cancelEdit = () => {
 		// if parent controls editing, tell parent to cancel; else use local flag
 		if (this.props.onEditCancel) {
 			this.props.onEditCancel();
@@ -211,10 +241,10 @@ export class RealtyCommentItem extends Component {
 			this.local.editing = false;
 		}
 		this.local.editingContent = "";
-	}
+	};
 
-	async saveEdit() {
-		if (this.props.validateContent) return;
+	saveEdit = async () => {
+		if (!this.props.validateContent) return;
 		const newContent = this.local.editingContent || "";
 		const comment = this.commentData;
 
@@ -231,7 +261,7 @@ export class RealtyCommentItem extends Component {
 			const id = comment.id;
 
 			// If pending/temp: enqueue the write action
-			if (this._isPendingRec()) {
+			if (this._isPendingRec) {
 				if (this.props.enqueueAction) {
 					this.props.enqueueAction(id, {
 						type: "write",
@@ -262,58 +292,74 @@ export class RealtyCommentItem extends Component {
 				console.error("Save edit failed", e);
 			}
 		}, 1000);
-	}
+	};
 
 	// ---------- Delete ----------
-	async deleteComment() {
+	deleteComment = async () => {
 		const comment = this.commentData;
 		if (this.props.validateContent) {
 			const validation = this.props.validateContent(null, "delete", comment);
 			if (!validation.valid) return;
 		}
-		this.dialogService.add(ConfirmationDialog, {
-			title: "Confirm Deletion",
-			body: "Are you sure you want to delete your comment?",
-			confirmLabel: "Delete",
-			confirm: async () => {
-				try {
-					const id = comment.id;
-					const parentId = comment.parent_id || null;
+		if (!this.isCommentAuthor) {
+			this.actionService.doAction({
+				name: "Remove Comment",
+				type: "ir.actions.act_window",
+				res_model: "comment_wizard",
+				view_mode: "form",
+				views: [[false, "form"]],
+				target: "new",
+				context: {
+					default_res_id: this.props.ctx.resId,
+					default_res_model: this.props.ctx.resModel,
+					default_comment_id: comment.id,
+				},
+			});
+		} else {
+			this.dialogService.add(ConfirmationDialog, {
+				title: "Confirm Deletion",
+				body: "Are you sure you want to delete your comment?",
+				confirmLabel: "Delete",
+				confirm: async () => {
+					try {
+						const id = comment.id;
+						const parentId = comment.parent_id || null;
 
-					// If pending/temp: prefer cancelling queued create (if parent provided hook)
-					if (this._isPendingRec()) {
-						// remove optimistic UI immediately
-						this.props.onDeleted && this.props.onDeleted(id, parentId);
-						// ask parent to cancel queued actions (if available)
-						if (this.props.enqueueAction) {
-							// we use a special action type 'cancel_create' which the parent queue handler should treat as canceling the pending create and clearing queue
-							this.props.enqueueAction(id, { type: "cancel_create" });
+						// If pending/temp: prefer cancelling queued create (if parent provided hook)
+						if (this._isPendingRec) {
+							// remove optimistic UI immediately
+							this.props.onDeleted && this.props.onDeleted(id, parentId);
+							// ask parent to cancel queued actions (if available)
+							if (this.props.enqueueAction) {
+								// we use a special action type 'cancel_create' which the parent queue handler should treat as canceling the pending create and clearing queue
+								this.props.enqueueAction(id, { type: "cancel_create" });
+							}
+							return;
 						}
-						return;
-					}
 
-					// Normal flow: call unlink on server
-					const result = await this.orm.unlink("realty_comment", [id]);
-					// if server returns deleted id, pass it along; otherwise fall back to id
-					const deletedId =
-						result && result.deleted_id ? result.deleted_id : id;
-					if (deletedId) {
-						const pid = parentId;
-						this.props.onDeleted && this.props.onDeleted(deletedId, pid);
+						// Normal flow: call unlink on server
+						const result = await this.orm.unlink("realty_comment", [id]);
+						// if server returns deleted id, pass it along; otherwise fall back to id
+						const deletedId =
+							result && result.deleted_id ? result.deleted_id : id;
+						if (deletedId) {
+							const pid = parentId;
+							this.props.onDeleted && this.props.onDeleted(deletedId, pid);
+						}
+					} catch (e) {
+						console.error("Delete failed", e);
 					}
-				} catch (e) {
-					console.error("Delete failed", e);
-				}
-			},
-			cancel: () => {},
-		});
-	}
+				},
+				cancel: () => {},
+			});
+		}
+	};
 
 	get isEditing() {
 		const data = this.commentData || {};
 		const id = data.id ?? this.props.id ?? null;
 		// if parent passes editingId, use that; else fallback to local.editing
-		if (this.props.editingId !== undefined && this.props.editingId !== null) {
+		if (this.props.editingId !== 0) {
 			try {
 				return Number(this.props.editingId) === Number(id);
 			} catch (e) {

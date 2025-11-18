@@ -166,26 +166,29 @@ class ProductReport(models.Model):
     def create(self, vals_list):
         for vals in vals_list:
             vals['company_id'] = self.env.company.id
-        return super().create(vals_list)
+        records = super().create(vals_list)
+        for record in records:
+            try:
+                all_attachments = record.img_ids
+
+                if all_attachments:
+                    attachment_ids = all_attachments.ids
+                    self.env['ir.attachment'].mark_true(attachment_ids)
+            except Exception as e:
+                _logger.error(
+                    "Failed to mark attachments as saved for record %s: %s",
+                    record.id, str(e))
+        return records
     
-    def unlink(self):
-        # collect attachments before deleting (so we know which records were involved)
-        attachments = self.mapped('img_ids')
-        rec_ids = self.ids[:]
-        model_name = self._name
+    @api.ondelete(at_uninstall=False)
+    def _unlink_report_attachments(self):
+        IrAttachment = self.env['ir.attachment']
 
-        # delete the records (this removes the M2M relation rows)
-        res = super().unlink()
-
-        # clear res_model/res_id for attachments that pointed to those records
-        attachments_to_clear = attachments.filtered(
-            lambda a: a.res_model == model_name and a.res_id in rec_ids
-        )
-        if attachments_to_clear:
-            # use sudo() if your users may not have rights to edit ir.attachment
-            attachments_to_clear.sudo().write({'res_model': False, 'res_id': False})
-
-        return res
+        for report in self:
+            all_attachments = report.img_ids
+            if all_attachments:
+                attachment_ids = all_attachments.ids
+                IrAttachment.mark_orphaned(attachment_ids, self._name, report.id)
 
     # Constrain
     _sql_constraints = [

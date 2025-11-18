@@ -42,29 +42,29 @@ class ResCompany(models.Model):
                 )
 
     # Onchange
-    @api.onchange("province_id")
+    @api.onchange('province_id')
     def _onchange_province_id(self):
-        if self.province_id:
-            if self.district_id and self.district_id.province_id != self.province_id:
-                self.district_id = False
-            if self.commune_id:
-                self.commune_id = False
-            return {
-                "domain": {"district_id": [("province_id", "=", self.province_id.id)]}
-            }
-        else:
-            self.district_id = False
-            self.commune_id = False
-        return {"domain": {"district_id": []}}
+        """Reset district and commune when province changes"""
+        for record in self:
+            if record.province_id:
+                # Check if current district belongs to new province
+                if record.district_id and record.district_id.province_id != record.province_id:
+                    record.district_id = False
+                # Always reset commune when province changes
+                record.commune_id = False
+            else:
+                # If province is cleared, clear district and commune
+                record.district_id = False
+                record.commune_id = False
 
-    @api.onchange("district_id")
+    @api.onchange('district_id')
     def _onchange_district_id(self):
-        if self.district_id:
-            if self.commune_id and self.commune_id.district_id != self.district_id:
-                self.commune_id = False
-            return {
-                "domain": {"commune_id": [("district_id", "=", self.district_id.id)]}
-            }
-        else:
-            self.commune_id = False
-        return {"domain": {"commune_id": []}}
+        """Reset commune when district changes"""
+        for record in self:
+            if record.district_id:
+                # Check if current commune belongs to new district
+                if record.commune_id and record.commune_id.district_id != record.district_id:
+                    record.commune_id = False
+            else:
+                # If district is cleared, clear commune
+                record.commune_id = False

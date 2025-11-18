@@ -1,6 +1,8 @@
 from odoo import models, fields, api  # type: ignore
 from odoo.exceptions import ValidationError, AccessError  # type: ignore
+import logging
 
+_logger = logging.getLogger(__name__)
 
 class ResPartner(models.Model):
     _inherit = "res.partner"
@@ -47,13 +49,21 @@ class ResPartner(models.Model):
         ondelete="restrict",
         tracking=True,
     )
-    subscribed_partner_ids = fields.Many2many(
+    subscriber_partner_ids = fields.Many2many(
         comodel_name='res.partner',
         relation='partner_subscribe_rel',
         column1='partner_id',
         column2='subscribed_partner_id',
-        string='Subscribed Partners'
+        string='Subscribers',
     )
+    
+    # Compute Attributes
+    is_user = fields.Boolean(string='Is a System User', compute='_compute_has_user', store=False)
+    
+    @api.depends('user_ids')
+    def _compute_has_user(self):
+        for r in self:
+            r.is_user = bool(r.user_ids)
 
     # Constrains
     _sql_constraints = [
@@ -181,12 +191,19 @@ class ResPartner(models.Model):
                 record.commune_resident_id = False
 
     # Action
-    def action_toggle_subscribe(self, target_partner):
-        """Toggle subscription of `self` to `target_partner` (add/remove)."""
+    def action_toggle_subscribe(self):
         self.ensure_one()
-        self.sudo().subscribed_partner_ids = [
-            (3 if target_partner in self.subscribed_partner_id.ids else 4, target_partner)
-        ]
+        current_partner = self.env.user.partner_id
+        if not current_partner:
+            return {'subscribed': False}
+
+        if current_partner.id in self.subscriber_partner_ids.ids:
+            # remove current_partner from this partner's subscribers
+            self.sudo().write({'subscriber_partner_ids': [(3, current_partner.id)]})
+            return {'subscribed': False}
+        else:
+            self.sudo().write({'subscriber_partner_ids': [(4, current_partner.id)]})
+            return {'subscribed': True}
 
     def action_notify_admin_new_partner(self, partner):
         """Notify users with 'realty_bds.access_group_full_users' access when a new partner is created"""
@@ -287,8 +304,3 @@ class ResPartner(models.Model):
             }
         except Exception as e:
             raise ValidationError(f"Error: Delete partner: {str(e)}")
-
-    # Helper method
-    def is_subscribed_to(self, target_partner):
-        """Return True if current partner subscribes to target_partner."""
-        return target_partner.id in self.subscribed_partner_ids.ids

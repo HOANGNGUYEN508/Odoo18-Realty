@@ -55,20 +55,19 @@
 						<button 
 							type="button" 
 							t-if="commentData.child_count &gt; 0" 
-							class="btn btn-sm btn-outline-secondary" 
+							t-att-class="'btn btn-sm ' + (_isExcessiveNesting ? 'btn-outline-info' : 'btn-outline-secondary')"
 							t-att-disabled="(props.getRepliesMeta(props.id) || {}).loading" 
 							t-on-click="toggleReplies"
 						>
-							<t t-esc="props.isRepliesVisible(props.id) ? 'Hide ' : 'Show '"/>
-							<t t-esc="commentData.child_count"/>
-							<t t-esc="commentData.child_count === 1 ? ' reply' : ' replies'"/>
-							<i t-att-class="'fa ' + (props.isRepliesVisible(props.id) ? 'fa-chevron-up' : 'fa-chevron-down') + ' ms-1'"/>
+							<t t-esc="_toggleRepliesButtonText"/>
+							<i t-if="!_isExcessiveNesting" t-att-class="'fa ' + (props.isRepliesVisible(props.id) ? 'fa-chevron-up' : 'fa-chevron-down') + ' ms-1'"/>
+							<i t-if="_isExcessiveNesting" class="fa fa-external-link ms-1" aria-hidden="true"/>
 						</button>
 					</div>
 				</div>
 			</div>
 
-			<div t-if="props.isRepliesVisible(props.id)" class="comment-replies mt-3">
+			<div t-if="props.isRepliesVisible(props.id) &amp;&amp; !_isExcessiveNesting" class="comment-replies mt-3">
 				<t t-if="(props.getRepliesMeta(props.id) || {}).loading">
 					<div class="text-center">Loading replies...</div>
 				</t>
@@ -94,6 +93,8 @@
 						editingId="props.editingId" 
 						enqueueAction="props.enqueueAction"
 						validateContent="props.validateContent"
+						enterExcessiveMode="props.enterExcessiveMode"
+						excessiveMode="props.excessiveMode"
 					/>
 				</t>
 

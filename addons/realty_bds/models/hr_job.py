@@ -21,7 +21,6 @@ class JobTitle(models.Model):
     )
 
     # Model Method
-    @api.model
     def write(self, vals):
         # Call the parent write method to update the record
         res = super(JobTitle, self).write(vals)

@@ -55,6 +55,7 @@
         "views/realty_Notify_remove_reason_views.xml",
         "views/ir_attachment_views.xml",
         "views/realty_permission_tracker_views.xml",
+				"views/realty_comment_wizard_views.xml",
         # templates
         "templates/signup_inherit_template.xml",
         "templates/my_profile_template.xml",
@@ -139,10 +140,17 @@
             "realty_bds/static/src/moderator_guideline/js/guideline_controller.js",
             # scss
             "realty_bds/static/src/moderator_guideline/scss/guideline_dialog.scss",
+            # boolean_subscriber
+            # xml
+            "realty_bds/static/src/boolean_subscriber/xml/subscribe_button.xml",
+						# js
+            "realty_bds/static/src/boolean_subscriber/js/boolean_subscriber.js",
+            # scss
+            "realty_bds/static/src/boolean_subscriber/scss/subsribe_button.scss",
         ],
     },
     "installable": True,
     "application": True,
     "auto_install": False,
     "license": "LGPL-3",
-}
+} # type: ignore

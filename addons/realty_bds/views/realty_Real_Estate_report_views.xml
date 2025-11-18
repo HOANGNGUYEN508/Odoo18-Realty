@@ -29,6 +29,8 @@
 						<field name="img_ids" widget="many2many_image" options="{
 								'number_of_files': 5, 
 								'accepted_file_extensions': '.png,.jpg,.jpeg,.gif,.webp',
+								'presentation_image': False,
+								'is_public': False
 							}" />
 					</group>
 
@@ -68,6 +70,8 @@
 						<field name="img_ids" widget="many2many_image" readonly="1" options="{
 								'number_of_files': 5, 
 								'accepted_file_extensions': '.png,.jpg,.jpeg,.gif,.webp', 
+								'presentation_image': False,
+								'is_public': False
 							}" />
 					</group>
 

@@ -1,5 +1,5 @@
 $avatar-size: 40px;
-$avatar-gap: 16px; // gap between avatar column and bubble
+$avatar-gap: 16px;
 $bubble-radius: 14px;
 $bubble-padding-vertical: 10px;
 $bubble-padding-horizontal: 12px;
@@ -19,11 +19,24 @@ $muted-border: rgba(11, 95, 255, 0.08);
 .comment-item {
   position: relative;
   margin-bottom: 12px;
-  /* inline CSS vars expected: --level-offset, --connector-left */
-  /* e.g. style="--level-offset: 22px; --connector-left: 42px;" */
 }
 
-/* scope highlight only to this item’s own bubble */
+.o_refresh_btn {
+  transition: all 0.2s ease;
+  
+  &:hover:not(:disabled) {
+    transform: rotate(180deg);
+  }
+  
+  &:active:not(:disabled) {
+    transform: rotate(360deg);
+  }
+  
+  i {
+    transition: inherit;
+  }
+}
+
 .comment-item.is-highlighted > .comment-row > .comment-bubble {
   border-left-color: $border-accent-strong;
   box-shadow: $shadow-strong;
@@ -31,19 +44,16 @@ $muted-border: rgba(11, 95, 255, 0.08);
   transition: all 0.15s ease;
 }
 
-/* row: avatar + bubble */
 .comment-row {
   display: flex;
   align-items: flex-start;
 }
 
-/* avatar column - this *moves* based on level */
 .comment-avatar {
   width: $avatar-size;
   flex: 0 0 $avatar-size;
-  /* move avatar right per level so bubble's right stays fixed */
   margin-left: var(--level-offset, 0px);
-  margin-right: 8px; // gap between avatar and bubble
+  margin-right: 8px;
 
   .avatar-img {
     width: $avatar-size;
@@ -56,7 +66,6 @@ $muted-border: rgba(11, 95, 255, 0.08);
   }
 }
 
-/* bubble - DO NOT shift horizontally; reduce width instead */
 .comment-bubble {
   background: #ffffff;
   border-radius: $bubble-radius;
@@ -66,7 +75,6 @@ $muted-border: rgba(11, 95, 255, 0.08);
   z-index: 2;
   border-left: 4px solid $border-accent;
 
-  /* bubble is anchored; its left space is reduced by avatar + gap + level-offset */
   margin-left: 0;
   max-width: calc(100% - #{$avatar-size} - #{$avatar-gap} - var(--level-offset, 0px));
 
@@ -115,27 +123,41 @@ $muted-border: rgba(11, 95, 255, 0.08);
       font-size: 0.82rem;
       padding: 0.25rem 0.5rem;
     }
+
+    .btn-outline-info {
+      border-color: #17a2b8;
+      color: #17a2b8;
+      font-weight: 500;
+
+      &:hover:not(:disabled) {
+        background: #17a2b8;
+        color: white;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(23, 162, 184, 0.25);
+      }
+
+      i.fa-external-link {
+        font-size: 0.75rem;
+      }
+    }
   }
 }
 
-/* connector: line joining reply chains. template should set --connector-left. */
 .comment-replies {
   margin-top: 8px;
   position: relative;
 
   > .comment-item::before {
-		display: none;
+    display: none;
   }
 }
 
-/* edit mode inputs */
 .comment-bubble input[type="text"],
 .comment-bubble textarea {
   width: 100%;
   box-sizing: border-box;
 }
 
-/* comment input row at bottom of dialog */
 .o_comment_form {
   margin-top: 12px;
 
@@ -155,7 +177,6 @@ $muted-border: rgba(11, 95, 255, 0.08);
   }
 }
 
-/* replying overlay shown above the input when replying */
 .replying-overlay {
   display: flex;
   align-items: center;
@@ -169,7 +190,6 @@ $muted-border: rgba(11, 95, 255, 0.08);
   border: 1px solid $muted-border;
 }
 
-/* invisible capture area to cancel reply when clicked below input */
 .reply-cancel-capture {
   display: block;
   width: 100%;
@@ -177,17 +197,14 @@ $muted-border: rgba(11, 95, 255, 0.08);
   cursor: default;
 }
 
-/* replies spacing tweaks */
 .comment-replies .comment-item {
   margin-bottom: 10px;
 }
 
-/* center load-more area */
 .comment-replies .text-center {
   text-align: center;
 }
 
-/* accessibility / focus */
 button:focus,
 input:focus,
 textarea:focus {
@@ -196,13 +213,11 @@ textarea:focus {
   border-radius: 6px;
 }
 
-/* ensure connector is visually behind the bubble */
 .comment-replies,
 .comment-item {
   position: relative;
 }
 
-/* responsive adjustments */
 @media (max-width: 480px) {
   .comment-bubble {
     padding: 8px 10px;
@@ -216,10 +231,8 @@ textarea:focus {
   }
 }
 
-/* Add: scrollable area containing pager + list */
 .o_comment_scroll {
-  /* Give the scrollable area a reasonable max-height within the dialog */
-  max-height: calc(60vh); /* tweak this value as you prefer (e.g. 55vh / 65vh) */
+  max-height: calc(60vh);
   overflow: auto;
   padding: 8px;
   border-radius: 8px;
@@ -227,25 +240,20 @@ textarea:focus {
   position: relative;
 }
 
-/* Make pager stick to top of the scrolling area */
 .o_comment_scroll .o_pager {
   position: sticky;
   top: 0;
   z-index: 6;
-  background: #ffffff; /* keep it visually separate from list */
+  background: #ffffff;
   padding-top: 6px;
   padding-bottom: 6px;
-  /* subtle bottom divider so it's obvious it's pinned */
   box-shadow: 0 4px 8px rgba(0,0,0,0.04);
 }
 
-/* Make sure comment list itself is spaced below sticky pager */
 .o_comment_scroll .o_comment_list {
-  /* leave a small gap so content doesn't butt directly to pager */
   margin-top: 8px;
 }
 
-/* header layout: sort select left, pager right */
 .o_comment_scroll_header {
   display: flex;
   align-items: center;
@@ -253,13 +261,11 @@ textarea:focus {
   padding: 6px 4px;
 }
 
-/* ensure sort select doesn't grow too big */
 .o_comment_sort {
   flex: 0 0 auto;
   min-width: 180px;
 }
 
-/* pager container sits at the right via ms-auto, keep it tight */
 .o_comment_pager {
   display: flex;
   align-items: center;
@@ -267,20 +273,14 @@ textarea:focus {
   flex: 0 0 auto;
 }
 
-/* responsive: shrink select on small screens */
 @media (max-width: 520px) {
   .o_comment_sort {
     min-width: 110px;
   }
 }
 
-
-/* ---------------------------
-   Jump-to-page speech bubble
-   --------------------------- */
-
 .jump-bubble {
-  position: fixed; /* positioned by JS via inline style (left/top) */
+  position: fixed;
   z-index: 1060;
   display: block;
   pointer-events: auto;
@@ -293,24 +293,21 @@ textarea:focus {
   border: 1px solid $muted-border;
   color: $text-color;
   transform-origin: top left;
-  /* CSS var provided by JS: --jump-tail-left (px from left edge of bubble) */
 }
 
-/* top-pointing tail: sits above the bubble and looks like a speech-tail */
 .jump-bubble__tail {
   position: absolute;
-  top: -8px; /* above the bubble */
-  left: var(--jump-tail-left, 16px); /* controlled by JS */
+  top: -8px;
+  left: var(--jump-tail-left, 16px);
   width: 0;
   height: 0;
   border-left: 8px solid transparent;
   border-right: 8px solid transparent;
-  border-bottom: 8px solid #fff; /* same as bubble background */
+  border-bottom: 8px solid #fff;
   filter: drop-shadow(0 -2px 0 rgba(0,0,0,0.02));
   pointer-events: none;
 }
 
-/* small subtle border-shadow for the tail to match bubble border */
 .jump-bubble__tail::after {
   content: "";
   position: absolute;
@@ -325,7 +322,6 @@ textarea:focus {
   pointer-events: none;
 }
 
-/* content inside the bubble */
 .jump-bubble__content {
   display: flex;
   flex-direction: column;
@@ -333,7 +329,6 @@ textarea:focus {
   min-width: 160px;
 }
 
-/* input + error */
 .jump-bubble__input {
   width: 100%;
   box-sizing: border-box;
@@ -346,20 +341,19 @@ textarea:focus {
   margin-top: 2px;
 }
 
-/* buttons row */
 .jump-bubble__actions {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
 }
 
-/* small responsive adjustments */
 @media (max-width: 520px) {
   .jump-bubble {
-    left: 8px !important; /* JS will set top, but force left to stay inside viewport */
+    left: 8px !important;
     right: 8px !important;
     min-width: auto;
   }
-  .jump-bubble__tail { display: none; } /* don't show tail on very small screens */
+  .jump-bubble__tail { 
+    display: none; 
+  }
 }
-

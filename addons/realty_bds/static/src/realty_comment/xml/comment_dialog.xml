@@ -2,7 +2,10 @@
 <templates xml:space="preserve">
 	<t t-name="realty_bds.comment_dialog">
 		<Dialog t-props="{'title': 'Comments'}" size="lg">
-			<t t-if="state.topLevel.length === 0 &amp;&amp; !state.loading">
+			<t t-if="state.absoluteDelete">
+				<div class="text-center p-3">This post has been deleted by its creator. Please close this comment section as there is nothing here.</div>
+			</t>
+			<t t-elif="state.topLevel.length === 0 &amp;&amp; !state.loading">
 				<div class="text-center p-3">No comments yet. Be the first to comment!</div>
 			</t>
 			<t t-else="">
@@ -18,8 +21,27 @@
 							</select>
 						</div>
 
-						<!-- Right: pager & controls -->
-						<div class="o_comment_pager ms-auto d-flex align-items-center gap-2">
+						<!-- Go back button (excessive mode) -->
+						<t t-if="state.excessiveMode">
+							<button type="button" class="btn btn-sm btn-outline-primary ms-3" t-on-click="exitExcessiveMode" title="Go back to normal view">
+								<i class="fa fa-arrow-left me-1" aria-hidden="true"/>
+								Go back
+							</button>
+						</t>
+
+						<!-- Right: pager & controls (hidden in excessive mode) -->
+						<div t-if="!state.excessiveMode" class="o_comment_pager ms-auto d-flex align-items-center gap-2">
+							<!-- Refresh button -->
+							<button 
+								type="button" 
+								class="btn btn-sm btn-light o_refresh_btn" 
+								t-att-disabled="state.loading || state.absoluteDelete" 
+								t-on-click="refreshToPageZero"
+								title="Refresh comments"
+							>
+								<i class="fa fa-refresh" aria-hidden="true"/>
+							</button>
+
 							<span t-ref="pageAnchor" t-on-click="openJumpDialog" style="cursor: pointer; user-select:none;">
 								<t t-esc="state.page + 1"/>
 								<t t-if="state.maxPage"> / <t t-esc="state.maxPage"/>
@@ -46,8 +68,8 @@
 								</div>
 							</t>
 
-							<button type="button" class="btn btn-sm btn-light" t-att-disabled="state.loading || state.page == 0" t-on-click="loadPrevPage">&#10094;</button>
-							<button type="button" class="btn btn-sm btn-light" t-att-disabled="state.loading || !state.hasMore" t-on-click="loadNextPage">&#10095;</button>
+							<button type="button" class="btn btn-sm btn-light" t-att-disabled="state.loading || state.page == 0 || state.absoluteDelete" t-on-click="loadPrevPage">&#10094;</button>
+							<button type="button" class="btn btn-sm btn-light" t-att-disabled="state.loading || !state.hasMore || state.absoluteDelete" t-on-click="loadNextPage">&#10095;</button>
 						</div>
 					</div>
 
@@ -71,8 +93,10 @@
 								onEditStart="(id) =&gt; startEditing(id)" 
 								onEditCancel="() =&gt; cancelEditing()" 
 								editingId="state.editingId" 
-								enqueueAction="(tmpId, action) =&gt; _enqueueAction(tmpId, action)"
-								validateContent="_contentValidation"
+								enqueueAction="(tmpId, action) =&gt; _enqueueAction(tmpId, action)" 
+								validateContent="_contentValidation" 
+								enterExcessiveMode="(pid) =&gt; enterExcessiveMode(pid)"
+								excessiveMode="state.excessiveMode"
 							/>
 						</t>
 					</div>

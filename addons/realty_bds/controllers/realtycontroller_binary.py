@@ -12,8 +12,7 @@ from odoo.tools.image import image_guess_size_from_field_name  # type: ignore
 _logger = logging.getLogger(__name__)
 
 ALLOWED_ATTACHMENT_FIELDS = {
-    "product.template": ["img_ids"],
-    "product.template": ["private_img_ids"],
+    "product.template": ["img_ids", "private_img_ids"],
     "res.users": ["avatar_128"],
     "notification": ["img_ids"],
     "guideline": ["img_ids"],
@@ -30,7 +29,7 @@ class AttachmentSecurityService:
     @staticmethod
     def is_model_field_allowed(model, field):
         allowed = ALLOWED_ATTACHMENT_FIELDS.get(model)
-        return allowed and field in allowed
+        return bool(allowed and field in allowed)
 
     @staticmethod
     def check_fast_path_access(env, attachment_id, model, field):

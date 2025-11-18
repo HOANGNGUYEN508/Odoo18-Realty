@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+	<t t-name="realty_bds.SubscribeButton">
+		<t t-if="!props.invisible &amp;&amp; isUser &amp;&amp; !isSelf">
+			<button t-att-title="titleStr" type="button" t-att-class="'o_subscribe_button ' + (state.loading ? 'o_loading' : '')" t-on-click.stop="toggleSubscribe" t-att-disabled="state.loading || props.readonly" class="o_icon_button">
+				<t t-if="state.loading">
+					<i class="fa fa-spinner fa-spin" aria-hidden="true" />
+				</t>
+				<t t-else="">
+					<i t-att-class="state.subscribed ? 'fa fa-bell' : 'fa fa-bell-o'" aria-hidden="true"/>
+				</t>
+		</button>
+	</t>
+</t>
+</templates>

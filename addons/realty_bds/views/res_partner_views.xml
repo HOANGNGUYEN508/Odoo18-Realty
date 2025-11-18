@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <odoo>
 	<!-- Form View Inherit -->
 	<record id="view_partner_form_inherit_job_title" model="ir.ui.view">
@@ -59,16 +58,60 @@
 				<attribute name="invisible">1</attribute>
 			</xpath>
 
+			<!-- Action buttons section -->
+			<xpath expr="//div[@class='oe_title mb24']/field[@name='company_type']" position="after">
+				<div class="d-flex align-items-center" style="margin-left: auto;">
+					<button name="action_create_user" type="object" class="btn btn-primary mx-2 oe_edit_only" invisible="is_user == True" groups="realty_bds.access_group_full_users,realty_bds.access_group_realty_users">
+						<i class="fa fa-check" aria-hidden="true"/>
+						<span>Pass</span>
+					</button>
+					<field name="subscriber_partner_ids" widget="boolean_subscribe" nolabel="1" invisible="is_user == False"/>
+				</div>
+			</xpath>
+
 			<!-- Hide the notebook -->
 			<xpath expr="//notebook" position="attributes">
 				<attribute name="invisible">1</attribute>
 			</xpath>
+		</field>
+	</record>
 
-			<!-- Add action buttons after the notebook -->
-			<xpath expr="//notebook" position="after">
-				<div>
-					<button name="action_create_user" string="Pass" type="object" class="btn-primary mx-2" groups="realty_bds.access_group_full_users" />
-					<button name="action_delete_partner" string="Delete" type="object" class="btn-danger" groups="realty_bds.access_group_full_users" confirm="Are you sure you want to delete this partner?" />
+	<!-- List View Inherit -->
+	<record id="view_partner_list_inherit" model="ir.ui.view">
+		<field name="name">res.partner.list.inherit</field>
+		<field name="model">res.partner</field>
+		<field name="inherit_id" ref="base.view_partner_tree"/>
+		<field name="arch" type="xml">
+			<xpath expr="//list/field[@name='complete_name']" position="before">
+				<field name="subscriber_partner_ids" widget="boolean_subscribe" readonly="is_user == False" nolabel="1"/>
+			</xpath>
+		</field>
+	</record>
+
+	<!-- kanban View Inherit -->
+	<record id="view_partner_kanban_inherit" model="ir.ui.view">
+		<field name="name">res.partner.kanban.inherit</field>
+		<field name="model">res.partner</field>
+		<field name="inherit_id" ref="base.res_partner_kanban_view"/>
+		<field name="arch" type="xml">
+			<xpath expr="//templates/t[@t-name='card']//div[@class='mb-1']" position="replace">
+				<div class="mb-1 d-flex justify-content-between align-items-center">
+					<!-- left side: name + existing parent/function logic -->
+					<div class="d-flex flex-column">
+						<div class="d-flex align-items-center">
+							<field name="display_name" class="mb-0 fw-bold fs-5"/>
+							<field t-if="record.parent_id.raw_value and !record.function.raw_value" class="text-muted ms-2" name="parent_id"/>
+							<field t-elif="!record.parent_id.raw_value and record.function.raw_value" class="text-muted ms-2" name="function"/>
+							<div t-elif="record.parent_id.raw_value and record.function.raw_value" class="text-muted ms-2">
+								<field name="function"/> at <field name="parent_id"/>
+							</div>
+						</div>
+					</div>
+
+					<!-- right side: subscribe toggle, kept compact and right-aligned -->
+					<div class="ms-2 d-flex align-items-center">
+						<field name="subscriber_partner_ids" widget="boolean_subscribe" readonly="is_user == False"/>
+					</div>
 				</div>
 			</xpath>
 		</field>

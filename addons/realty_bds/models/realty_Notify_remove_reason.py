@@ -8,13 +8,22 @@ _logger = logging.getLogger(__name__)
 
 class RemoveReason(models.Model):
     _name = "remove_reason"
-    _description = "Canned remove reasons for posts"
+    _description = "Canned remove reasons"
     _inherit = ["mail.thread", "mail.activity.mixin"]
     _rec_name = "name"
 
     # Attributes
     name = fields.Char(string="Name", required=True, tracking=True)
     active = fields.Boolean(string="Active", default=True, tracking=True)
+    for_type = fields.Selection(
+        [
+            ("post", "Post"),
+            ("comment", "Comment"),
+        ],
+        string="What is this reason for?",
+        default="post",
+        tracking=True,
+    )
 
     # Relationship Attributes
     company_id = fields.Many2one(

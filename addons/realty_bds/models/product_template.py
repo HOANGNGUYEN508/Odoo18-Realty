@@ -110,7 +110,7 @@ class ProductTemplate(models.Model):
     )
     private_img_ids = fields.Many2many(
         "ir.attachment",
-        relation="product_template_private_img_rel", 
+        relation="product_template_private_img_rel",
         required=True,
         string="Private Images",
         domain="[('mimetype', 'like', 'image/%')]",
@@ -226,6 +226,10 @@ class ProductTemplate(models.Model):
 
     # Action
     def action_view_history(self):
+        if not self or not self.exists():
+            raise UserError(
+                "The record no longer exists (deleted by another user). Please refresh the view."
+            )
         self.ensure_one()
         return {
             "type":
@@ -247,6 +251,10 @@ class ProductTemplate(models.Model):
         }
 
     def action_schedule(self):
+        if not self or not self.exists():
+            raise UserError(
+                "The record no longer exists (deleted by another user). Please refresh the view."
+            )
         self.ensure_one()  # Ensure only one record is selected
         if self.approval != "approved":
             raise UserError("❌ Error: Wait for approval.")
@@ -283,6 +291,10 @@ class ProductTemplate(models.Model):
         }
 
     def action_make_report(self):
+        if not self or not self.exists():
+            raise UserError(
+                "The record no longer exists (deleted by another user). Please refresh the view."
+            )
         self.ensure_one()
         if self.approval != "approved":
             raise UserError("❌ Error: Wait for approval.")
@@ -333,12 +345,15 @@ class ProductTemplate(models.Model):
                 "❌ Error: Only posts in 'Rejected' state can be resend for approval."
             )
         if self.edit_counter == 0:
-            raise UserError(
-                "❌ Error: You have exhausted your edit attempts.")
+            raise UserError("❌ Error: You have exhausted your edit attempts.")
         self.approval = "pending"
         self._assign_moderator_after_send()
 
     def action_approve(self):
+        if not self or not self.exists():
+            raise UserError(
+                "The record no longer exists (deleted by another user). Please refresh the view."
+            )
         self.check_action("approve")
 
         self.approval = "approved"
@@ -346,6 +361,10 @@ class ProductTemplate(models.Model):
         self.moderated_on = fields.Datetime.now()
 
     def action_reject(self):
+        if not self or not self.exists():
+            raise UserError(
+                "The record no longer exists (deleted by another user). Please refresh the view."
+            )
         self.check_action("reject")
 
         # Return action to open the reject wizard
@@ -370,6 +389,10 @@ class ProductTemplate(models.Model):
         }
 
     def action_remove(self):
+        if not self or not self.exists():
+            raise UserError(
+                "The record no longer exists (deleted by another user). Please refresh the view."
+            )
         self.check_action("remove")
 
         # Return action to open the remove wizard
@@ -540,6 +563,15 @@ class ProductTemplate(models.Model):
             )
             vals["company_id"] = self.env.company.id
         records = super().create(vals_list)
+        for record in records:
+            try:
+                all_attachments = record.img_ids | record.private_img_ids
+            
+                if all_attachments:
+                    attachment_ids = all_attachments.ids
+                    self.env['ir.attachment'].mark_true(attachment_ids)
+            except Exception as e:
+                _logger.error("Failed to mark attachments as saved for record %s: %s", record.id, str(e))
         return records
 
     def write(self, vals):
@@ -560,49 +592,32 @@ class ProductTemplate(models.Model):
             "list_price",
             "unit_price_id",
         }
-        if not (address_keys & set(vals.keys())):
-            return super().write(vals)
+        if (address_keys & set(vals.keys())):
+            vals["name"] = self._build_address_name(
+                vals.get("house_number"),
+                vals.get("street"),
+                vals.get("commune_id"),
+                vals.get("district_id"),
+                vals.get("real_estate_area"),
+                vals.get("usable_area"),
+                vals.get("number_of_floors"),
+                vals.get("frontage"),
+                vals.get("list_price"),
+                vals.get("unit_price_id"),
+            )
 
-        vals["name"] = self._build_address_name(
-            vals.get("house_number"),
-            vals.get("street"),
-            vals.get("commune_id"),
-            vals.get("district_id"),
-            vals.get("real_estate_area"),
-            vals.get("usable_area"),
-            vals.get("number_of_floors"),
-            vals.get("frontage"),
-            vals.get("list_price"),
-            vals.get("unit_price_id"),
-        )
         return super().write(vals)
 
-    def unlink(self):
-        # collect attachments before deleting (so we know which records were involved)
-        attachments = self.mapped("img_ids")
-        rec_ids = self.ids[:]
-        model_name = self._name
+    @api.ondelete(at_uninstall=False)
+    def _unlink_product_attachments(self):
+        IrAttachment = self.env['ir.attachment']
 
-        # delete the records (this removes the M2M relation rows)
-        res = super().unlink()
-
-        # clear res_model/res_id for attachments that pointed to those records
-        attachments_to_mark = attachments.filtered(
-            lambda a: a.res_model == model_name and a.res_id in rec_ids)
-        # mark them orphaned and clear the res_* so they become 'orphans'
-        if attachments_to_mark:
-            now = fields.Datetime.now()
-            # loop to preserve original res_id per attachment
-            for att in attachments_to_mark.sudo():
-                # write the orphan metadata, then clear the pointers
-                att.write({
-                    "orphaned_date": now,
-                    "orphaned_from_model": model_name,
-                    "orphaned_from_res_id": att.res_id,
-                    "res_model": False,
-                    "res_id": False,
-                })
-        return res
+        for product in self:
+            all_attachments = product.img_ids | product.private_img_ids
+            if all_attachments:
+                attachment_ids = all_attachments.ids
+                IrAttachment.mark_orphaned(attachment_ids, self._name,
+                                           product.id)
 
     @api.model
     def set_presentation_image(self, ids, attachment_id):

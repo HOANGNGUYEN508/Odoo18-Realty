@@ -29,7 +29,7 @@ from . import realty_Report_owner_feedback
 from . import realty_Real_Estate_report
 from . import realty_notify
 from . import realty_Notify_moderator_assignment_sequence
-from . import realty_Notify_guideline 
+from . import realty_Notify_guideline
 from . import realty_Notify_urgent_buying
 from . import realty_Notify_congratulation
 from . import realty_Notify_notification
@@ -37,5 +37,6 @@ from . import realty_Notify_moderator_guideline
 from . import realty_Notify_reject_reason
 from . import realty_Notify_remove_reason
 from . import realty_Notify_wizard
+from . import realty_comment_wizard
 from . import realty_Notify_comment
 from . import ir_attachment

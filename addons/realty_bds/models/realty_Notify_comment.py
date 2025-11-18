@@ -1,6 +1,7 @@
 from odoo import models, fields, api  # type: ignore
 from odoo.exceptions import ValidationError, AccessError, UserError  # type: ignore
 from odoo.http import request  # type: ignore
+from markupsafe import Markup # type: ignore
 import datetime
 import logging
 import re
@@ -9,6 +10,7 @@ import unicodedata
 from typing import Optional
 
 _logger = logging.getLogger(__name__)
+
 _WHITESPACE_RE = re.compile(r'\s+')
 _ALLOWED_PUNCT = set(".,!?:;\"'`-+()[]{}@#$%&*=/|\\^~<>")
 
@@ -57,7 +59,7 @@ class RealtyComment(models.Model):
     is_author = fields.Boolean(string="Is Author",
                                compute="_compute_is_author",
                                store=True)
-    child_count = fields.Integer(string="Replies",
+    child_count = fields.Integer(string="Replies Count",
                                  compute="_compute_child_count",
                                  store=True)
     comment_level = fields.Integer(
@@ -234,7 +236,8 @@ class RealtyComment(models.Model):
             return str(value)
         except Exception:
             return None
-
+        
+    @api.model
     def _push_bus_notifications(self, payloads):
         """Normalize each payload field and send a single shaped message per item."""
         try:
@@ -270,7 +273,88 @@ class RealtyComment(models.Model):
             except Exception:
                 _logger.exception(
                     "Failed to send bus message for realty_comment: %r", p)
+                
+    def _send_removal_notification(self, target_partner_id, moderator_name, reason, content, res_model, res_id):
+        """Send removal notification to the comment author."""
+        if not target_partner_id:
+            return
+        if not (res_model and res_id):
+            return
+        rec = self.env[res_model].sudo().browse(int(res_id))
+        # Build styled HTML body
+        html_body = f"""
+            <div style="font-family: Arial, sans-serif; padding: 15px; background-color: #f9f9f9; border-left: 4px solid #ff6b6b;">
+                <h3 style="color: #333; margin-top: 0;">Comment Removed</h3>
+                <p style="color: #555;">
+                    <strong>Moderator {html.escape(moderator_name)}</strong> has removed your comment.
+                </p>
+                <p style="color: #555; margin-bottom: 10px;">
+                    This comment was removed from
+                    <strong>{html.escape(str(res_model))}</strong>
+                    posted by
+                    <strong>{html.escape(str(rec.create_uid.name or ""))}</strong>.
+                </p>
+                <div style="background: white; padding: 10px; margin: 10px 0; border-radius: 4px;">
+                    <strong>Comment:</strong>
+                    <blockquote style="margin: 10px 0; padding: 10px; background: #f5f5f5; border-left: 3px solid #ddd;">
+                        {html.escape(content or "")}
+                    </blockquote>
+                </div>
+                <p style="color: #555;">
+                    <strong>Reason:</strong> <em>{html.escape(reason or "No reason provided")}</em>
+                </p>
+                <p style="font-size: 0.9em; color: #666; margin-bottom: 0;">
+                    If you disagree with this action, please reply or contact the moderator for more details.
+                </p>
+            </div>
+        """
 
+        msg = None
+
+        # Try to post to the record's chatter
+        
+        try:
+            rec = self.env[res_model].sudo().browse(int(res_id))
+            if rec.exists():
+                try:
+                    msg = rec.sudo().message_post(
+                        body=Markup(html_body),
+                        subject="Comment Removal Notification",
+                        subtype_xmlid="mail.mt_note",
+                    )
+                except Exception as e:
+                    _logger.warning("message_post failed: %s", e)
+                    msg = None
+        except Exception as e:
+            _logger.warning("Failed to get target record: %s", e)
+
+        # Fallback: create mail.message directly
+        if not msg:
+            msg_vals = {
+                "model": res_model or self._name,
+                "res_id": int(res_id) if res_id else False,
+                "body": Markup(html_body),
+                "subject": "Comment Removal Notification",
+                "message_type": "notification",
+                "partner_ids": [(4, target_partner_id)],
+            }
+
+            try:
+                msg = self.env["mail.message"].sudo().create(msg_vals)
+            except Exception as e:
+                _logger.error("Failed to create mail.message: %s", e)
+                return
+
+        # Ensure notification exists and is unread
+        if msg and msg.exists():
+            self.env["mail.notification"].sudo().create({
+                "res_partner_id": target_partner_id,
+                "notification_type": "inbox",
+                "mail_message_id": msg.id,
+                "is_read": False,
+            })
+
+        
     # Model Method
     @api.model
     def get_top_level_page(self, res_model, res_id, limit=10, offset=0):
@@ -365,13 +449,14 @@ class RealtyComment(models.Model):
         vals = dict(vals_list[0])
         ctx = dict(self.env.context or {})
         
-        required_keys = {"res_model", "res_id", "contnent", "parent_id"}
+        required_keys = {"res_model", "res_id", "content"}
         if create_or_reply == "reply":
             required_keys.add("parent_id")
         missing = [k for k in required_keys if k not in vals]
         if missing:
             raise ValidationError(f"Missing required keys on create: {', '.join(missing)}")
-        
+        post = self.env[vals["res_model"]].browse(vals["res_id"]).exists()
+        if not post: raise UserError("The post you comment to no longer exists (deleted by another user).")
         if not vals.get("res_model") or not vals.get("res_id"):
             raise ValidationError(
                 "res_model and res_id are required to create a comment.")
@@ -399,7 +484,7 @@ class RealtyComment(models.Model):
         if not recs:
             return recs
         rec = recs[0]
-
+        post.compute_comment_count(True)
         # Prepare payloads: create payload + optional parent_update (coalesced)
         try:
             create_payload = {
@@ -474,7 +559,7 @@ class RealtyComment(models.Model):
                 "res_id": rec.res_id,
             }
             try:
-                self._push_bus_notifications([update_payload])
+                self._push_bus_notifications(update_payload)
             except Exception:
                 _logger.exception(
                     "Failed to send update payload for realty_comment %s",
@@ -488,12 +573,27 @@ class RealtyComment(models.Model):
         else:
             return {"id": False}
 
-    def unlink(self):
+    def unlink(self, reason=None):
+        if self.env.context.get('skip_realty_delete_custom'):
+            # Delete in bulk only happen if user delete the post
+            return super(RealtyComment, self).unlink()
         self.ensure_one()
+        is_owner = self.create_uid.id == self.env.uid
+
+        if reason is None: reason_str = None
+        else: reason_str = str(reason).strip() if isinstance(reason, str) else str(reason).strip()
+        
+        if is_owner: 
+            if reason_str: raise UserError("Why do you need to provide reason to delete your own comment?")
+        elif not reason_str: raise ValidationError("Moderator removal requires a reason.")
+        target = self.create_uid.partner_id.id if self.create_uid and self.create_uid.partner_id else None
         parent_id = self.parent_id.id if self.parent_id else False
         rec_res_model = self.res_model
         rec_res_id = self.res_id
+        post = self.env[rec_res_model].browse(rec_res_id).exists()
+        if not post: raise UserError("The post you comment to no longer exists (deleted by another user).")
         deleted_id = self.id
+        content = self.content
         result = super(RealtyComment, self).unlink()
         if result:
             delete_payload = {
@@ -524,6 +624,8 @@ class RealtyComment(models.Model):
                     "Failed to send delete/parent_update for realty_comment %s",
                     deleted_id,
                 )
+            if not is_owner: self._send_removal_notification(target, self.env.user.name, reason_str, content, rec_res_model, rec_res_id)
+            post.compute_comment_count(False)
             return {"deleted_id": deleted_id, "parent_id": parent_id}
         else:
             return {"deleted_id": False, "parent_id": False}

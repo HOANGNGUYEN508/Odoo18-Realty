@@ -1,5 +1,5 @@
 from odoo import models, fields, api  # type: ignore
-from odoo.exceptions import AccessError  # type: ignore
+from odoo.exceptions import AccessError, UserError  # type: ignore
 
 
 class Guideline(models.Model):
@@ -33,9 +33,6 @@ class Guideline(models.Model):
     )
 
     # Computed Attribute
-    comment_count = fields.Integer(
-        string="Comment Count",
-        default=0)  # compute in create of realty_comment
     like_count = fields.Integer(string="Like Count",
                                 compute="_compute_like_count",
                                 store=True)
@@ -47,6 +44,7 @@ class Guideline(models.Model):
 
     # Action
     def action_toggle_like(self):
+        if not self or not self.exists(): raise UserError("The post no longer exists (deleted by another user). Please refresh the view.")
         """Add/remove current user from like_user_ids"""
         self.ensure_one()
 

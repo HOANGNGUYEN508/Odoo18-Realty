@@ -1,5 +1,5 @@
 from odoo import models, fields, api  # type: ignore
-from odoo.exceptions import AccessError  # type: ignore
+from odoo.exceptions import AccessError, UserError  # type: ignore
 
 
 class UrgentBuying(models.Model):
@@ -47,9 +47,6 @@ class UrgentBuying(models.Model):
     )
 
     # Computed Attribute
-    comment_count = fields.Integer(
-        string="Comment Count",
-        default=0)  # compute in create of realty_comment
     like_count = fields.Integer(string="Like Count",
                                 compute="_compute_like_count",
                                 store=True)
@@ -62,6 +59,7 @@ class UrgentBuying(models.Model):
     # Action
     def action_toggle_like(self):
         """Add/remove current user from like_user_ids"""
+        if not self or not self.exists(): raise UserError("The post no longer exists (deleted by another user). Please refresh the view.")
         self.ensure_one()
 
         # Check if user has the group

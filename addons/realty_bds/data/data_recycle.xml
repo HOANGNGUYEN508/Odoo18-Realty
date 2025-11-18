@@ -10,8 +10,22 @@
 				("mimetype", "ilike", "image"), 
 				("orphaned_date", "!=", False), 
 				("orphaned_from_model", "!=", False), 
-				("orphaned_from_res_id", "!=", False), 
 				("orphaned_from_model", "=", "product.template")
+			]</field>
+			<field name="time_field_id" ref="base.field_ir_attachment__create_date"/>
+			<field name="time_field_delta">30</field>
+			<field name="time_field_delta_unit">days</field>
+		</record>
+
+		<record id="recycle_rule_attachment_unsaved_images_product_template" model="data_recycle.model">
+			<field name="name">Delete Unsaved Product Images (30 Days)</field>
+			<field name="res_model_id" ref="base.model_ir_attachment"/>
+			<field name="recycle_mode">automatic</field>
+			<field name="recycle_action">unlink</field>
+			<field name="domain">[
+				("res_model", "=", "product.template"), 
+				("mimetype", "ilike", "image"), 
+				("orphaned_from_res_id", "=", -1)
 			]</field>
 			<field name="time_field_id" ref="base.field_ir_attachment__create_date"/>
 			<field name="time_field_delta">30</field>
@@ -28,8 +42,22 @@
 				("mimetype", "ilike", "image"), 
 				("orphaned_date", "!=", False), 
 				("orphaned_from_model", "!=", False), 
-				("orphaned_from_res_id", "!=", False), 
 				("orphaned_from_model", "=", "product_report")
+			]</field>
+			<field name="time_field_id" ref="base.field_ir_attachment__create_date"/>
+			<field name="time_field_delta">30</field>
+			<field name="time_field_delta_unit">days</field>
+		</record>
+
+		<record id="recycle_rule_attachment_unsaved_images_product_report" model="data_recycle.model">
+			<field name="name">Delete Unsaved Report Images (30 Days)</field>
+			<field name="res_model_id" ref="base.model_ir_attachment"/>
+			<field name="recycle_mode">automatic</field>
+			<field name="recycle_action">unlink</field>
+			<field name="domain">[
+				("res_model", "=", "product_report"), 
+				("mimetype", "ilike", "image"), 
+				("orphaned_from_res_id", "=", -1)
 			]</field>
 			<field name="time_field_id" ref="base.field_ir_attachment__create_date"/>
 			<field name="time_field_delta">30</field>
@@ -46,8 +74,22 @@
 				("mimetype", "ilike", "image"), 
 				("orphaned_date", "!=", False), 
 				("orphaned_from_model", "!=", False), 
-				("orphaned_from_res_id", "!=", False), 
 				("orphaned_from_model", "=", "congratulation")
+			]</field>
+			<field name="time_field_id" ref="base.field_ir_attachment__create_date"/>
+			<field name="time_field_delta">30</field>
+			<field name="time_field_delta_unit">days</field>
+		</record>
+
+		<record id="recycle_rule_attachment_unsaved_images_congratulation" model="data_recycle.model">
+			<field name="name">Delete Unsaved Notify Congratulation Images (30 Days)</field>
+			<field name="res_model_id" ref="base.model_ir_attachment"/>
+			<field name="recycle_mode">automatic</field>
+			<field name="recycle_action">unlink</field>
+			<field name="domain">[
+				("res_model", "=", "congratulation"), 
+				("mimetype", "ilike", "image"), 
+				("orphaned_from_res_id", "=", -1)
 			]</field>
 			<field name="time_field_id" ref="base.field_ir_attachment__create_date"/>
 			<field name="time_field_delta">30</field>
@@ -64,8 +106,22 @@
 				("mimetype", "ilike", "image"), 
 				("orphaned_date", "!=", False), 
 				("orphaned_from_model", "!=", False), 
-				("orphaned_from_res_id", "!=", False), 
 				("orphaned_from_model", "=", "notification")
+			]</field>
+			<field name="time_field_id" ref="base.field_ir_attachment__create_date"/>
+			<field name="time_field_delta">30</field>
+			<field name="time_field_delta_unit">days</field>
+		</record>
+
+		<record id="recycle_rule_attachment_unsaved_images_notification" model="data_recycle.model">
+			<field name="name">Delete Unsaved Notify Notification Images (30 Days)</field>
+			<field name="res_model_id" ref="base.model_ir_attachment"/>
+			<field name="recycle_mode">automatic</field>
+			<field name="recycle_action">unlink</field>
+			<field name="domain">[
+				("res_model", "=", "notification"), 
+				("mimetype", "ilike", "image"), 
+				("orphaned_from_res_id", "=", -1)
 			]</field>
 			<field name="time_field_id" ref="base.field_ir_attachment__create_date"/>
 			<field name="time_field_delta">30</field>
@@ -82,12 +138,37 @@
 				("mimetype", "ilike", "image"), 
 				("orphaned_date", "!=", False), 
 				("orphaned_from_model", "!=", False), 
-				("orphaned_from_res_id", "!=", False), 
 				("orphaned_from_model", "=", "guideline")
 			]</field>
 			<field name="time_field_id" ref="base.field_ir_attachment__create_date"/>
 			<field name="time_field_delta">30</field>
 			<field name="time_field_delta_unit">days</field>
+		</record>
+
+		<record id="recycle_rule_attachment_unsaved_images_guideline" model="data_recycle.model">
+			<field name="name">Delete Unsaved Notify Guideline Images (30 Days)</field>
+			<field name="res_model_id" ref="base.model_ir_attachment"/>
+			<field name="recycle_mode">automatic</field>
+			<field name="recycle_action">unlink</field>
+			<field name="domain">[
+				("res_model", "=", "guideline"), 
+				("mimetype", "ilike", "image"), 
+				("orphaned_from_res_id", "=", -1)
+			]</field>
+			<field name="time_field_id" ref="base.field_ir_attachment__create_date"/>
+			<field name="time_field_delta">30</field>
+			<field name="time_field_delta_unit">days</field>
+		</record>
+
+		<record id="recycle_rule_mail_notification_read" model="data_recycle.model">
+			<field name="name">Delete Read Mail Notification (6 Months)</field>
+			<field name="res_model_id" ref="sms.model_mail_notification"/>
+			<field name="recycle_mode">automatic</field>
+			<field name="recycle_action">unlink</field>
+			<field name="domain">[("is_read", "=", True)]</field>
+			<field name="time_field_id" ref="base.field_ir_attachment__create_date"/>
+			<field name="time_field_delta">6</field>
+			<field name="time_field_delta_unit">months</field>
 		</record>
 	</data>
 </odoo>

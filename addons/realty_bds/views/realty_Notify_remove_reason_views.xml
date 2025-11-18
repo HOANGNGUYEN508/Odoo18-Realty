@@ -6,6 +6,7 @@
 		<field name="arch" type="xml">
 			<list>
 				<field name="name"/>
+				<field name="for_type"/>
 			</list>
 		</field>
 	</record>
@@ -19,6 +20,7 @@
 				<sheet>
 					<group>
 						<field id="remove_reason_name" name="name" placeholder="Enter a name" autocomplete="off"/>
+						<field id="remove_reason_type" name="for_type" widget="selection"/>
 					</group>
 				</sheet>
 				<chatter/>
