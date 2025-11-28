@@ -1,0 +1,25 @@
+<odoo>
+	<record id="view_product_wizard_form" model="ir.ui.view">
+		<field name="name">Product Wizard Form</field>
+		<field name="model">product_wizard</field>
+		<field name="arch" type="xml">
+			<form>
+				<sheet>
+					<group>
+						<group>
+							<field name="res_model" invisible="1" readonly="1"/>
+							<field name="res_id" invisible="1" readonly="1"/>
+							<div class="o_form_label">Please provide a reason:</div>
+							<field name="reject_select"/>
+							<field name="reason" placeholder="Enter the reason..." nolabel="1" invisible="reject_select != 'other'" />
+						</group>
+					</group>
+				</sheet>
+				<footer>
+					<button name="action_confirm" string="Confirm" type="object" class="btn-danger"/>
+					<button string="Cancel" class="btn-secondary" special="cancel"/>
+				</footer>
+			</form>
+		</field>
+	</record>
+</odoo>

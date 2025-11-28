@@ -34,5 +34,12 @@
 			<field name="moderator_group" ref="realty_bds.access_group_mod_urgent_buying"/>
 			<field name="realty_group" ref="realty_bds.access_group_realty_urgent_buying"/>
 		</record>
+
+		<record id="res_users_permission" model="permission_tracker">
+			<field name="model_name">res.users</field>
+			<field name="user_group" ref="realty_bds.access_group_seen_users"/>
+			<field name="moderator_group" ref="realty_bds.access_group_full_users"/>
+			<field name="realty_group" ref="realty_bds.access_group_realty_users"/>
+		</record>
 	</data>
 </odoo>

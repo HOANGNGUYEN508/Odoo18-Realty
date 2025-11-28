@@ -51,7 +51,12 @@ class AttachmentSecurityService:
 
         # Quick read: check public / creator info so we can optionally allow uploader
         try:
-            att_infos = env["ir.attachment"].sudo().browse([attachment_id]).read(["id", "create_uid", "public"])
+            att_infos = (
+                env["ir.attachment"]
+                .sudo()
+                .browse([attachment_id])
+                .read(["id", "create_uid", "public"])
+            )
             att_info = att_infos[0] if att_infos else {}
             create_uid = att_info.get("create_uid") and att_info["create_uid"][0]
             is_public = bool(att_info.get("public"))
@@ -60,7 +65,10 @@ class AttachmentSecurityService:
             if ALLOW_OWNER_FASTPATH and create_uid == env.uid:
                 return True
         except Exception:
-            _logger.exception("Fast-path(single): failed to read basic attachment info for %s", attachment_id)
+            _logger.exception(
+                "Fast-path(single): failed to read basic attachment info for %s",
+                attachment_id,
+            )
 
         # Proceed with model search
         try:
@@ -73,7 +81,10 @@ class AttachmentSecurityService:
             recs = model_env_for_search.search(domain, limit=1)
         except Exception:
             _logger.exception(
-                "Fast-path(single) search error on %s.%s for attachment %s", model, field, attachment_id
+                "Fast-path(single) search error on %s.%s for attachment %s",
+                model,
+                field,
+                attachment_id,
             )
             return False
 
@@ -84,7 +95,11 @@ class AttachmentSecurityService:
                 # do not spam logs — warning only when entirely failing higher-level checks
                 continue
             except Exception:
-                _logger.exception("Fast-path(single): unexpected error checking %s id=%s", model, rec.id)
+                _logger.exception(
+                    "Fast-path(single): unexpected error checking %s id=%s",
+                    model,
+                    rec.id,
+                )
                 continue
             else:
                 return True
@@ -112,7 +127,12 @@ class AttachmentSecurityService:
 
         allowed_attachment_ids = set()
         try:
-            infos = env["ir.attachment"].sudo().browse(list(attachment_ids)).read(["id", "create_uid", "public"])
+            infos = (
+                env["ir.attachment"]
+                .sudo()
+                .browse(list(attachment_ids))
+                .read(["id", "create_uid", "public"])
+            )
             for info in infos:
                 aid = int(info.get("id"))
                 is_public = bool(info.get("public"))
@@ -122,9 +142,13 @@ class AttachmentSecurityService:
                 elif ALLOW_OWNER_FASTPATH and create_uid == env.uid:
                     allowed_attachment_ids.add(aid)
         except Exception:
-            _logger.exception("Batch fast-path: failed reading base attachment infos; will continue to full search")
+            _logger.exception(
+                "Batch fast-path: failed reading base attachment infos; will continue to full search"
+            )
 
-        remaining_to_search = [aid for aid in attachment_ids if int(aid) not in allowed_attachment_ids]
+        remaining_to_search = [
+            aid for aid in attachment_ids if int(aid) not in allowed_attachment_ids
+        ]
         if not remaining_to_search:
             return allowed_attachment_ids
 
@@ -132,7 +156,10 @@ class AttachmentSecurityService:
             recs = model_env_for_search.search([(field, "in", remaining_to_search)])
         except Exception:
             _logger.exception(
-                "Batch fast-path: search error on %s.%s for ids %s", model, field, remaining_to_search
+                "Batch fast-path: search error on %s.%s for ids %s",
+                model,
+                field,
+                remaining_to_search,
             )
             return allowed_attachment_ids
 
@@ -145,20 +172,30 @@ class AttachmentSecurityService:
             except AccessError:
                 continue
             except Exception:
-                _logger.exception("Batch fast-path: unexpected error while checking rec %s id=%s", model, rec.id)
+                _logger.exception(
+                    "Batch fast-path: unexpected error while checking rec %s id=%s",
+                    model,
+                    rec.id,
+                )
                 continue
 
             # record is readable by current user — extract referenced attachment ids
             ref_ids = []
             try:
                 ref_field = getattr(rec, field)
-                ref_ids = ref_field.ids if hasattr(ref_field, "ids") else list(ref_field)
+                ref_ids = (
+                    ref_field.ids if hasattr(ref_field, "ids") else list(ref_field)
+                )
             except Exception:
                 try:
                     data = rec.read([field])[0].get(field, []) or []
                     ref_ids = [int(x) for x in data]
                 except Exception:
-                    _logger.exception("Batch fast-path: failed to extract references from %s id=%s", model, rec.id)
+                    _logger.exception(
+                        "Batch fast-path: failed to extract references from %s id=%s",
+                        model,
+                        rec.id,
+                    )
                     continue
 
             for aid in ref_ids:
@@ -202,7 +239,11 @@ class BinaryController(http.Controller):
                 else:
                     return
             except Exception:
-                _logger.exception("Direct fast-path: unexpected error checking %s id=%s", res_model, res_id)
+                _logger.exception(
+                    "Direct fast-path: unexpected error checking %s id=%s",
+                    res_model,
+                    res_id,
+                )
 
         # FALLBACK: scan stored many2many fields that point to ir.attachment
         domain = [
@@ -217,7 +258,10 @@ class BinaryController(http.Controller):
 
         mm_fields = request.env["ir.model.fields"].sudo().search(domain)
         if not mm_fields:
-            _logger.warning("No stored m2m fields pointing to ir.attachment found (attachment %s)", attachment.id)
+            _logger.warning(
+                "No stored m2m fields pointing to ir.attachment found (attachment %s)",
+                attachment.id,
+            )
             raise AccessError("You are not allowed to access this file.")
 
         found_any_reference = False
@@ -231,9 +275,16 @@ class BinaryController(http.Controller):
                 continue
 
             try:
-                rec = search_env.search([(field_name, "in", int(attachment.id))], limit=1)
+                rec = search_env.search(
+                    [(field_name, "in", int(attachment.id))], limit=1
+                )
             except Exception:
-                _logger.exception("Error searching %s.%s for attachment %s", model_name, field_name, attachment.id)
+                _logger.exception(
+                    "Error searching %s.%s for attachment %s",
+                    model_name,
+                    field_name,
+                    attachment.id,
+                )
                 continue
 
             if not rec:
@@ -245,11 +296,19 @@ class BinaryController(http.Controller):
             except AccessError as ae:
                 unreadable_refs.append((model_name, rec.id))
                 if not allow_any:
-                    _logger.warning("User cannot read referenced %s id=%s for attachment %s: %s", model_name, rec.id, attachment.id, ae)
+                    _logger.warning(
+                        "User cannot read referenced %s id=%s for attachment %s: %s",
+                        model_name,
+                        rec.id,
+                        attachment.id,
+                        ae,
+                    )
                     raise AccessError("You are not allowed to access this file.")
                 continue
             except Exception:
-                _logger.exception("Unexpected error checking access on %s id=%s", model_name, rec.id)
+                _logger.exception(
+                    "Unexpected error checking access on %s id=%s", model_name, rec.id
+                )
                 if not allow_any:
                     raise AccessError("You are not allowed to access this file.")
                 continue
@@ -258,10 +317,17 @@ class BinaryController(http.Controller):
                     return
 
         if not found_any_reference:
-            _logger.warning("Found no references to attachment %s (res_model/res_id empty and no m2m refs)", attachment.id)
+            _logger.warning(
+                "Found no references to attachment %s (res_model/res_id empty and no m2m refs)",
+                attachment.id,
+            )
             raise AccessError("You are not allowed to access this file.")
 
-        _logger.warning("Found references but none readable for attachment %s unreadable_refs=%s", attachment.id, unreadable_refs)
+        _logger.warning(
+            "Found references but none readable for attachment %s unreadable_refs=%s",
+            attachment.id,
+            unreadable_refs,
+        )
         raise AccessError("You are not allowed to access this file.")
 
     def _serve_direct_binary(self, attachment, filename=None, download=False):
@@ -274,7 +340,12 @@ class BinaryController(http.Controller):
                 ("Content-Length", len(file_data)),
             ]
             if download:
-                headers.append(("Content-Disposition", f'attachment; filename={filename or attachment.name}'))
+                headers.append(
+                    (
+                        "Content-Disposition",
+                        f"attachment; filename={filename or attachment.name}",
+                    )
+                )
 
             return request.make_response(file_data, headers)
         else:
@@ -311,8 +382,12 @@ class BinaryController(http.Controller):
             field_param = field or request.httprequest.args.get("field")
 
             if access_token:
-                record = request.env["ir.binary"]._find_record(None, "ir.attachment", int(attachment_id), access_token, field="raw")
-                stream = request.env["ir.binary"]._get_stream_from(record, "raw", filename)
+                record = request.env["ir.binary"]._find_record(
+                    None, "ir.attachment", int(attachment_id), access_token, field="raw"
+                )
+                stream = request.env["ir.binary"]._get_stream_from(
+                    record, "raw", filename
+                )
                 send_file_kwargs = {"as_attachment": str2bool(download)}
                 if nocache:
                     send_file_kwargs["max_age"] = None
@@ -326,16 +401,32 @@ class BinaryController(http.Controller):
                 return self._serve_direct_binary(attachment, filename, download)
             else:
                 model_whitelist = (
-                    [model_param] if model_param and AttachmentSecurityService.is_model_field_allowed(model_param, field_param) else None
+                    [model_param]
+                    if model_param
+                    and AttachmentSecurityService.is_model_field_allowed(
+                        model_param, field_param
+                    )
+                    else None
                 )
                 field_whitelist = (
-                    [field_param] if field_param and AttachmentSecurityService.is_model_field_allowed(model_param, field_param) else None
+                    [field_param]
+                    if field_param
+                    and AttachmentSecurityService.is_model_field_allowed(
+                        model_param, field_param
+                    )
+                    else None
                 )
                 self._ensure_user_can_read_linked_record(
-                    attachment, model_whitelist=model_whitelist, field_whitelist=field_whitelist
+                    attachment,
+                    model_whitelist=model_whitelist,
+                    field_whitelist=field_whitelist,
                 )
 
-                stream = request.env["ir.binary"].sudo()._get_stream_from(attachment.sudo(), "raw", filename)
+                stream = (
+                    request.env["ir.binary"]
+                    .sudo()
+                    ._get_stream_from(attachment.sudo(), "raw", filename)
+                )
                 send_file_kwargs = {"as_attachment": str2bool(download)}
                 if nocache:
                     send_file_kwargs["max_age"] = None
@@ -343,10 +434,17 @@ class BinaryController(http.Controller):
                 return stream.get_response(**send_file_kwargs)
 
         except AccessError:
-            _logger.warning("content_protected: AccessError for attachment %s (uid=%s)", attachment_id, request.env.uid)
+            _logger.warning(
+                "content_protected: AccessError for attachment %s (uid=%s)",
+                attachment_id,
+                request.env.uid,
+            )
             raise AccessError("You are not allowed to access this file.")
         except Exception:
-            _logger.exception("content_protected: Failed to serve protected attachment %s", attachment_id)
+            _logger.exception(
+                "content_protected: Failed to serve protected attachment %s",
+                attachment_id,
+            )
             raise request.not_found()
 
     @http.route(
@@ -381,7 +479,9 @@ class BinaryController(http.Controller):
         """
         try:
             if xmlid or access_token:
-                record = request.env["ir.binary"]._find_record(xmlid, model, id and int(id), access_token, field=field)
+                record = request.env["ir.binary"]._find_record(
+                    xmlid, model, id and int(id), access_token, field=field
+                )
             else:
                 try:
                     model_env = request.env[model].sudo()
@@ -397,7 +497,7 @@ class BinaryController(http.Controller):
                 try:
                     id_int = int(id) if id is not None else None
                 except Exception:
-                  raise request.not_found()
+                    raise request.not_found()
                 if id_int is None:
                     raise request.not_found()
                 record = model_env.browse(id_int)
@@ -428,7 +528,13 @@ class BinaryController(http.Controller):
                 stream = (
                     request.env["ir.binary"]
                     .sudo()
-                    ._get_image_stream_from(placeholder, "raw", width=int(width), height=int(height), crop=crop)
+                    ._get_image_stream_from(
+                        placeholder,
+                        "raw",
+                        width=int(width),
+                        height=int(height),
+                        crop=crop,
+                    )
                 )
                 stream.public = False
 
@@ -436,7 +542,12 @@ class BinaryController(http.Controller):
                 stream.public = True
 
         except AccessError:
-            _logger.warning("image_protected: AccessError for image %s/%s (uid=%s)", model, id, request.env.uid)
+            _logger.warning(
+                "image_protected: AccessError for image %s/%s (uid=%s)",
+                model,
+                id,
+                request.env.uid,
+            )
             raise AccessError("You are not allowed to access this image.")
         except Exception:
             _logger.exception("Failed to serve protected image %s/%s", model, id)
@@ -471,15 +582,25 @@ class AttachmentMetaFastpathController(http.Controller):
         if not ids:
             return result
 
-        allowed_attachment_ids = AttachmentSecurityService.batch_check_fast_path_access(request.env, ids, model, field)
+        allowed_attachment_ids = AttachmentSecurityService.batch_check_fast_path_access(
+            request.env, ids, model, field
+        )
 
         if not allowed_attachment_ids:
             return result
 
         try:
-            metas = Attachment.sudo().browse(list(allowed_attachment_ids)).read(["id", "name", "mimetype"])
+            metas = (
+                Attachment.sudo()
+                .browse(list(allowed_attachment_ids))
+                .read(["id", "name", "mimetype"])
+            )
             for m in metas:
-                result[int(m["id"])] = {"id": int(m["id"]), "name": m.get("name", ""), "mimetype": m.get("mimetype", "")}
+                result[int(m["id"])] = {
+                    "id": int(m["id"]),
+                    "name": m.get("name", ""),
+                    "mimetype": m.get("mimetype", ""),
+                }
         except Exception:
             _logger.exception(
                 "attachment_meta_fastpath: failed to read attachment metadata for ids %s",

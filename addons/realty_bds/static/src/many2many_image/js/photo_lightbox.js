@@ -1,4 +1,5 @@
 import { Component, useState } from "@odoo/owl";
+import { IMAGE_MIMETYPES, FILE_TYPE_ICONS } from "./constants";
 
 export class PhotoLightbox extends Component {
 	static template = "realty_bds.PhotoLightbox";
@@ -26,6 +27,36 @@ export class PhotoLightbox extends Component {
 		return this.props.files.find((file) => file.id === this.props.index);
 	}
 
+	get isImage() {
+		const file = this.currentFile;
+		if (!file) return false;
+
+		if (file.mimetype) {
+			return IMAGE_MIMETYPES.includes(file.mimetype);
+		}
+
+		return true;
+	}
+
+	getFileIcon(mimetype) {
+		return FILE_TYPE_ICONS[mimetype] || "/web/static/src/img/mimetypes/binary.svg";
+	}
+
+	get displayUrl() {
+		const file = this.currentFile;
+		if (!file) return null;
+
+		if (this.isImage) {
+			return file.url;
+		}
+
+		if (file.thumbnailUrl) {
+			return file.thumbnailUrl;
+		}
+
+		return this.getFileIcon(file.mimetype);
+	}
+
 	togglePresentation() {
 		this.props.onSetPresentation(this.props.index);
 	}
@@ -43,6 +74,7 @@ export class PhotoLightbox extends Component {
 		const prevPos = (currentPos + len - 1) % len;
 		const prevId = this.props.files[prevPos].id;
 		this.props.onNavigate?.(prevId);
+		this.state.loading = true;
 	}
 
 	next() {
@@ -54,6 +86,7 @@ export class PhotoLightbox extends Component {
 		const nextPos = (currentPos + 1) % len;
 		const nextId = this.props.files[nextPos].id;
 		this.props.onNavigate?.(nextId);
+		this.state.loading = true;
 	}
 
 	close() {

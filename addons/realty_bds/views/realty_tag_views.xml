@@ -28,7 +28,7 @@
 
 	<!-- Action -->
 	<record id="action_tag" model="ir.actions.act_window">
-		<field name="name">Tag Action</field>
+		<field name="name">Tag</field>
 		<field name="res_model">tag</field>
 		<field name="view_mode">list,form</field>
 	</record>

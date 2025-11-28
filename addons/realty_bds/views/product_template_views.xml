@@ -85,7 +85,7 @@
 					</group>
 					<group string="Actions">
 						<field name="approval" readonly="1" widget="statusbar" options="{'clickable': 0}"/>
-						<field name="moderator_id" string="Moderator" readonly="1" invisible="approval == 'draft'"/>
+						<field name="moderator_id" string="Moderator" readonly="1" invisible="approval == 'draft'" widget="many2one_avatar_user"/>
 						<field name="edit_counter" readonly="1" invisible="edit_counter == -1"/>
 						<div class="o_row">
 							<button name="action_send" string="Send" type="object" class="btn-primary" invisible="edit_counter != -1 or approval != 'draft'" groups="realty_bds.access_group_seen_product,realty_bds.access_group_full_product,realty_bds.access_group_realty_product"/>
@@ -299,7 +299,7 @@
 					</group>
 					<group string="Actions">
 						<field name="approval" readonly="1" widget="statusbar" options="{'clickable': 0}"/>
-						<field name="moderator_id" string="Moderator" readonly="1"/>
+						<field name="moderator_id" string="Moderator" readonly="1" widget="many2one_avatar_user"/>
 						<field name="edit_counter" readonly="1" invisible="edit_counter == -1"/>
 						<button name="action_approve" invisible="approval != 'pending'" type="object" class="btn btn-sm btn-outline-success d-flex align-items-center">
 							<i class="fa fa-check me-1" aria-hidden="true"/>

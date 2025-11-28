@@ -1,42 +1,49 @@
 <odoo>
-    <menuitem 
-        id="menu_realty_root"
-        name="Real Estate"
-        sequence="10"/>
+	<menuitem 
+		id="menu_realty_root" 
+		name="Real Estate" 
+		sequence="10" 
+	/>
 
-    <menuitem
-        id="menu_user_root"
-        name="User"
-        parent="menu_realty_root"
-        sequence="10"/>
+	<menuitem 
+		id="menu_user_root" 
+		name="User" 
+		parent="menu_realty_root" 
+		sequence="10"
+	/>
 
-    <menuitem
-        id="menu_product_root"
-        name="Real Estate"
-        parent="menu_realty_root"
-        sequence="20"/>
+	<menuitem 
+		id="menu_product_root" 
+		name="Real Estate" 
+		parent="menu_realty_root" 
+		sequence="20"
+	/>
 
-		<menuitem
-        id="menu_report_root"
-        name="Report"
-        parent="menu_realty_root"
-        sequence="25"/>
+	<menuitem 
+		id="menu_report_root" 
+		name="Report" 
+		parent="menu_realty_root" 
+		sequence="25"
+	/>
 
-    <menuitem
-        id="menu_address_root"
-        name="Address"
-        parent="menu_realty_root"
-        sequence="15"/>
+	<menuitem 
+		id="menu_address_root" 
+		name="Address" 
+		parent="menu_realty_root" 
+		sequence="15"
+	/>
 
-		<menuitem
-        id="menu_notify_root"
-        name="Notify"
-        parent="menu_realty_root"
-        sequence="26"/>
+	<menuitem 
+		id="menu_notify_root" 
+		name="Notify" 
+		parent="menu_realty_root" 
+		sequence="26"
+	/>
 
-    <menuitem
-        id="menu_more_root"
-        name="More"
-        parent="menu_realty_root"
-        sequence="30"/>
+	<menuitem 
+		id="menu_more_root"
+		name="More" 
+		parent="menu_realty_root" 
+		sequence="30"
+	/>
 </odoo>

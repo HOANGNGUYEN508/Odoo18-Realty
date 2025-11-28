@@ -123,12 +123,3 @@ class Province(models.Model):
                     # Keep non-Vietnamese characters as is
                     sort_key += char
             record.sort_key = sort_key
-
-    # Constrain
-    _sql_constraints = [
-        (
-            "province_unique_name",
-            "UNIQUE(name,region_id)",
-            "This name already exists!",
-        ),  # Ensure uniqueness
-    ]

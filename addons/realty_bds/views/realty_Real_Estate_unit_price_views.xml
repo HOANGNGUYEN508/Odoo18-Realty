@@ -30,7 +30,7 @@
 
 	<!-- Admin Menu -->
 	<record id="action_unit_price" model="ir.actions.act_window">
-		<field name="name">Unit Price Action</field>
+		<field name="name">Unit Price</field>
 		<field name="res_model">unit_price</field>
 		<field name="view_mode">list,form</field>
 	</record>

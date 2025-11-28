@@ -1,0 +1,9 @@
+<odoo>
+	<menuitem 
+		id="menu_view_default_hr_job" 
+		action="action_setting_default_hr_job" 
+		name="Default Job Position" 
+		parent="hr.menu_config_recruitment" 
+		sequence="3"
+	/>
+</odoo>

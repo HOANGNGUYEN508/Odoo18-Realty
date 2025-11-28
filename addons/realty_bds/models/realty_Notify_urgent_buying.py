@@ -13,18 +13,13 @@ class UrgentBuying(models.Model):
     finance = fields.Char(string="Finance", required=True, tracking=True)
 
     # Relationship Attributes
-    region_id = fields.Many2one("region",
-                                string="Region",
-                                required=True,
-                                tracking=True)
-    district_id = fields.Many2one("district",
-                                  string="District",
-                                  required=True,
-                                  tracking=True)
-    reason_buy_id = fields.Many2one("reasons_buy",
-                                    string="Reason",
-                                    required=True,
-                                    tracking=True)
+    region_id = fields.Many2one("region", string="Region", required=True, tracking=True)
+    district_id = fields.Many2one(
+        "district", string="District", required=True, tracking=True
+    )
+    reason_buy_id = fields.Many2one(
+        "reasons_buy", string="Reason", required=True, tracking=True
+    )
     tag_ids = fields.Many2many(
         "tag",
         string="Tags",
@@ -47,9 +42,9 @@ class UrgentBuying(models.Model):
     )
 
     # Computed Attribute
-    like_count = fields.Integer(string="Like Count",
-                                compute="_compute_like_count",
-                                store=True)
+    like_count = fields.Integer(
+        string="Like Count", compute="_compute_like_count", store=True
+    )
 
     @api.depends("like_user_ids")
     def _compute_like_count(self):
@@ -59,17 +54,25 @@ class UrgentBuying(models.Model):
     # Action
     def action_toggle_like(self):
         """Add/remove current user from like_user_ids"""
-        if not self or not self.exists(): raise UserError("The post no longer exists (deleted by another user). Please refresh the view.")
+        if not self or not self.exists():
+            raise UserError(
+                "The post no longer exists (deleted by another user). Please refresh the view."
+            )
         self.ensure_one()
 
         # Check if user has the group
-        group_dict = self.env["permission_tracker"]._get_permission_groups(self._name) or {}
+        group_dict = (
+            self.env["permission_tracker"]._get_permission_groups(self._name) or {}
+        )
         user_group = group_dict.get("user_group")
         realty_group = group_dict.get("realty_group")
-        if not (self.env.user.has_group(user_group) or self.env.user.has_group(realty_group)):
+        if not (
+            self.env.user.has_group(user_group) or self.env.user.has_group(realty_group)
+        ):
             raise AccessError(
-                f"You don't have the necessary permissions to like posts.")
-        
+                f"You don't have the necessary permissions to like posts."
+            )
+
         user_id = self.env.uid
 
         # Use toggle command - adds if not present, removes if present

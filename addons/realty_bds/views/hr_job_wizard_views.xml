@@ -1,0 +1,27 @@
+<odoo>
+	<record id="view_hr_job_default_position_wizard_form" model="ir.ui.view">
+		<field name="name">Setting Default Job Position Wizard Form</field>
+		<field name="model">hr_job_wizard</field>
+		<field name="arch" type="xml">
+			<form>
+				<sheet>
+					<group>
+						<field name="default_job_id" readonly="1"/>
+						<field name="job_selection" widget="selection" options="{'no_create': True}"/>
+					</group>
+				</sheet>
+				<footer>
+					<button name="action_confirm" string="Confirm" type="object" class="btn-danger"/>
+					<button string="Cancel" class="btn-secondary" special="cancel"/>
+				</footer>
+			</form>
+		</field>
+	</record>
+
+	<record id="action_setting_default_hr_job" model="ir.actions.act_window">
+		<field name="name">Setting Default Job Position</field>
+		<field name="res_model">hr_job_wizard</field>
+		<field name="view_mode">form</field>
+		<field name="target">new</field>
+	</record>
+</odoo>

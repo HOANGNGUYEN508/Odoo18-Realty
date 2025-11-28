@@ -13,6 +13,22 @@ class Province(models.Model):
     region_ids = fields.Many2many("region", string="Region")
 
     # Constrain
+    @api.constrains("name", "region_ids")
+    def _check_unique_name_per_region(self):
+        """Ensure province name is unique within each region"""
+        for record in self:
+            if record.region_ids:
+                for region in record.region_ids:
+                    # Search for other provinces with same name in this region
+                    duplicate = self.search([
+                        ('id', '!=', record.id),
+                        ('name', '=', record.name),
+                        ('region_ids', 'in', region.id)
+                    ], limit=1)
+                    
+                    if duplicate:
+                        raise ValidationError(f"❌ Error: A province with the name '{record.name}' already exists in region '{region.name}'!")
+
     @api.constrains("name")
     def _check_name(self):
         try:

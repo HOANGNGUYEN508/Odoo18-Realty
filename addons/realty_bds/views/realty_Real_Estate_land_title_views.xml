@@ -28,7 +28,7 @@
 
 	<!-- Admin Menu -->
 	<record id="action_land_title" model="ir.actions.act_window">
-		<field name="name">Land Title Action</field>
+		<field name="name">Land Title</field>
 		<field name="res_model">land_title</field>
 		<field name="view_mode">list,form</field>
 	</record>

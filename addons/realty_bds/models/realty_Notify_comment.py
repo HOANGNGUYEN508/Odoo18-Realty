@@ -1,7 +1,7 @@
 from odoo import models, fields, api  # type: ignore
 from odoo.exceptions import ValidationError, AccessError, UserError  # type: ignore
 from odoo.http import request  # type: ignore
-from markupsafe import Markup # type: ignore
+from markupsafe import Markup  # type: ignore
 import datetime
 import logging
 import re
@@ -11,7 +11,7 @@ from typing import Optional
 
 _logger = logging.getLogger(__name__)
 
-_WHITESPACE_RE = re.compile(r'\s+')
+_WHITESPACE_RE = re.compile(r"\s+")
 _ALLOWED_PUNCT = set(".,!?:;\"'`-+()[]{}@#$%&*=/|\\^~<>")
 
 
@@ -35,36 +35,30 @@ class RealtyComment(models.Model):
         required=True,
         help="Model string, e.g. 'notification'",
     )
-    res_id = fields.Integer(string="Resource ID",
-                            index=True,
-                            required=True,
-                            help="ID in the resource model")
-    parent_id = fields.Many2one("realty_comment",
-                                string="Reply To",
-                                ondelete="cascade")
-    child_ids = fields.One2many("realty_comment",
-                                "parent_id",
-                                string="Replies",
-                                copy=False)
-    like_user_ids = fields.Many2many("res.users",
-                                     "comment_like_rel",
-                                     "comment_id",
-                                     "user_id",
-                                     string="Liked By")
+    res_id = fields.Integer(
+        string="Resource ID", index=True, required=True, help="ID in the resource model"
+    )
+    parent_id = fields.Many2one("realty_comment", string="Reply To", ondelete="cascade")
+    child_ids = fields.One2many(
+        "realty_comment", "parent_id", string="Replies", copy=False
+    )
+    like_user_ids = fields.Many2many(
+        "res.users", "comment_like_rel", "comment_id", "user_id", string="Liked By"
+    )
 
     # Computed Attributes
-    like_count = fields.Integer(string="Likes",
-                                compute="_compute_like_count",
-                                store=True)
-    is_author = fields.Boolean(string="Is Author",
-                               compute="_compute_is_author",
-                               store=True)
-    child_count = fields.Integer(string="Replies Count",
-                                 compute="_compute_child_count",
-                                 store=True)
+    like_count = fields.Integer(
+        string="Likes", compute="_compute_like_count", store=True
+    )
+    is_author = fields.Boolean(
+        string="Is Author", compute="_compute_is_author", store=True
+    )
+    child_count = fields.Integer(
+        string="Replies Count", compute="_compute_child_count", store=True
+    )
     comment_level = fields.Integer(
-        string="Comment Level",
-        default=0)  # compute in create to avoid recursion issues
+        string="Comment Level", default=0
+    )  # compute in create to avoid recursion issues
 
     @api.depends("child_ids")
     def _compute_child_count(self):
@@ -110,14 +104,17 @@ class RealtyComment(models.Model):
         rec.ensure_one()
 
         # Check if user has the group
-        group_dict = self.env["permission_tracker"]._get_permission_groups(
-            rec.res_model) or {}
+        group_dict = (
+            self.env["permission_tracker"]._get_permission_groups(rec.res_model) or {}
+        )
         user_group = group_dict.get("user_group")
         realty_group = group_dict.get("realty_group")
-        if not (self.env.user.has_group(user_group)
-                or self.env.user.has_group(realty_group)):
+        if not (
+            self.env.user.has_group(user_group) or self.env.user.has_group(realty_group)
+        ):
             raise AccessError(
-                "You don't have the necessary permissions to like comment.")
+                "You don't have the necessary permissions to like comment."
+            )
 
         uid = self.env.uid
         currently_liked = uid in rec.like_user_ids.ids
@@ -136,7 +133,8 @@ class RealtyComment(models.Model):
             self._push_bus_notifications([like_payload])
         except Exception:
             _logger.exception(
-                "Failed to send like update for realty_comment %s", rec.id)
+                "Failed to send like update for realty_comment %s", rec.id
+            )
 
         return {"count": rec.like_count}
 
@@ -200,11 +198,15 @@ class RealtyComment(models.Model):
         """Normalize common Odoo/Python objects into JSON-safe primitives."""
         # Record-like (res.users etc.)
         try:
-            if hasattr(value, "id") and (hasattr(value, "name")
-                                         or hasattr(value, "display_name")):
+            if hasattr(value, "id") and (
+                hasattr(value, "name") or hasattr(value, "display_name")
+            ):
                 vid = int(value.id) if value.id is not None else None
-                vname = (getattr(value, "name", None)
-                         or getattr(value, "display_name", None) or "")
+                vname = (
+                    getattr(value, "name", None)
+                    or getattr(value, "display_name", None)
+                    or ""
+                )
                 return [vid, str(vname)]
         except Exception:
             pass
@@ -236,7 +238,7 @@ class RealtyComment(models.Model):
             return str(value)
         except Exception:
             return None
-        
+
     @api.model
     def _push_bus_notifications(self, payloads):
         """Normalize each payload field and send a single shaped message per item."""
@@ -254,7 +256,8 @@ class RealtyComment(models.Model):
                 # if p is not a dict, convert to dict form
                 if not isinstance(p, dict):
                     _logger.warning(
-                        "realty_comment: unexpected payload type %r", type(p))
+                        "realty_comment: unexpected payload type %r", type(p)
+                    )
                     continue
 
                 normalized = {}
@@ -272,9 +275,12 @@ class RealtyComment(models.Model):
                 )
             except Exception:
                 _logger.exception(
-                    "Failed to send bus message for realty_comment: %r", p)
-                
-    def _send_removal_notification(self, target_partner_id, moderator_name, reason, content, res_model, res_id):
+                    "Failed to send bus message for realty_comment: %r", p
+                )
+
+    def _send_removal_notification(
+        self, target_partner_id, moderator_name, reason, content, res_model, res_id
+    ):
         """Send removal notification to the comment author."""
         if not target_partner_id:
             return
@@ -312,7 +318,7 @@ class RealtyComment(models.Model):
         msg = None
 
         # Try to post to the record's chatter
-        
+
         try:
             rec = self.env[res_model].sudo().browse(int(res_id))
             if rec.exists():
@@ -347,14 +353,15 @@ class RealtyComment(models.Model):
 
         # Ensure notification exists and is unread
         if msg and msg.exists():
-            self.env["mail.notification"].sudo().create({
-                "res_partner_id": target_partner_id,
-                "notification_type": "inbox",
-                "mail_message_id": msg.id,
-                "is_read": False,
-            })
+            self.env["mail.notification"].sudo().create(
+                {
+                    "res_partner_id": target_partner_id,
+                    "notification_type": "inbox",
+                    "mail_message_id": msg.id,
+                    "is_read": False,
+                }
+            )
 
-        
     # Model Method
     @api.model
     def get_top_level_page(self, res_model, res_id, limit=10, offset=0):
@@ -362,15 +369,13 @@ class RealtyComment(models.Model):
         try:
             res_id = int(res_id)
         except Exception:
-            return {
-                "comments": [],
-                "hasMore": False,
-                "page": 0,
-                "total_count": 0
-            }
+            return {"comments": [], "hasMore": False, "page": 0, "total_count": 0}
 
-        domain = [("res_model", "=", res_model), ("res_id", "=", res_id),
-                  ("parent_id", "=", False)]
+        domain = [
+            ("res_model", "=", res_model),
+            ("res_id", "=", res_id),
+            ("parent_id", "=", False),
+        ]
 
         total_count = self.search_count(domain)
 
@@ -381,16 +386,18 @@ class RealtyComment(models.Model):
             order="like_count DESC, create_date DESC",
         )
 
-        data = comments.read([
-            "id",
-            "content",
-            "create_uid",
-            "create_date",
-            "like_count",
-            "child_count",
-            "res_model",
-            "res_id",
-        ])
+        data = comments.read(
+            [
+                "id",
+                "content",
+                "create_uid",
+                "create_date",
+                "like_count",
+                "child_count",
+                "res_model",
+                "res_id",
+            ]
+        )
 
         return {
             "comments": data,
@@ -414,20 +421,19 @@ class RealtyComment(models.Model):
         )
 
         return {
-            "replies":
-            replies.read([
-                "id",
-                "content",
-                "create_uid",
-                "create_date",
-                "like_count",
-                "child_count",
-                "comment_level",
-            ]),
-            "hasMore":
-            len(replies) == limit,
-            "page":
-            offset // limit,
+            "replies": replies.read(
+                [
+                    "id",
+                    "content",
+                    "create_uid",
+                    "create_date",
+                    "like_count",
+                    "child_count",
+                    "comment_level",
+                ]
+            ),
+            "hasMore": len(replies) == limit,
+            "page": offset // limit,
         }
 
     @api.model_create_multi
@@ -436,7 +442,8 @@ class RealtyComment(models.Model):
             raise ValidationError("No values provided for comment creation.")
         if len(vals_list) > 1:
             raise ValidationError(
-                "Only single comment creation is allowed in this API.")
+                "Only single comment creation is allowed in this API."
+            )
 
         # Extract client_tmp_id from context for deduplication
         ctx = dict(self.env.context or {})
@@ -447,20 +454,25 @@ class RealtyComment(models.Model):
 
         # normalize single vals dict
         vals = dict(vals_list[0])
-        ctx = dict(self.env.context or {})
-        
+
         required_keys = {"res_model", "res_id", "content"}
         if create_or_reply == "reply":
             required_keys.add("parent_id")
         missing = [k for k in required_keys if k not in vals]
         if missing:
-            raise ValidationError(f"Missing required keys on create: {', '.join(missing)}")
+            raise ValidationError(
+                f"Missing required keys on create: {', '.join(missing)}"
+            )
         post = self.env[vals["res_model"]].browse(vals["res_id"]).exists()
-        if not post: raise UserError("The post you comment to no longer exists (deleted by another user).")
+        if not post:
+            raise UserError(
+                "The post you comment to no longer exists (deleted by another user)."
+            )
         if not vals.get("res_model") or not vals.get("res_id"):
             raise ValidationError(
-                "res_model and res_id are required to create a comment.")
-        
+                "res_model and res_id are required to create a comment."
+            )
+
         vals["content"] = self._sanitize_content(vals.get("content"))
 
         parent_id = vals.get("parent_id")
@@ -488,29 +500,19 @@ class RealtyComment(models.Model):
         # Prepare payloads: create payload + optional parent_update (coalesced)
         try:
             create_payload = {
-                "type":
-                "create",
-                "id":
-                rec.id,
-                "content":
-                rec.content,
-                "create_uid":
-                rec.create_uid and (rec.create_uid.id, rec.create_uid.name)
+                "type": "create",
+                "id": rec.id,
+                "content": rec.content,
+                "create_uid": rec.create_uid
+                and (rec.create_uid.id, rec.create_uid.name)
                 or False,
-                "create_date":
-                rec.create_date,
-                "like_count":
-                rec.like_count or 0,
-                "child_count":
-                rec.child_count or 0,
-                "res_model":
-                rec.res_model,
-                "res_id":
-                rec.res_id,
-                "parent_id":
-                rec.parent_id.id if rec.parent_id else False,
-                "client_tmp_id":
-                client_tmp_id,
+                "create_date": rec.create_date,
+                "like_count": rec.like_count or 0,
+                "child_count": rec.child_count or 0,
+                "res_model": rec.res_model,
+                "res_id": rec.res_id,
+                "parent_id": rec.parent_id.id if rec.parent_id else False,
+                "client_tmp_id": client_tmp_id,
             }
 
             payloads = [create_payload]
@@ -540,12 +542,12 @@ class RealtyComment(models.Model):
 
     def write(self, vals):
         self.ensure_one()
-        if self.env.context.get('skip_custom_realty_write_logic'):
+        if self.env.context.get("skip_custom_realty_write_logic"):
             return super(RealtyComment, self).write(vals)
-        content_only = set(vals.keys()) == {'content'} and 'content' in vals
+        content_only = set(vals.keys()) == {"content"} and "content" in vals
         if not content_only:
             raise UserError("Only content field can be updated.")
-        vals['content'] = self._sanitize_content(vals.get('content'))
+        vals["content"] = self._sanitize_content(vals.get("content"))
         result = super(RealtyComment, self).write(vals)
 
         if result:
@@ -562,8 +564,8 @@ class RealtyComment(models.Model):
                 self._push_bus_notifications(update_payload)
             except Exception:
                 _logger.exception(
-                    "Failed to send update payload for realty_comment %s",
-                    rec.id)
+                    "Failed to send update payload for realty_comment %s", rec.id
+                )
 
             return {
                 "id": rec.id,
@@ -574,24 +576,39 @@ class RealtyComment(models.Model):
             return {"id": False}
 
     def unlink(self, reason=None):
-        if self.env.context.get('skip_realty_delete_custom'):
+        if self.env.context.get("skip_realty_delete_custom"):
             # Delete in bulk only happen if user delete the post
             return super(RealtyComment, self).unlink()
         self.ensure_one()
         is_owner = self.create_uid.id == self.env.uid
 
-        if reason is None: reason_str = None
-        else: reason_str = str(reason).strip() if isinstance(reason, str) else str(reason).strip()
-        
-        if is_owner: 
-            if reason_str: raise UserError("Why do you need to provide reason to delete your own comment?")
-        elif not reason_str: raise ValidationError("Moderator removal requires a reason.")
-        target = self.create_uid.partner_id.id if self.create_uid and self.create_uid.partner_id else None
+        if reason is None:
+            reason_str = None
+        else:
+            reason_str = (
+                str(reason).strip() if isinstance(reason, str) else str(reason).strip()
+            )
+
+        if is_owner:
+            if reason_str:
+                raise UserError(
+                    "Why do you need to provide reason to delete your own comment?"
+                )
+        elif not reason_str:
+            raise ValidationError("Moderator removal requires a reason.")
+        target = (
+            self.create_uid.partner_id.id
+            if self.create_uid and self.create_uid.partner_id
+            else None
+        )
         parent_id = self.parent_id.id if self.parent_id else False
         rec_res_model = self.res_model
         rec_res_id = self.res_id
         post = self.env[rec_res_model].browse(rec_res_id).exists()
-        if not post: raise UserError("The post you comment to no longer exists (deleted by another user).")
+        if not post:
+            raise UserError(
+                "The post you comment to no longer exists (deleted by another user)."
+            )
         deleted_id = self.id
         content = self.content
         result = super(RealtyComment, self).unlink()
@@ -624,7 +641,15 @@ class RealtyComment(models.Model):
                     "Failed to send delete/parent_update for realty_comment %s",
                     deleted_id,
                 )
-            if not is_owner: self._send_removal_notification(target, self.env.user.name, reason_str, content, rec_res_model, rec_res_id)
+            if not is_owner:
+                self._send_removal_notification(
+                    target,
+                    self.env.user.name,
+                    reason_str,
+                    content,
+                    rec_res_model,
+                    rec_res_id,
+                )
             post.compute_comment_count(False)
             return {"deleted_id": deleted_id, "parent_id": parent_id}
         else:
@@ -641,15 +666,14 @@ class RealtyComment(models.Model):
                 "The 'policy' model is not available. No reserved words will be checked."
             )
         for record in self:
-            clean_content = record.content.strip().lower(
-            ) if record.content else ""
+            clean_content = record.content.strip().lower() if record.content else ""
             if not clean_content:
                 raise ValidationError("Comment cannot be empty!")
-            match = next((w for w in reserved_words if w in clean_content),
-                         None)
+            match = next((w for w in reserved_words if w in clean_content), None)
             if match:
                 raise ValidationError(
-                    f"❌ Error: Name contains reserved word: '{match}'!")
+                    f"❌ Error: Name contains reserved word: '{match}'!"
+                )
             if len(record.content) > 500:
                 raise ValidationError("Comment cannot exceed 500 characters!")
 
@@ -663,8 +687,7 @@ class RealtyComment(models.Model):
                         f"Target record not found: {rec.res_model} (id={rec.res_id})."
                     )
             except KeyError:
-                raise ValidationError(
-                    f"Model '{rec.res_model}' does not exist.")
+                raise ValidationError(f"Model '{rec.res_model}' does not exist.")
 
     @api.constrains("parent_id", "res_model", "res_id")
     def _check_parent_same_target(self):
@@ -681,24 +704,29 @@ class RealtyComment(models.Model):
         try:
             super(RealtyComment, self).init()
         except Exception:
-            _logger.exception(
-                "super().init() failed during module init — continuing")
+            _logger.exception("super().init() failed during module init — continuing")
 
         cr = self.env.cr
         try:
-            cr.execute("""
+            cr.execute(
+                """
                 CREATE INDEX IF NOT EXISTS realty_comment_res_model_res_id_idx
                 ON realty_comment (res_model, res_id)
-            """)
+            """
+            )
         except Exception:
             _logger.exception(
-                "Failed to create index realty_comment_res_model_res_id_idx")
+                "Failed to create index realty_comment_res_model_res_id_idx"
+            )
 
         try:
-            cr.execute("""
+            cr.execute(
+                """
                 CREATE UNIQUE INDEX IF NOT EXISTS comment_like_rel_unique_idx
                 ON comment_like_rel (comment_id, user_id)
-            """)
+            """
+            )
         except Exception:
             _logger.exception(
-                "Failed to create unique index comment_like_rel_unique_idx")
+                "Failed to create unique index comment_like_rel_unique_idx"
+            )

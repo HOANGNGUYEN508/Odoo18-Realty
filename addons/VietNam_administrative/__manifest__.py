@@ -14,10 +14,10 @@
         'views/province_views.xml',
         'views/district_views.xml',
         'views/commune_views.xml',
-        'views/menu.xml',
+        'menu/menu.xml',
     ],
     "installable": True,
     "application": False,
     'auto_install': False,
     'license': 'LGPL-3',
-}
+} # type: ignore

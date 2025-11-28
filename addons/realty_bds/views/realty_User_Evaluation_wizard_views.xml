@@ -1,0 +1,27 @@
+<odoo>
+	<record id="view_reject_user_wizard" model="ir.ui.view">
+		<field name="name">User Evaluation Wizard Form</field>
+		<field name="model">user_evaluation_wizard</field>
+		<field name="arch" type="xml">
+			<form>
+				<sheet>
+					<group>
+						<group>
+							<field name="res_model" invisible="1" readonly="1"/>
+							<field name="res_id" invisible="1" readonly="1"/>
+							<field name="action_type" invisible="1" readonly="1"/>
+							<div class="o_form_label" invisible="action_type == 'note'">Please provide a reason:</div>
+							<field name="reject_select" invisible="action_type == 'note'"/>
+							<field name="reason" placeholder="Enter the reason..." nolabel="1" invisible="reject_select != 'other' or action_type == 'note'"/>
+							<field name="note" placeholder="Enter your note..." nolabel="1" invisible="action_type != 'note'"/>
+						</group>
+					</group>
+				</sheet>
+				<footer>
+					<button name="action_confirm" string="Confirm" type="object" class="btn-danger"/>
+					<button string="Cancel" class="btn-secondary" special="cancel"/>
+				</footer>
+			</form>
+		</field>
+	</record>
+</odoo>

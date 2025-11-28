@@ -5,15 +5,8 @@ import { useX2ManyCrud } from "@web/views/fields/relational_utils";
 import { Component, useState, onWillStart } from "@odoo/owl";
 import { PhotoLightbox } from "./photo_lightbox";
 import { ValidatedFileInput } from "./validated_file_input";
+import { IMAGE_MIMETYPES } from "./constants";
 import { rpc } from "@web/core/network/rpc";
-
-const MIME_EXT_MAP = {
-	"image/jpeg": ".jpg",
-	"image/png": ".png",
-	"image/gif": ".gif",
-	"image/webp": ".webp",
-	"image/bmp": ".bmp",
-};
 
 export class Many2ManyImageField extends Component {
 	static template = "realty_bds.Many2ManyImageField";
@@ -181,7 +174,7 @@ export class Many2ManyImageField extends Component {
 			await this.orm.call("ir.attachment", "write", [
 				[file.id],
 				{
-					name: `${result.result}${MIME_EXT_MAP[file.mimetype] || ""}`,
+					name: `${result.result}${IMAGE_MIMETYPES[file.mimetype] || ""}`,
 					public: this.isPublic,
 				},
 			]);

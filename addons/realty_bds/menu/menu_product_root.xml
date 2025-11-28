@@ -1,67 +1,67 @@
 <odoo>
 	<!-- Product's Attributes -->
 	<menuitem 
-    id="menu_feature_root" 
-    name="Feature"
-    parent="menu_product_root"
-    action="action_feature"
-    sequence="0"
-	/>
-
-  <menuitem 
-    id="menu_group_home_direction_root" 
-    name="Group home direction" 
-    parent="menu_product_root"
-    action="action_group_home_direction"
-    sequence="1"
-	/>	
-
-  <menuitem 
-    id="menu_home_direction_root" 
-    name="Home direction" 
-    parent="menu_product_root"
-    action="action_home_direction"
-    sequence="2"
-	/>
-
-  <menuitem 
-		id="menu_land_title_root" 
-		name="Land Title" 
+		id="menu_feature_root" 
+		name="Feature" 
 		parent="menu_product_root" 
-		action="action_land_title"
-		sequence="3"
+		action="action_feature" 
+		sequence="0" 
 	/>
 
 	<menuitem 
-    id="menu_reasons_buy_root" 
-    name="Reasons for buying "
-    parent="menu_product_root" 
-    action="action_reasons_buy"
-    sequence="4"
+		id="menu_group_home_direction_root" 
+		name="Group home direction" 
+		parent="menu_product_root" 
+		action="action_group_home_direction" 
+		sequence="1" 
 	/>
 
-  <menuitem 
-    id="menu_status_root" 
-    name="Status"
-    parent="menu_product_root" 
-    action="action_status"
-    sequence="5"
+	<menuitem 
+		id="menu_home_direction_root" 
+		name="Home direction" 
+		parent="menu_product_root" 
+		action="action_home_direction" 
+		sequence="2" 
 	/>
 
-  <menuitem 
-  	id="menu_type_root"
-    name="Type" 
-    parent="menu_product_root"
-    action="action_type"
-    sequence="6"
+	<menuitem 
+		id="menu_land_title_root" 
+		name="Land Title" 
+		parent="menu_product_root" 
+		action="action_land_title" 
+		sequence="3" 
 	/>
 
-  <menuitem 
+	<menuitem 
+		id="menu_reasons_buy_root" 
+		name="Reasons for buying " 
+		parent="menu_product_root" 
+		action="action_reasons_buy" 
+		sequence="4" 
+	/>
+
+	<menuitem 
+		id="menu_status_root" 
+		name="Status" 
+		parent="menu_product_root" 
+		action="action_status" 
+		sequence="5" 
+	/>
+
+	<menuitem 
+		id="menu_type_root" 
+		name="Type" 
+		parent="menu_product_root" 
+		action="action_type" 
+		sequence="6"
+	/>
+
+	<menuitem 
 		id="menu_unit_price_root" 
 		name="Unit Price" 
 		parent="menu_product_root" 
-		action="action_unit_price"
-		sequence="7"
+		action="action_unit_price" 
+		sequence="7" 
 	/>
 
 	<!-- Product -->
@@ -69,17 +69,17 @@
 		id="menu_product_template_root" 
 		name="Ware House" 
 		parent="menu_product_root" 
-		action="action_product_template"
-		groups="realty_bds.access_group_realty_product,realty_bds.access_group_full_product,realty_bds.access_group_seen_product"
-		sequence="20"
+		action="action_product_template" 
+		groups="realty_bds.access_group_realty_product,realty_bds.access_group_full_product,realty_bds.access_group_seen_product" 
+		sequence="20" 
 	/>
 
 	<menuitem 
 		id="menu_product_template_root_queue" 
 		name="Ware House [Queue]" 
 		parent="menu_product_root" 
-		action="action_product_template_queue"
-		groups="realty_bds.access_group_realty_product,realty_bds.access_group_mod_product"
-		sequence="21"
+		action="action_product_template_queue" 
+		groups="realty_bds.access_group_realty_product,realty_bds.access_group_mod_product" 
+		sequence="21" 
 	/>
 </odoo>

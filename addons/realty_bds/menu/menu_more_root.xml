@@ -1,50 +1,50 @@
 <odoo>
-  <menuitem 
-    id="menu_policy_list_root"
-    name="Policy" 
-    parent="menu_more_root"
-    action="action_policy"
-    sequence="0"
+	<menuitem 
+		id="menu_policy_list_root" 
+		name="Policy" parent="menu_more_root" 
+		action="action_policy" 
+		sequence="0" 
 	/>
 
 	<menuitem 
-    id="menu_tag_root" 
-    name="Tag"
-    parent="menu_more_root" 
-    action="action_tag"
-    sequence="1"
+		id="menu_tag_root" 
+		name="Tag" 
+		parent="menu_more_root" 
+		action="action_tag" 
+		sequence="1" 
 	/>
 
 	<menuitem 
 		id="menu_remove_reason_root" 
-		name="Remove Canned Responses" 
+		name="Remove Canned Responses"
 		parent="menu_more_root" 
 		action="action_remove_reason" 
-		sequence="2"
+		sequence="2" 
 	/>
-	
+
 	<menuitem 
 		id="menu_reject_reason_root" 
 		name="Reject Canned Responses" 
 		parent="menu_more_root" 
 		action="action_reject_reason" 
-		sequence="3"
+		sequence="3" 
 	/>
 
 	<menuitem 
 		id="menu_client_feedback_root" 
 		name="Client Feedback Canned Responses" 
 		parent="menu_more_root" 
-		action="action_client_feedback"
-		sequence="4"
+		action="action_client_feedback" 
+		sequence="4" 
 	/>
 
 	<menuitem 
 		id="menu_owner_feedback_root" 
 		name="Owner Feedback Canned Responses" 
 		parent="menu_more_root" 
-		action="action_owner_feedback"
-		sequence="5"/>
+		action="action_owner_feedback" 
+		sequence="5"
+	/>
 
 	<menuitem 
 		id="menu_moderator_guideline_root" 
@@ -52,21 +52,21 @@
 		parent="menu_more_root" 
 		action="action_moderator_guideline" 
 		sequence="6"
+	 />
+
+	<menuitem 
+		id="menu_moderator_assignment_sequence_root" 
+		name="Moderator Assignment Sequence"
+		parent="menu_more_root" 
+		action="action_moderator_assignment_sequence" 
+		sequence="7" 
 	/>
 
 	<menuitem 
-    id="menu_moderator_assignment_sequence_root" 
-    name="Moderator Assignment Sequence"
-    parent="menu_more_root" 
-    action="action_moderator_assignment_sequence"
-    sequence="7"
-	/>
-
-	<menuitem 
-    id="menu_permission_tracker_root" 
-    name="Permission Configurations"
-    parent="menu_more_root" 
-    action="action_permission_tracker"
-    sequence="8"
+		id="menu_permission_tracker_root" 
+		name="Permission Configurations" 
+		parent="menu_more_root" 
+		action="action_permission_tracker"
+		sequence="8" 
 	/>
 </odoo>

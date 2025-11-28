@@ -1,0 +1,45 @@
+.lightbox-file-preview {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 32px;
+	background: white;
+	border-radius: 8px;
+	max-width: 400px;
+
+	.lightbox-file-icon {
+		width: 96px;
+		height: 96px;
+		margin-bottom: 24px;
+		filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+	}
+
+	.lightbox-file-info {
+		text-align: center;
+		width: 100%;
+
+		.lightbox-file-name {
+			font-size: 16px;
+			font-weight: 600;
+			color: #333;
+			margin-bottom: 8px;
+			word-break: break-word;
+		}
+
+		.lightbox-file-hint {
+			font-size: 14px;
+			color: #666;
+			font-style: italic;
+		}
+	}
+}
+
+.spinner-overlay {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	z-index: 1001;
+	color: #7e6dae;
+}

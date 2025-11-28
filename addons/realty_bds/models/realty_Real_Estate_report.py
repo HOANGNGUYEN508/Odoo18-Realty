@@ -20,9 +20,7 @@ class ProductReport(models.Model):
     phone = fields.Char(string="Phone", required=True, tracking=True)
     email = fields.Char(string="Email", required=True, tracking=True)
     active = fields.Boolean(string="Active", default=True, tracking=True)
-    opinions = fields.Text(string="Initial Opinions",
-                           required=True,
-                           tracking=True)
+    opinions = fields.Text(string="Initial Opinions", required=True, tracking=True)
     other_reason = fields.Text(
         string="Other Reason",
         help="Enter your reason if you selected 'Other'.",
@@ -110,8 +108,9 @@ class ProductReport(models.Model):
             if report.owner_feedback_selection == "other":
                 report.owner_feedback = report.other_owner_feedback  # Store custom text
             elif report.owner_feedback_selection:
-                report.owner_feedback = (report.owner_feedback_selection
-                                         )  # Store predefined reason
+                report.owner_feedback = (
+                    report.owner_feedback_selection
+                )  # Store predefined reason
             else:
                 report.owner_feedback = False
 
@@ -119,11 +118,13 @@ class ProductReport(models.Model):
     def _compute_client_feedback(self):
         for report in self:
             if report.client_feedback_selection == "other":
-                report.client_feedback = (report.other_client_feedback
-                                          )  # Store custom text
+                report.client_feedback = (
+                    report.other_client_feedback
+                )  # Store custom text
             elif report.client_feedback_selection:
-                report.client_feedback = (report.client_feedback_selection
-                                          )  # Store predefined reason
+                report.client_feedback = (
+                    report.client_feedback_selection
+                )  # Store predefined reason
             else:
                 report.client_feedback = False
 
@@ -136,36 +137,37 @@ class ProductReport(models.Model):
     client_feedback_selection = fields.Selection(
         selection="_get_client_feedback_selection",
         string="Client Feedback",
-        help=
-        "Choose a predefined client feedback or 'Other' to enter a custom client feedback.",
+        help="Choose a predefined client feedback or 'Other' to enter a custom client feedback.",
     )
     owner_feedback_selection = fields.Selection(
         selection="_get_owner_feedback_selection",
         string="Owner Feedback",
-        help=
-        "Choose a predefined owner feedback or 'Other' to enter a custom owner feedback.",
+        help="Choose a predefined owner feedback or 'Other' to enter a custom owner feedback.",
     )
 
     def _get_reason_selection(self):
         reasons = self.env["reasons_buy"].search([])
-        return [(reason.name, reason.name)
-                for reason in reasons] + [("other", "Other")]
+        return [(reason.name, reason.name) for reason in reasons] + [("other", "Other")]
 
     def _get_owner_feedback_selection(self):
         owner_feedbacks = self.env["owner_feedback"].search([])
-        return [(owner_feedback.name, owner_feedback.name)
-                for owner_feedback in owner_feedbacks] + [("other", "Other")]
+        return [
+            (owner_feedback.name, owner_feedback.name)
+            for owner_feedback in owner_feedbacks
+        ] + [("other", "Other")]
 
     def _get_client_feedback_selection(self):
         client_feedbacks = self.env["client_feedback"].search([])
-        return [(client_feedback.name, client_feedback.name)
-                for client_feedback in client_feedbacks] + [("other", "Other")]
+        return [
+            (client_feedback.name, client_feedback.name)
+            for client_feedback in client_feedbacks
+        ] + [("other", "Other")]
 
     # Model Method
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
-            vals['company_id'] = self.env.company.id
+            vals["company_id"] = self.env.company.id
         records = super().create(vals_list)
         for record in records:
             try:
@@ -173,16 +175,18 @@ class ProductReport(models.Model):
 
                 if all_attachments:
                     attachment_ids = all_attachments.ids
-                    self.env['ir.attachment'].mark_true(attachment_ids)
+                    self.env["ir.attachment"].mark_true(attachment_ids)
             except Exception as e:
                 _logger.error(
                     "Failed to mark attachments as saved for record %s: %s",
-                    record.id, str(e))
+                    record.id,
+                    str(e),
+                )
         return records
-    
+
     @api.ondelete(at_uninstall=False)
     def _unlink_report_attachments(self):
-        IrAttachment = self.env['ir.attachment']
+        IrAttachment = self.env["ir.attachment"]
 
         for report in self:
             all_attachments = report.img_ids
@@ -205,7 +209,8 @@ class ProductReport(models.Model):
         for rec in self:
             if not pattern.match(rec.phone or ""):
                 raise ValidationError(
-                    "❌ Error: Phone must be 9-12 digits, numbers only.")
+                    "❌ Error: Phone must be 9-12 digits, numbers only."
+                )
 
     @api.constrains("citizen_id")
     def _check_citizen_id(self):
@@ -213,7 +218,8 @@ class ProductReport(models.Model):
         for rec in self:
             if not pattern.match(rec.citizen_id or ""):
                 raise ValidationError(
-                    "❌ Error: Citizen ID must be 9-12 digits, numbers only.")
+                    "❌ Error: Citizen ID must be 9-12 digits, numbers only."
+                )
 
     @api.constrains("email")
     def _check_email(self):
@@ -221,8 +227,7 @@ class ProductReport(models.Model):
         pattern = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
         for rec in self:
             if not pattern.match(rec.email or ""):
-                raise ValidationError(
-                    "❌ Error: Please enter a valid email address.")
+                raise ValidationError("❌ Error: Please enter a valid email address.")
 
     @api.constrains(
         "name",
@@ -243,30 +248,12 @@ class ProductReport(models.Model):
 
         # Define per-field requirements
         specs = {
-            "name": {
-                "max_len": 100,
-                "allow_empty": False
-            },
-            "customer": {
-                "max_len": 100,
-                "allow_empty": False
-            },
-            "opinions": {
-                "max_len": 500,
-                "allow_empty": False
-            },
-            "reason": {
-                "max_len": 300,
-                "allow_empty": False
-            },
-            "owner_feedback": {
-                "max_len": 300,
-                "allow_empty": False
-            },
-            "client_feedback": {
-                "max_len": 300,
-                "allow_empty": False
-            },
+            "name": {"max_len": 100, "allow_empty": False},
+            "customer": {"max_len": 100, "allow_empty": False},
+            "opinions": {"max_len": 500, "allow_empty": False},
+            "reason": {"max_len": 300, "allow_empty": False},
+            "owner_feedback": {"max_len": 300, "allow_empty": False},
+            "client_feedback": {"max_len": 300, "allow_empty": False},
         }
         special_chars = set(r"@#$%&*<>?/|{}[]\!+=;:,")
 
@@ -282,13 +269,16 @@ class ProductReport(models.Model):
                 # Length check
                 if len(text) > rules["max_len"]:
                     raise ValidationError(
-                        f"❌ Error: {field_name.replace('_',' ').title()} cannot exceed {rules['max_len']} characters.")
+                        f"❌ Error: {field_name.replace('_',' ').title()} cannot exceed {rules['max_len']} characters."
+                    )
                 # Special-character check
                 if any(ch in special_chars for ch in text):
                     raise ValidationError(
-                        f"❌ Error: {field_name.replace('_',' ').title()} cannot contain special characters ({r'@#$%&*<>?/|{}[]\!+=;:,'}).")
+                        f"❌ Error: {field_name.replace('_',' ').title()} cannot contain special characters ({r'@#$%&*<>?/|{}[]\!+=;:,'})."
+                    )
                 # Reserved-word check
                 match = next((w for w in reserved_words if w in text), None)
                 if match:
                     raise ValidationError(
-                        f"❌ Error: {field_name.replace('_',' ').title()} contains reserved word: '{match}'!")
+                        f"❌ Error: {field_name.replace('_',' ').title()} contains reserved word: '{match}'!"
+                    )

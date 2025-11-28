@@ -55,21 +55,21 @@ class Commune(models.Model):
     # Onchange
     @api.onchange("province_id")
     def _onchange_province_id(self):
-        # When selecting/editing a province, clear the district if invalid and apply domain
-        if self.province_id:
-            if self.district_id and self.district_id.province_id != self.province_id:
-                self.district_id = False
-            return {
-                "domain": {"district_id": [("province_id", "=", self.province_id.id)]}
-            }
-        else:
-            self.district_id = False
-        return {
-            "domain": {
-                "district_id": (
-                    [("province_id", "=", self.province_id.id)]
-                    if self.province_id
-                    else []
-                )
-            }
-        }  # Do not display districts if no province is selected
+        """Reset district when province changes and update domain"""
+        for record in self:
+            if record.province_id:
+                # Clear district if it doesn't belong to the new province
+                if (
+                    record.district_id
+                    and record.district_id.province_id != record.province_id
+                ):
+                    record.district_id = False
+                return {
+                    "domain": {
+                        "district_id": [("province_id", "=", record.province_id.id)]
+                    }
+                }
+            else:
+                # Clear district if province is cleared
+                record.district_id = False
+                return {"domain": {"district_id": []}}

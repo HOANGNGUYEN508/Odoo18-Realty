@@ -1,0 +1,18 @@
+<odoo>
+	<!-- kanban View Inherit -->
+	<record id="view_employee_kanban_inherit" model="ir.ui.view">
+		<field name="name">hr.employee.kanban.inherit</field>
+		<field name="model">hr.employee</field>
+		<field name="inherit_id" ref="hr.hr_kanban_view_employees"/>
+		<field name="arch" type="xml">
+			<xpath expr="//templates/t[@t-name='card']//div[@t-if='record.show_hr_icon_display.raw_value' and @class='float-end']" position="replace">
+				<div t-if="record.show_hr_icon_display.raw_value" class="float-end d-flex align-items-center gap-2">
+					<button title="Terminate Employee" type="object" name="action_terminate_employee" class="btn btn-smy">
+						<i class="fa fa-user-times"/>
+					</button>
+					<field name="hr_icon_display" class="o_employee_availability align-items-center" widget="hr_presence_status"/>
+				</div>
+			</xpath>
+		</field>
+	</record>
+</odoo>

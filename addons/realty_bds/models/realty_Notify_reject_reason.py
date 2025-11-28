@@ -15,6 +15,16 @@ class RejectReason(models.Model):
     # Attributes
     name = fields.Char(string="Name", required=True, tracking=True)
     active = fields.Boolean(string="Active", default=True, tracking=True)
+    for_type = fields.Selection(
+        [
+            ("post", "Post"),
+            ("property", "Property"),
+            ("user_evaluation", "User Evaluation"),
+        ],
+        string="What is this reason for?",
+        default="post",
+        tracking=True,
+    )
 
     # Relationship Attributes
     company_id = fields.Many2one(
@@ -29,10 +39,10 @@ class RejectReason(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
-            vals['company_id'] = self.env.company.id
+            vals["company_id"] = self.env.company.id
         return super().create(vals_list)
 
-    # Constrain
+    # Constraint
     _sql_constraints = [
         (
             "reject_reason_unique_name",
@@ -54,14 +64,18 @@ class RejectReason(models.Model):
             clean_name = record.name.strip().lower() if record.name else ""
             if not record.name.strip():  # Prevent empty or spaces-only names
                 raise ValidationError(
-                    "❌ Error: Name cannot be empty or contain only spaces!")
+                    "❌ Error: Name cannot be empty or contain only spaces!"
+                )
             if len(record.name) > 100:  # Limit name length
+                raise ValidationError("❌ Error: Name cannot exceed 100 characters!")
+            if any(
+                char in record.name for char in r"@#$%&*<>?/|{}[]\\!+=;:,"
+            ):  # Block special characters
                 raise ValidationError(
-                    "❌ Error: Name cannot exceed 100 characters!")
-            if any(char in record.name for char in
-                   r"@#$%&*<>?/|{}[]\\!+=;:,"):  # Block special characters
-                raise ValidationError(
-                    f"❌ Error: Name cannot contain special characters ({r'@#$%&*<>?/|{}[]\!+=;:,'})!")
+                    f"❌ Error: Name cannot contain special characters ({r'@#$%&*<>?/|{}[]\!+=;:,'})!"
+                )
             match = next((w for w in reserved_words if w in clean_name), None)
             if match:
-                raise ValidationError(f"❌ Error: Name contains reserved word: '{match}'!")
+                raise ValidationError(
+                    f"❌ Error: Name contains reserved word: '{match}'!"
+                )

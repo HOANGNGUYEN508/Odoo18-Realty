@@ -12,7 +12,7 @@
 				("orphaned_from_model", "!=", False), 
 				("orphaned_from_model", "=", "product.template")
 			]</field>
-			<field name="time_field_id" ref="base.field_ir_attachment__create_date"/>
+			<field name="time_field_id" ref="base.field_ir_attachment__orphaned_date"/>
 			<field name="time_field_delta">30</field>
 			<field name="time_field_delta_unit">days</field>
 		</record>
@@ -44,7 +44,7 @@
 				("orphaned_from_model", "!=", False), 
 				("orphaned_from_model", "=", "product_report")
 			]</field>
-			<field name="time_field_id" ref="base.field_ir_attachment__create_date"/>
+			<field name="time_field_id" ref="base.field_ir_attachment__orphaned_date"/>
 			<field name="time_field_delta">30</field>
 			<field name="time_field_delta_unit">days</field>
 		</record>
@@ -76,7 +76,7 @@
 				("orphaned_from_model", "!=", False), 
 				("orphaned_from_model", "=", "congratulation")
 			]</field>
-			<field name="time_field_id" ref="base.field_ir_attachment__create_date"/>
+			<field name="time_field_id" ref="base.field_ir_attachment__orphaned_date"/>
 			<field name="time_field_delta">30</field>
 			<field name="time_field_delta_unit">days</field>
 		</record>
@@ -108,7 +108,7 @@
 				("orphaned_from_model", "!=", False), 
 				("orphaned_from_model", "=", "notification")
 			]</field>
-			<field name="time_field_id" ref="base.field_ir_attachment__create_date"/>
+			<field name="time_field_id" ref="base.field_ir_attachment__orphaned_date"/>
 			<field name="time_field_delta">30</field>
 			<field name="time_field_delta_unit">days</field>
 		</record>
@@ -140,7 +140,7 @@
 				("orphaned_from_model", "!=", False), 
 				("orphaned_from_model", "=", "guideline")
 			]</field>
-			<field name="time_field_id" ref="base.field_ir_attachment__create_date"/>
+			<field name="time_field_id" ref="base.field_ir_attachment__orphaned_date"/>
 			<field name="time_field_delta">30</field>
 			<field name="time_field_delta_unit">days</field>
 		</record>
@@ -166,7 +166,18 @@
 			<field name="recycle_mode">automatic</field>
 			<field name="recycle_action">unlink</field>
 			<field name="domain">[("is_read", "=", True)]</field>
-			<field name="time_field_id" ref="base.field_ir_attachment__create_date"/>
+			<field name="time_field_id" ref="sms.model_mail_notification__create_date"/>
+			<field name="time_field_delta">6</field>
+			<field name="time_field_delta_unit">months</field>
+		</record>
+
+		<record id="recycle_rule_user_evaluation" model="data_recycle.model">
+			<field name="name">Delete User Evaluation after Review (6 Months)</field>
+			<field name="res_model_id" ref="realty_bds.user_evaluation"/>
+			<field name="recycle_mode">automatic</field>
+			<field name="recycle_action">unlink</field>
+			<field name="domain">[("state", "!=", "pending")]</field>
+			<field name="time_field_id" ref="realty_bds.user_evaluation__moderated_on"/>
 			<field name="time_field_delta">6</field>
 			<field name="time_field_delta_unit">months</field>
 		</record>

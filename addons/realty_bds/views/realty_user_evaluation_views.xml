@@ -1,0 +1,133 @@
+<odoo>
+	<!-- Kanban View -->
+	<record id="user_evaluation_kanban_view" model="ir.ui.view">
+		<field name="name">User Evaluation Kanban</field>
+		<field name="model">user_evaluation</field>
+		<field name="arch" type="xml">
+			<kanban template="card" class="two-per-row-kanban" create="false" delete="false">
+				<field name="note"/>
+				<field name="email"/>
+				<field name="phone"/>
+				<field name="citizen_id"/>
+				<field name="province_id"/>
+				<field name="district_id"/>
+				<field name="commune_id"/>
+				<field name="province_resident_id"/>
+				<field name="district_resident_id"/>
+				<field name="commune_resident_id"/>
+				<field name="signup_company_id"/>
+				<field name="document_id"/>
+				<field name="state"/>
+				<field name="moderated_on"/>
+				<field name="moderator_id"/>
+				<field name="reason"/>
+				<templates>
+					<t t-name="card">
+						<div class="oe_product_kanban d-flex flex-column justify-content-center">
+							<!-- Header row -->
+							<div class="d-flex justify-content-between align-items-center w-100 mb2">
+								<!-- Action buttons -->
+								<div class="o_kanban_action_buttons">
+									<button name="action_note" type="object" icon="fa-sticky-note" title="Note" class="btn btn-sm" t-att-style="'color: #7e6dae;'" />
+									<button name="action_schedule" type="object" icon="fa-calendar" title="Schedule" class="btn btn-sm" t-att-style="'color: #7e6dae;'" />
+								</div>
+							</div>
+
+							<!-- User's Info -->
+							<div class="o_post_content">
+								<div>
+									<strong t-esc="record.signup_company_id and record.signup_company_id.value or '—'"/>
+								</div>
+								<div>
+									<span class="fa fa-envelope me-1" aria-hidden="true"/>
+									<span t-esc="record.email and record.email.value or '—'"/>
+								</div>
+								<div>
+									<span class="fa fa-phone me-1" aria-hidden="true"/>
+									<span t-esc="record.phone and record.phone.value or '—'"/>
+								</div>
+								<div>
+									<span class="fa fa-id-card me-1" aria-hidden="true"/>
+									<span t-esc="record.citizen_id and record.citizen_id.value or '—'"/>
+								</div>
+								<div>
+									<span class="fa fa-map-marker me-1" aria-hidden="true" title="Present Address"/>
+									<span t-esc="record.province_id and record.province_id.value or '—'"/>
+									<span t-esc="record.district_id and ', ' + record.district_id.value or ''"/>
+									<span t-esc="record.commune_id and ', ' + record.commune_id.value or ''"/>
+								</div>
+								<div>
+									<span class="fa fa-home me-1" aria-hidden="true" title="Permanent Address"/>
+									<span t-esc="record.province_resident_id and record.province_resident_id.value or '—'"/>
+									<span t-esc="record.district_resident_id and ', ' + record.district_resident_id.value or ''"/>
+									<span t-esc="record.commune_resident_id and ', ' + record.commune_resident_id.value or ''"/>
+								</div>
+								<div>
+									<strong>Documents:</strong>
+									<field name="document_id" widget="one2many_file"/>
+								</div>
+								<div class="mt-2">
+									<strong>Note:</strong>
+									<p t-esc="record.note and record.note.value or 'No additional notes.'"/>
+								</div>
+							</div>
+
+							<div class="o_post_footer mt-1 d-flex gap-2 align-items-center" t-if="record.state and record.state.raw_value == 'pending'">
+								<!-- Approve button -->
+								<button name="action_approve" type="object" class="btn btn-sm btn-outline-success d-flex align-items-center">
+									<i class="fa fa-check me-1" aria-hidden="true"/>
+									<span>Approve</span>
+								</button>
+
+								<!-- Reject button -->
+								<button name="action_reject" type="object" class="btn btn-sm btn-outline-danger d-flex align-items-center">
+									<i class="fa fa-times me-1" aria-hidden="true"/>
+									<span>Reject</span>
+								</button>
+							</div>
+
+							<t t-if="record.state and record.state.raw_value == 'rejected'">
+								<i class="fa fa-times me-1" aria-hidden="true"/>
+								<span class="badge_rejected" t-esc="record.state.raw_value"/>
+							</t>
+
+							<!-- Reason to reject -->
+							<t t-if="record.state and record.state.raw_value == 'rejected'">
+								<div class="o_rejection_container mt-3 p-3">
+									<div class="d-flex align-items-center mb-2">
+										<!-- Avatar -->
+										<t t-if="record.moderator_id">
+											<img t-att-src="'/web/image_protected?model=res.users&amp;id=' + record.moderator_id.raw_value + '&amp;field=avatar_128'" alt="avatar" class="o_post_avatar avatar_notify" />
+										</t>
+										<div class="flex-grow-1 d-flex flex-column">
+											<div class="fw-bold">
+												<t t-esc="record.moderator_id and record.moderator_id.value or '—'"/>
+											</div>
+											<div class="small text-muted">
+												<t t-esc="record.moderated_on and record.moderated_on.value or '—'"/>
+											</div>
+										</div>
+									</div>
+
+									<!-- Reason -->
+									<div class="o_rejection_reason">
+										<span class="fw-bold" t-esc="'Reason Reject:'"/>
+										<t t-esc="record.reason.value or 'No reason provided.'"/>
+									</div>
+								</div>
+							</t>
+						</div>
+					</t>
+				</templates>
+			</kanban>
+		</field>
+	</record>
+
+	<!-- Menu Mod -->
+	<record id="action_user_evaluation" model="ir.actions.act_window">
+		<field name="name">Hiring Assessment</field>
+		<field name="res_model">user_evaluation</field>
+		<field name="view_mode">kanban</field>
+		<field name="domain">[('state', '=', 'pending')]</field>
+	</record>
+</odoo>

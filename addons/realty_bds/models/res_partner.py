@@ -1,15 +1,16 @@
 from odoo import models, fields, api  # type: ignore
-from odoo.exceptions import ValidationError, AccessError  # type: ignore
+from odoo.exceptions import ValidationError, AccessError, UserError  # type: ignore
 import logging
 
 _logger = logging.getLogger(__name__)
+
 
 class ResPartner(models.Model):
     _inherit = "res.partner"
 
     # Attributes
     citizen_id = fields.Char(string="Số CCCD", tracking=True)
-    password = fields.Char(string="Password", tracking=True)
+    moderated_on = fields.Datetime(string="Moderated On")
 
     # Relationship Attributes
     province_id = fields.Many2one(
@@ -50,17 +51,27 @@ class ResPartner(models.Model):
         tracking=True,
     )
     subscriber_partner_ids = fields.Many2many(
-        comodel_name='res.partner',
-        relation='partner_subscribe_rel',
-        column1='partner_id',
-        column2='subscribed_partner_id',
-        string='Subscribers',
+        comodel_name="res.partner",
+        relation="partner_subscribe_rel",
+        column1="partner_id",
+        column2="subscribed_partner_id",
+        string="Subscribers",
     )
-    
+    moderator_id = fields.Many2one("res.users", string="Moderator")
+    document_id = fields.One2many(
+        "ir.attachment",
+        "res_id",
+        string="Documents",
+        domain=[("res_model", "=", "res.partner")],
+        help="Identity documents after evaluation",
+    )
+
     # Compute Attributes
-    is_user = fields.Boolean(string='Is a System User', compute='_compute_has_user', store=False)
-    
-    @api.depends('user_ids')
+    is_user = fields.Boolean(
+        string="Is a System User", compute="_compute_has_user", store=False
+    )
+
+    @api.depends("user_ids")
     def _compute_has_user(self):
         for r in self:
             r.is_user = bool(r.user_ids)
@@ -134,13 +145,16 @@ class ResPartner(models.Model):
                 )
 
     # Onchange
-    @api.onchange('province_id')
+    @api.onchange("province_id")
     def _onchange_province_id(self):
         """Reset district and commune when province changes"""
         for record in self:
             if record.province_id:
                 # Check if current district belongs to new province
-                if record.district_id and record.district_id.province_id != record.province_id:
+                if (
+                    record.district_id
+                    and record.district_id.province_id != record.province_id
+                ):
                     record.district_id = False
                 # Always reset commune when province changes
                 record.commune_id = False
@@ -149,26 +163,32 @@ class ResPartner(models.Model):
                 record.district_id = False
                 record.commune_id = False
 
-    @api.onchange('district_id')
+    @api.onchange("district_id")
     def _onchange_district_id(self):
         """Reset commune when district changes"""
         for record in self:
             if record.district_id:
                 # Check if current commune belongs to new district
-                if record.commune_id and record.commune_id.district_id != record.district_id:
+                if (
+                    record.commune_id
+                    and record.commune_id.district_id != record.district_id
+                ):
                     record.commune_id = False
             else:
                 # If district is cleared, clear commune
                 record.commune_id = False
 
-    @api.onchange('province_resident_id')
+    @api.onchange("province_resident_id")
     def _onchange_province_resident_id(self):
         """Reset resident district and commune when resident province changes"""
         for record in self:
             if record.province_resident_id:
                 # Check if current resident district belongs to new resident province
-                if (record.district_resident_id and 
-                    record.district_resident_id.province_id != record.province_resident_id):
+                if (
+                    record.district_resident_id
+                    and record.district_resident_id.province_id
+                    != record.province_resident_id
+                ):
                     record.district_resident_id = False
                 # Always reset resident commune when resident province changes
                 record.commune_resident_id = False
@@ -177,14 +197,17 @@ class ResPartner(models.Model):
                 record.district_resident_id = False
                 record.commune_resident_id = False
 
-    @api.onchange('district_resident_id')
+    @api.onchange("district_resident_id")
     def _onchange_district_resident_id(self):
         """Reset resident commune when resident district changes"""
         for record in self:
             if record.district_resident_id:
                 # Check if current resident commune belongs to new resident district
-                if (record.commune_resident_id and 
-                    record.commune_resident_id.district_id != record.district_resident_id):
+                if (
+                    record.commune_resident_id
+                    and record.commune_resident_id.district_id
+                    != record.district_resident_id
+                ):
                     record.commune_resident_id = False
             else:
                 # If resident district is cleared, clear resident commune
@@ -195,16 +218,17 @@ class ResPartner(models.Model):
         self.ensure_one()
         current_partner = self.env.user.partner_id
         if not current_partner:
-            return {'subscribed': False}
+            return {"subscribed": False}
 
         if current_partner.id in self.subscriber_partner_ids.ids:
             # remove current_partner from this partner's subscribers
-            self.sudo().write({'subscriber_partner_ids': [(3, current_partner.id)]})
-            return {'subscribed': False}
+            self.sudo().write({"subscriber_partner_ids": [(3, current_partner.id)]})
+            return {"subscribed": False}
         else:
-            self.sudo().write({'subscriber_partner_ids': [(4, current_partner.id)]})
-            return {'subscribed': True}
+            self.sudo().write({"subscriber_partner_ids": [(4, current_partner.id)]})
+            return {"subscribed": True}
 
+    # Helper method
     def action_notify_admin_new_partner(self, partner):
         """Notify users with 'realty_bds.access_group_full_users' access when a new partner is created"""
         group_xml_id = "realty_bds.access_group_full_users"
@@ -251,12 +275,24 @@ class ResPartner(models.Model):
     def action_create_user(self):
         """Open a wizard to select a job title before creating a user from the partner"""
         self.ensure_one()
-        # if self.user_ids:
-        #     raise ValidationError("❌ This partner already has user account(s)!")
-        if not self.env.user.has_group("realty_bds.access_group_full_users"):
-            raise AccessError("You are not allowed to create a user from the partner!")
-        if not self.password:
-            raise ValidationError("The partner already has a use!")
+        if self.is_user:
+            raise ValidationError("❌ This partner already has user account(s)!")
+        if self.is_company:
+            raise ValidationError("❌ Cannot create user for a company partner!")
+        
+        group_dict = (
+            self.env["permission_tracker"]._get_permission_groups("res.users") or {}
+        )
+        moderator_group = group_dict.get("moderator_group")
+        realty_group = group_dict.get("realty_group")
+        if not (
+            self.env.user.has_group(moderator_group)
+            or self.env.user.has_group(realty_group)
+        ):
+            raise AccessError(
+                "You don't have the necessary permissions to perform this action."
+            )
+
         # Open wizard
         return {
             "type": "ir.actions.act_window",
@@ -268,39 +304,16 @@ class ResPartner(models.Model):
                 "default_partner_id": self.id,
                 "default_name": self.name,
                 "default_email": self.email,
-                "default_password": self.password,
-                "default_citizen_id": self.citizen_id,
-                "default_province_id": self.province_id.id,
-                "default_district_id": self.district_id.id,
-                "default_commune_id": self.commune_id.id,
-                "default_province_resident_id": self.province_resident_id.id,
-                "default_district_resident_id": self.district_resident_id.id,
-                "default_commune_resident_id": self.commune_resident_id.id,
             },
         }
 
-    def action_delete_partner(self):
-        """Delete partner"""
-        self.ensure_one()
-        if not self.env.user.has_group("realty_bds.access_group_full_users"):
-            raise AccessError("You are not allowed to delete this partner!")
-        try:
-            partner_name = self.name
-            self.sudo().unlink()
-            self.env["bus.bus"]._sendone(
-                self.env.user.partner_id,
-                "simple_notification",
-                {
-                    "title": "Thành công",
-                    "message": f"Partner {partner_name} was successfully deleted!",
-                    "type": "success",
-                    "sticky": False,
-                },
-            )
-            return {
-                "type": "ir.actions.act_url",
-                "url": "/web#action=base.action_partner_form&model=res.partner&view_type=list",
-                "target": "self",
-            }
-        except Exception as e:
-            raise ValidationError(f"Error: Delete partner: {str(e)}")
+    # Method
+    @api.ondelete(at_uninstall=False)
+    def _unlink_partner_documents(self):
+        IrAttachment = self.env["ir.attachment"]
+
+        for post in self:
+            all_attachments = post.document_id
+            if all_attachments:
+                attachment_ids = all_attachments.ids
+                IrAttachment.mark_orphaned(attachment_ids, self._name, post.id)

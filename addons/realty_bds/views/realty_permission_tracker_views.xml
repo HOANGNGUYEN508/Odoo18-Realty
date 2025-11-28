@@ -34,7 +34,7 @@
 
 	<!-- Action -->
 	<record id="action_permission_tracker" model="ir.actions.act_window">
-		<field name="name">Permission Tracker Action</field>
+		<field name="name">Permission Tracker</field>
 		<field name="res_model">permission_tracker</field>
 		<field name="view_mode">list,form</field>
 	</record>

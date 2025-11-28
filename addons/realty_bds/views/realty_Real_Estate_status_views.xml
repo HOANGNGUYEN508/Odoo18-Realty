@@ -28,7 +28,7 @@
 
 	<!-- Action-->
 	<record id="action_status" model="ir.actions.act_window">
-		<field name="name">Status Action</field>
+		<field name="name">Status</field>
 		<field name="res_model">status</field>
 		<field name="view_mode">list,form</field>
 	</record>

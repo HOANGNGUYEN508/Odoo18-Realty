@@ -33,7 +33,20 @@
 						<button class="nav prev" t-on-click="prev" t-att-disabled="state.loading">&#10094;</button>
 					</t>
 					<t t-if="currentFile">
-						<img t-att-src="currentFile.url" t-att-alt="currentFile.name" t-on-load="onImageLoad" t-att-class="!state.loading ? '' : 'o_hidden'" />
+						<!-- Display image if it's an image file -->
+						<t t-if="isImage">
+							<img t-att-src="displayUrl" t-att-alt="currentFile.name" t-on-load="onImageLoad" t-att-class="!state.loading ? '' : 'o_hidden'" />
+						</t>
+						<!-- Display file icon if it's not an image -->
+						<t t-else="">
+							<div class="lightbox-file-preview" t-on-load="onImageLoad">
+								<img t-att-src="displayUrl" t-att-alt="currentFile.name" class="lightbox-file-icon" t-on-load="onImageLoad" />
+								<div class="lightbox-file-info">
+									<div class="lightbox-file-name" t-esc="currentFile.name"/>
+									<div class="lightbox-file-hint">Click download to open this file</div>
+								</div>
+							</div>
+						</t>
 					</t>
 					<t t-if="props.files.length &gt; 1">
 						<button class="nav next" t-on-click="next" t-att-disabled="state.loading">&#10095;</button>

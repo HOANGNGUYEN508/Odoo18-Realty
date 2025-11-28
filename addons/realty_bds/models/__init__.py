@@ -18,8 +18,10 @@ from . import res_partner
 from . import realty_create_user_wizard
 from . import realty_assign_employee_wizard
 from . import hr_job
+from . import hr_job_wizard
 from . import hr_department
 from . import hr_employee
+from . import hr_employee_wizard
 from . import res_company
 from . import ir_filters
 from . import product_template
@@ -40,3 +42,6 @@ from . import realty_Notify_wizard
 from . import realty_comment_wizard
 from . import realty_Notify_comment
 from . import ir_attachment
+from . import realty_product_wizard
+from . import realty_user_evaluation
+from . import realty_user_evaluation_wizard

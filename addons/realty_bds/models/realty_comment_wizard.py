@@ -21,11 +21,11 @@ class CommentWizard(models.TransientModel):
 
     @api.model
     def _get_remove_selection(self):
-        reasons = self.env["remove_reason"].search([("for_type", "=", "comment"),
-                                                    ("active", "=", True)])
+        reasons = self.env["remove_reason"].search(
+            [("for_type", "=", "comment"), ("active", "=", True)]
+        )
 
-        return [(reason.name, reason.name)
-                for reason in reasons] + [("other", "Other")]
+        return [(reason.name, reason.name) for reason in reasons] + [("other", "Other")]
 
     @api.onchange("remove_select")
     def _onchange_remove_select(self):
@@ -45,20 +45,25 @@ class CommentWizard(models.TransientModel):
         if not final_reason:
             raise ValidationError("Reason is required.")
 
-        group_dict = self.env["permission_tracker"]._get_permission_groups(
-                self.res_model) or {}
+        group_dict = (
+            self.env["permission_tracker"]._get_permission_groups(self.res_model) or {}
+        )
 
         moderator_group = group_dict.get("moderator_group")
         realty_group = group_dict.get("realty_group")
-        if not (self.env.user.has_group(moderator_group)
-                or self.env.user.has_group(realty_group)):
+        if not (
+            self.env.user.has_group(moderator_group)
+            or self.env.user.has_group(realty_group)
+        ):
             raise AccessError(
                 f"You don't have the necessary permissions to perform this action."
             )
 
         comment = self.env["realty_comment"].browse(self.comment_id).exists()
         if not comment:
-            raise UserError("The record no longer exists (deleted by another user). Please exit the form.")
+            raise UserError(
+                "The record no longer exists (deleted by another user). Please exit the form."
+            )
         comment.unlink(final_reason)
 
         return {"type": "ir.actions.act_window_close"}

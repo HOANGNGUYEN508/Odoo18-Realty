@@ -29,7 +29,7 @@ class ModeratorGuideline(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
-            vals['company_id'] = self.env.company.id
+            vals["company_id"] = self.env.company.id
         return super().create(vals_list)
 
     # Constrain
@@ -54,10 +54,12 @@ class ModeratorGuideline(models.Model):
             clean_name = record.name.strip().lower() if record.name else ""
             if not record.name.strip():  # Prevent empty or spaces-only names
                 raise ValidationError(
-                    "❌ Error: Name cannot be empty or contain only spaces!")
+                    "❌ Error: Name cannot be empty or contain only spaces!"
+                )
             if len(record.name) > 100:  # Limit name length
-                raise ValidationError(
-                    "❌ Error: Name cannot exceed 100 characters!")
+                raise ValidationError("❌ Error: Name cannot exceed 100 characters!")
             match = next((w for w in reserved_words if w in clean_name), None)
             if match:
-                raise ValidationError(f"❌ Error: Name contains reserved word: '{match}'!")
+                raise ValidationError(
+                    f"❌ Error: Name contains reserved word: '{match}'!"
+                )

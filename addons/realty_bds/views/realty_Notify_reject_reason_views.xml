@@ -6,6 +6,7 @@
 		<field name="arch" type="xml">
 			<list>
 				<field name="name"/>
+				<field name="for_type"/>
 			</list>
 		</field>
 	</record>
@@ -19,6 +20,7 @@
 				<sheet>
 					<group>
 						<field id="reject_reason_name" name="name" placeholder="Enter a name" autocomplete="off"/>
+						<field id="reject_reason_type" name="for_type" widget="selection"/>
 					</group>
 				</sheet>
 				<chatter/>
@@ -28,7 +30,7 @@
 
 	<!-- Action -->
 	<record id="action_reject_reason" model="ir.actions.act_window">
-		<field name="name">Reject Reason</field>
+		<field name="name">Rejection Reason</field>
 		<field name="res_model">reject_reason</field>
 		<field name="view_mode">list,form</field>
 	</record>

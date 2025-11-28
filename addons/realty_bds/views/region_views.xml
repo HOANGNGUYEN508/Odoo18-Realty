@@ -29,7 +29,7 @@
 
 	<!-- Admin Menu -->
 	<record id="action_region" model="ir.actions.act_window">
-		<field name="name">Region Action</field>
+		<field name="name">Region</field>
 		<field name="res_model">region</field>
 		<field name="view_mode">list,form</field>
 	</record>

@@ -1255,4 +1255,16 @@
 			<field name="perm_unlink" eval="False"/>
 		</record>
 	</data>
+
+	<!-- user_evaluation -->
+		<record id="realty_user_evaluation_company_rule" model="ir.rule">
+			<field name="name">User Evaluation: Review records that have been assigned to self (moderator)</field>
+			<field name="model_id" ref="realty_bds.model_user_evaluation"/>
+			<field name="domain_force">['&amp;',('signup_company_id', '=', user.company_id.id),('moderator_id', '=', user.id)]</field>
+			<field name="groups" eval="[(4, ref('realty_bds.access_group_full_users'))]"/>
+			<field name="perm_read" eval="True"/>
+			<field name="perm_write" eval="True"/>
+			<field name="perm_create" eval="False"/>
+			<field name="perm_unlink" eval="False"/>
+		</record>
 </odoo>

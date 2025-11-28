@@ -4,7 +4,9 @@ from odoo.exceptions import ValidationError, AccessError, UserError  # type: ign
 
 class NotifyWizard(models.TransientModel):
     _name = "notify_wizard"
-    _description = "Generic Wizard use for rejecting posts with reason or removing posts"
+    _description = (
+        "Generic Wizard use for rejecting posts with reason or removing posts"
+    )
 
     # Attributes
     reason = fields.Text(string="Reason", required=True)
@@ -32,17 +34,18 @@ class NotifyWizard(models.TransientModel):
 
     @api.model
     def _get_reject_selection(self):
-        reasons = self.env["reject_reason"].search([("active", "=", True)])
-        return [(reason.name, reason.name)
-                for reason in reasons] + [("other", "Other")]
+        reasons = self.env["reject_reason"].search(
+            [("for_type", "=", "post"), ("active", "=", True)]
+        )
+        return [(reason.name, reason.name) for reason in reasons] + [("other", "Other")]
 
     @api.model
     def _get_remove_selection(self):
-        reasons = self.env["remove_reason"].search([("for_type", "=", "post"),
-                                                    ("active", "=", True)])
+        reasons = self.env["remove_reason"].search(
+            [("for_type", "=", "post"), ("active", "=", True)]
+        )
 
-        return [(reason.name, reason.name)
-                for reason in reasons] + [("other", "Other")]
+        return [(reason.name, reason.name) for reason in reasons] + [("other", "Other")]
 
     @api.onchange("reject_select")
     def _onchange_reject_select(self):
@@ -73,12 +76,16 @@ class NotifyWizard(models.TransientModel):
         if not final_reason:
             raise ValidationError("Reason is required.")
 
-        group_dict = self.env["permission_tracker"]._get_permission_groups(self.res_model) or {}
+        group_dict = (
+            self.env["permission_tracker"]._get_permission_groups(self.res_model) or {}
+        )
 
         moderator_group = group_dict.get("moderator_group")
         realty_group = group_dict.get("realty_group")
-        if not (self.env.user.has_group(moderator_group)
-                or self.env.user.has_group(realty_group)):
+        if not (
+            self.env.user.has_group(moderator_group)
+            or self.env.user.has_group(realty_group)
+        ):
             raise AccessError(
                 f"You don't have the necessary permissions to perform this action."
             )
@@ -87,14 +94,14 @@ class NotifyWizard(models.TransientModel):
         target_model = self.env[self.res_model]
         record = target_model.browse(self.res_id)
 
-        # Check company permission
-        if record.company_id != self.env.user.company_id and record.company_id.id != 1:
-            raise AccessError("You can only reject posts from your own company.")
-
         # Perform action based on action_type
         if self.action_type == "reject":
             # Check edit counter
-            value = (self.env["ir.config_parameter"].sudo().get_param("realty_bds.editcounter", default="3"))
+            value = (
+                self.env["ir.config_parameter"]
+                .sudo()
+                .get_param("realty_bds.editcounter", default="3")
+            )
 
             try:
                 default_counter = int(value)
@@ -108,20 +115,24 @@ class NotifyWizard(models.TransientModel):
             else:
                 edit_counter = default_counter
 
-            record.write({
-                "approval": "rejected",
-                "edit_counter": edit_counter,
-                "moderator_id": self.env.user.id,
-                "moderated_at": fields.Datetime.now(),
-                "reason": final_reason,
-            })
+            record.write(
+                {
+                    "approval": "rejected",
+                    "edit_counter": edit_counter,
+                    "moderator_id": self.env.user.id,
+                    "moderated_at": fields.Datetime.now(),
+                    "reason": final_reason,
+                }
+            )
         elif self.action_type == "remove":
-            record.write({
-                "approval": "removed",
-                "moderator_id": self.env.user.id,
-                "moderated_at": fields.Datetime.now(),
-                "reason": final_reason,
-            })
+            record.write(
+                {
+                    "approval": "removed",
+                    "moderator_id": self.env.user.id,
+                    "moderated_at": fields.Datetime.now(),
+                    "reason": final_reason,
+                }
+            )
         else:
             raise ValidationError("Invalid action type.")
 

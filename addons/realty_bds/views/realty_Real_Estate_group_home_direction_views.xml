@@ -28,7 +28,7 @@
 
 	<!-- Action -->
 	<record id="action_group_home_direction" model="ir.actions.act_window">
-		<field name="name">Group Home Direction Action</field>
+		<field name="name">Group Home Direction</field>
 		<field name="res_model">group_home_direction</field>
 		<field name="view_mode">list,form</field>
 	</record>

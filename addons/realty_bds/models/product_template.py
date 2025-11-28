@@ -10,27 +10,21 @@ class ProductTemplate(models.Model):
     _inherit = "product.template"
 
     # Attributes
-    house_number = fields.Char(required=True,
-                               string="House Number",
-                               tracking=True)
+    house_number = fields.Char(required=True, string="House Number", tracking=True)
     street = fields.Char(required=True, string="Street", tracking=True)
-    real_estate_area = fields.Float(digits=(6, 3),
-                                    required=True,
-                                    string="Real Estate Area (m²)",
-                                    tracking=True)
-    usable_area = fields.Float(digits=(6, 3),
-                               required=True,
-                               string="Usable Area (m²)",
-                               tracking=True)
-    number_of_floors = fields.Integer(required=True,
-                                      string="Number of Floors",
-                                      tracking=True)
-    frontage = fields.Float(digits=(6, 3),
-                            required=True,
-                            string="Frontage (m)",
-                            tracking=True)
-    presentation_image_id = fields.Integer(string="Presentation Image",
-                                           tracking=True)
+    real_estate_area = fields.Float(
+        digits=(6, 3), required=True, string="Real Estate Area (m²)", tracking=True
+    )
+    usable_area = fields.Float(
+        digits=(6, 3), required=True, string="Usable Area (m²)", tracking=True
+    )
+    number_of_floors = fields.Integer(
+        required=True, string="Number of Floors", tracking=True
+    )
+    frontage = fields.Float(
+        digits=(6, 3), required=True, string="Frontage (m)", tracking=True
+    )
+    presentation_image_id = fields.Integer(string="Presentation Image", tracking=True)
     active = fields.Boolean(string="Active", default=True, tracking=True)
     approval = fields.Selection(
         [
@@ -65,42 +59,28 @@ class ProductTemplate(models.Model):
         default=lambda self: self.env.company.currency_id.id,
         tracking=True,
     )
-    region_id = fields.Many2one("region",
-                                required=True,
-                                string="Region",
-                                tracking=True)
-    province_id = fields.Many2one("res.country.state",
-                                  required=True,
-                                  string="Province",
-                                  tracking=True)
-    commune_id = fields.Many2one("commune",
-                                 required=True,
-                                 string="Commune",
-                                 tracking=True)
-    district_id = fields.Many2one("district",
-                                  required=True,
-                                  string="District",
-                                  tracking=True)
-    type_id = fields.Many2one("type",
-                              required=True,
-                              string="Type",
-                              tracking=True)
-    status_id = fields.Many2one("status",
-                                required=True,
-                                string="Status",
-                                tracking=True)
-    land_title_id = fields.Many2one("land_title",
-                                    required=True,
-                                    string="Land Title",
-                                    tracking=True)
+    region_id = fields.Many2one("region", required=True, string="Region", tracking=True)
+    province_id = fields.Many2one(
+        "res.country.state", required=True, string="Province", tracking=True
+    )
+    commune_id = fields.Many2one(
+        "commune", required=True, string="Commune", tracking=True
+    )
+    district_id = fields.Many2one(
+        "district", required=True, string="District", tracking=True
+    )
+    type_id = fields.Many2one("type", required=True, string="Type", tracking=True)
+    status_id = fields.Many2one("status", required=True, string="Status", tracking=True)
+    land_title_id = fields.Many2one(
+        "land_title", required=True, string="Land Title", tracking=True
+    )
     feature_ids = fields.Many2many("feature", required=True, string="Feature")
-    home_direction_id = fields.Many2one("home_direction",
-                                        string="Direction",
-                                        tracking=True)  # Not required
-    unit_price_id = fields.Many2one("unit_price",
-                                    required=True,
-                                    string="Unit Price",
-                                    tracking=True)
+    home_direction_id = fields.Many2one(
+        "home_direction", string="Direction", tracking=True
+    )  # Not required
+    unit_price_id = fields.Many2one(
+        "unit_price", required=True, string="Unit Price", tracking=True
+    )
     img_ids = fields.Many2many(
         "ir.attachment",
         relation="product_template_img_rel",
@@ -118,8 +98,7 @@ class ProductTemplate(models.Model):
     shared_user_ids = fields.Many2many(
         "res.users",
         string="Shared with Users",
-        help=
-        "Users (in other companies, or same) who can also read this department.",
+        help="Users (in other companies, or same) who can also read this department.",
     )
     shared_company_ids = fields.Many2many(
         "res.company",
@@ -133,26 +112,24 @@ class ProductTemplate(models.Model):
         ondelete="restrict",
         tracking=True,
     )
-    moderator_id = fields.Many2one("res.users",
-                                   string="Moderator",
-                                   help="User who approved/rejected this post")
+    moderator_id = fields.Many2one(
+        "res.users", string="Moderator", help="User who approved/rejected this post"
+    )
 
     # Compute Attributes
-    attributes = fields.Char(compute="_compute_attributes",
-                             store=False,
-                             string="Attributes")
-    price_per_sqm = fields.Char(compute="_compute_price_per_sqm",
-                                store=False,
-                                string="Million/m²")
-    display_price = fields.Char(compute="_compute_display_price",
-                                store=False,
-                                string="Price")
-    absolute_price = fields.Float(compute="_compute_absolute_price",
-                                  store=True,
-                                  string="Product True Price")
-    address = fields.Char(compute="_compute_address",
-                          store=False,
-                          string="Address")
+    attributes = fields.Char(
+        compute="_compute_attributes", store=False, string="Attributes"
+    )
+    price_per_sqm = fields.Char(
+        compute="_compute_price_per_sqm", store=False, string="Million/m²"
+    )
+    display_price = fields.Char(
+        compute="_compute_display_price", store=False, string="Price"
+    )
+    absolute_price = fields.Float(
+        compute="_compute_absolute_price", store=True, string="Product True Price"
+    )
+    address = fields.Char(compute="_compute_address", store=False, string="Address")
 
     @api.depends("house_number", "street", "commune_id", "district_id")
     def _compute_address(self):
@@ -162,8 +139,9 @@ class ProductTemplate(models.Model):
     @api.depends("list_price", "unit_price_id.multiplier")
     def _compute_absolute_price(self):
         for rec in self:
-            rec.absolute_price = (rec.list_price
-                                  or 0.0) * (rec.unit_price_id.multiplier or 1)
+            rec.absolute_price = (rec.list_price or 0.0) * (
+                rec.unit_price_id.multiplier or 1
+            )
 
     @api.depends(
         "real_estate_area",
@@ -193,14 +171,17 @@ class ProductTemplate(models.Model):
     @api.depends("list_price", "real_estate_area")
     def _compute_price_per_sqm(self):
         for rec in self:
-            multiplier = (rec.unit_price_id.multiplier if rec.unit_price_id
-                          and rec.unit_price_id.multiplier else 0)
+            multiplier = (
+                rec.unit_price_id.multiplier
+                if rec.unit_price_id and rec.unit_price_id.multiplier
+                else 0
+            )
             if rec.real_estate_area and multiplier:
-                value = ((rec.list_price or 0.0) *
-                         (multiplier / 1000000)) / rec.real_estate_area
+                value = (
+                    (rec.list_price or 0.0) * (multiplier / 1000000)
+                ) / rec.real_estate_area
                 # Format: remove .0 if integer, otherwise keep 3 decimals max
-                rec.price_per_sqm = f"{round(value, 3):.3f}".rstrip(
-                    "0").rstrip(".")
+                rec.price_per_sqm = f"{round(value, 3):.3f}".rstrip("0").rstrip(".")
             else:
                 rec.price_per_sqm = "0"
 
@@ -213,8 +194,11 @@ class ProductTemplate(models.Model):
                 amount = f"{round(raw_amount, 3):.3f}".rstrip("0").rstrip(".")
             else:
                 amount = str(int(raw_amount))
-            unit_name = (rec.unit_price_id.name.lower() if rec.unit_price_id
-                         and rec.unit_price_id.name else "-")
+            unit_name = (
+                rec.unit_price_id.name.lower()
+                if rec.unit_price_id and rec.unit_price_id.name
+                else "-"
+            )
             symbol = currency.symbol or "-"
             position = currency.position or ""
             if position == "Before Amount":
@@ -232,22 +216,18 @@ class ProductTemplate(models.Model):
             )
         self.ensure_one()
         return {
-            "type":
-            "ir.actions.act_window",
-            "name":
-            f"History: {self.name}",
-            "res_model":
-            "mail.tracking.value",
-            "view_mode":
-            "list",
-            "views": [(self.env.ref("realty_bds.view_product_history_tree").id,
-                       "list")],
+            "type": "ir.actions.act_window",
+            "name": f"History: {self.name}",
+            "res_model": "mail.tracking.value",
+            "view_mode": "list",
+            "views": [
+                (self.env.ref("realty_bds.view_product_history_tree").id, "list")
+            ],
             "domain": [
                 ("mail_message_id.model", "=", "product.template"),
                 ("mail_message_id.res_id", "=", self.id),
             ],
-            "target":
-            "new",
+            "target": "new",
         }
 
     def action_schedule(self):
@@ -284,8 +264,7 @@ class ProductTemplate(models.Model):
                 "default_stop": stop,
                 "default_res_model_id": model_id,  # Link to product.template
                 "default_res_id": self.id,  # Current product ID
-                "default_user_id":
-                self.env.user.id,  # Current user as organizer
+                "default_user_id": self.env.user.id,  # Current user as organizer
                 "default_partner_ids": [(6, 0, partner_ids)],  # Attendees
             },
         }
@@ -307,8 +286,7 @@ class ProductTemplate(models.Model):
             "name": "Create Product Report",
             "res_model": "product_report",
             "view_mode": "form",
-            "view_id":
-            self.env.ref("realty_bds.product_report_form_view_user").id,
+            "view_id": self.env.ref("realty_bds.product_report_form_view_user").id,
             "context": {
                 "default_product_id": self.id,
                 "default_name": report_name,
@@ -319,8 +297,7 @@ class ProductTemplate(models.Model):
     def action_send(self):
         self.ensure_one()
         if self.create_uid != self.env.user:
-            raise UserError(
-                "❌ Error: You can only send your own post for approval.")
+            raise UserError("❌ Error: You can only send your own post for approval.")
         if self.approval == "pending":
             raise UserError("❌ Error: Wait for approval.")
         if self.approval != "draft":
@@ -328,16 +305,14 @@ class ProductTemplate(models.Model):
                 "❌ Error: Only posts in 'Draft' state can be send for approval."
             )
         if self.edit_counter != -1:
-            raise UserError(
-                "❌ Error: This is not the first time you send this.")
+            raise UserError("❌ Error: This is not the first time you send this.")
         self.approval = "pending"
         self._assign_moderator_after_send()
 
     def action_resend(self):
         self.ensure_one()
         if self.create_uid != self.env.user:
-            raise UserError(
-                "❌ Error: You can only send your own post for approval.")
+            raise UserError("❌ Error: You can only send your own post for approval.")
         if self.approval == "pending":
             raise UserError("❌ Error: Wait for approval.")
         if self.approval != "rejected":
@@ -369,20 +344,13 @@ class ProductTemplate(models.Model):
 
         # Return action to open the reject wizard
         return {
-            "name":
-            "Reject Post",
-            "type":
-            "ir.actions.act_window",
-            "res_model":
-            "notify_wizard",
-            "view_mode":
-            "form",
-            "views":
-            [(self.env.ref("realty_bds.view_generic_wizard_form").id, "form")],
-            "target":
-            "new",
+            "name": "Reject Property",
+            "type": "ir.actions.act_window",
+            "res_model": "product_wizard",
+            "view_mode": "form",
+            "views": [(self.env.ref("realty_bds.view_product_wizard_form").id, "form")],
+            "target": "new",
             "context": {
-                "default_action_type": "reject",
                 "default_model_name": self._name,  # Pass the model name
                 "default_record_id": self.id,  # Pass the record ID
             },
@@ -397,18 +365,12 @@ class ProductTemplate(models.Model):
 
         # Return action to open the remove wizard
         return {
-            "name":
-            "Remove Post",
-            "type":
-            "ir.actions.act_window",
-            "res_model":
-            "notify_wizard",
-            "view_mode":
-            "form",
-            "views":
-            [(self.env.ref("realty_bds.view_generic_wizard_form").id, "form")],
-            "target":
-            "new",
+            "name": "Remove Post",
+            "type": "ir.actions.act_window",
+            "res_model": "notify_wizard",
+            "view_mode": "form",
+            "views": [(self.env.ref("realty_bds.view_generic_wizard_form").id, "form")],
+            "target": "new",
             "context": {
                 "default_action_type": "remove",
                 "default_model_name": self._name,  # Pass the model name
@@ -421,29 +383,33 @@ class ProductTemplate(models.Model):
         # will later override in child models to use action
         self.ensure_one()
 
-        group_dict = self.env["permission_tracker"]._get_permission_groups(
-            self._name) or {}
+        group_dict = (
+            self.env["permission_tracker"]._get_permission_groups(self._name) or {}
+        )
         moderator_group = group_dict.get("moderator_group")
         realty_group = group_dict.get("realty_group")
 
         # Check if user has the moderator group
-        if not (self.env.user.has_group(moderator_group)
-                or self.env.user.has_group(realty_group)):
+        if not (
+            self.env.user.has_group(moderator_group)
+            or self.env.user.has_group(realty_group)
+        ):
             raise AccessError(
-                f"You don't have the necessary permissions to {action} posts.")
+                f"You don't have the necessary permissions to {action} posts."
+            )
 
         # Check company permission (pass if user is in access_group_realty_urgent_buying)
         if not self.env.user.has_group(realty_group):
             if self.company_id != self.env.user.company_id and self.company_id.id != 1:
-                raise AccessError(
-                    f"You can only {action} posts from your own company.")
+                raise AccessError(f"You can only {action} posts from your own company.")
 
     def _assign_moderator(self):
         """Assign a moderator using round-robin distribution"""
         company_id = self.env.company.id
 
-        group_dict = self.env["permission_tracker"]._get_permission_groups(
-            self._name) or {}
+        group_dict = (
+            self.env["permission_tracker"]._get_permission_groups(self._name) or {}
+        )
         moderator_group = group_dict.get("moderator_group")
 
         # Get the moderator group
@@ -453,10 +419,14 @@ class ProductTemplate(models.Model):
             return None
 
         # Get moderators for the company and group
-        moderators = (self.env["res.users"].sudo().search(
-            [("groups_id", "in", group.id), ("company_id", "=", company_id)],
-            order="id",
-        ))
+        moderators = (
+            self.env["res.users"]
+            .sudo()
+            .search(
+                [("groups_id", "in", group.id), ("company_id", "=", company_id)],
+                order="id",
+            )
+        )
 
         if not moderators:
             _logger.warning(
@@ -467,17 +437,18 @@ class ProductTemplate(models.Model):
         # Use advisory lock to prevent race conditions
         lock_key = f"moderator_assignment_{company_id}_{group.id}_{self._name}"
         try:
-            self.env.cr.execute("SELECT pg_advisory_xact_lock(hashtext(%s))",
-                                (lock_key, ))
+            self.env.cr.execute(
+                "SELECT pg_advisory_xact_lock(hashtext(%s))", (lock_key,)
+            )
         except Exception:
-            _logger.exception("Failed to acquire advisory lock for %s",
-                              lock_key)
+            _logger.exception("Failed to acquire advisory lock for %s", lock_key)
             raise UserError("Could not acquire database lock, try again.")
 
         # Get or create sequence record for this company, group, and model
         sequence_model = self.env["moderator_assignment_sequence"]
         sequence = sequence_model.get_or_create_sequence(
-            company_id, group.id, self._name)
+            company_id, group.id, self._name
+        )
 
         # Get next moderator
         next_moderator = sequence.get_next_moderator(moderators)
@@ -493,8 +464,7 @@ class ProductTemplate(models.Model):
         if moderator_id:
             self.moderator_id = moderator_id
         else:
-            _logger.warning(
-                f"No moderator assigned for {self._name} post ID {self.id}")
+            _logger.warning(f"No moderator assigned for {self._name} post ID {self.id}")
 
     def format_number(self, value):
         return str(int(value)) if value == int(value) else f"{value:.2f}"
@@ -566,12 +536,16 @@ class ProductTemplate(models.Model):
         for record in records:
             try:
                 all_attachments = record.img_ids | record.private_img_ids
-            
+
                 if all_attachments:
                     attachment_ids = all_attachments.ids
-                    self.env['ir.attachment'].mark_true(attachment_ids)
+                    self.env["ir.attachment"].mark_true(attachment_ids)
             except Exception as e:
-                _logger.error("Failed to mark attachments as saved for record %s: %s", record.id, str(e))
+                _logger.error(
+                    "Failed to mark attachments as saved for record %s: %s",
+                    record.id,
+                    str(e),
+                )
         return records
 
     def write(self, vals):
@@ -592,7 +566,7 @@ class ProductTemplate(models.Model):
             "list_price",
             "unit_price_id",
         }
-        if (address_keys & set(vals.keys())):
+        if address_keys & set(vals.keys()):
             vals["name"] = self._build_address_name(
                 vals.get("house_number"),
                 vals.get("street"),
@@ -610,14 +584,13 @@ class ProductTemplate(models.Model):
 
     @api.ondelete(at_uninstall=False)
     def _unlink_product_attachments(self):
-        IrAttachment = self.env['ir.attachment']
+        IrAttachment = self.env["ir.attachment"]
 
         for product in self:
             all_attachments = product.img_ids | product.private_img_ids
             if all_attachments:
                 attachment_ids = all_attachments.ids
-                IrAttachment.mark_orphaned(attachment_ids, self._name,
-                                           product.id)
+                IrAttachment.mark_orphaned(attachment_ids, self._name, product.id)
 
     @api.model
     def set_presentation_image(self, ids, attachment_id):
@@ -634,18 +607,21 @@ class ProductTemplate(models.Model):
                     "❌ Error: The price must be rounded to the nearest million! For example: 0.535 billion VND = 535 million VND."
                 )
 
-    @api.constrains("real_estate_area", "usable_area", "frontage",
-                    "number_of_floors")
+    @api.constrains("real_estate_area", "usable_area", "frontage", "number_of_floors")
     def _check_numeric_values(self):
         for rec in self:
-            if any(value < 0 for value in [
+            if any(
+                value < 0
+                for value in [
                     rec.real_estate_area,
                     rec.usable_area,
                     rec.frontage,
                     rec.number_of_floors,
-            ]):
+                ]
+            ):
                 raise ValidationError(
-                    "❌ Error: All numeric fields must be greater than 0!")
+                    "❌ Error: All numeric fields must be greater than 0!"
+                )
 
     @api.constrains("house_number", "street")
     def _check_valid_values(self):
@@ -670,20 +646,21 @@ class ProductTemplate(models.Model):
                     raise ValidationError(
                         "❌ Error: House number or street cannot exceed 50 characters!"
                     )
-            if any(char in (rec.house_number or "")
-                   for char in forbidden) or any(char in (rec.street or "")
-                                                 for char in forbidden):
+            if any(char in (rec.house_number or "") for char in forbidden) or any(
+                char in (rec.street or "") for char in forbidden
+            ):
                 raise ValidationError(
                     f"❌ Error: House number or street cannot contain special characters ({r'@#$%&*<>?/|{}[]\!+=;:,'})!"
                 )
             match_hn = next(
-                (w for w in reserved_words if w in house_number_string), None)
+                (w for w in reserved_words if w in house_number_string), None
+            )
             if match_hn:
                 raise ValidationError(
                     f"❌ Error: House number contains reserved word: '{match_hn}'!"
                 )
-            match_s = next((w for w in reserved_words if w in street_string),
-                           None)
+            match_s = next((w for w in reserved_words if w in street_string), None)
             if match_s:
                 raise ValidationError(
-                    f"❌ Error: Street contains reserved word: '{match_s}'!")
+                    f"❌ Error: Street contains reserved word: '{match_s}'!"
+                )

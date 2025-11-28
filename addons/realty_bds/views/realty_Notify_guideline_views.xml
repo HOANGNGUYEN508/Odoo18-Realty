@@ -23,7 +23,7 @@
 
 					<group string="Actions">
 						<field name="approval" readonly="1" widget="statusbar" options="{'clickable': 0}"/>
-						<field name="moderator_id" string="Moderator" readonly="1" invisible="approval == 'draft'"/>
+						<field name="moderator_id" widget="many2one_avatar_user" string="Moderator" readonly="1" invisible="approval == 'draft'"/>
 						<button name="action_remove" type="object" class="btn btn-sm btn-outline-danger d-flex align-items-center" invisible="approval != 'approved'" groups="realty_bds.access_group_mod_guideline,realty_bds.access_group_realty_guideline">
 							<i class="fa fa-times me-1" aria-hidden="true"/>
 							<span>Remove</span>

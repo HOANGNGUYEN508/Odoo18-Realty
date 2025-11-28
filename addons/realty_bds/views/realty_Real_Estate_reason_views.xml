@@ -28,7 +28,7 @@
 
 	<!-- Action -->
 	<record id="action_reasons_buy" model="ir.actions.act_window">
-		<field name="name">Reasons for Buying Action</field>
+		<field name="name">Reasons for Buying</field>
 		<field name="res_model">reasons_buy</field>
 		<field name="view_mode">list,form</field>
 	</record>

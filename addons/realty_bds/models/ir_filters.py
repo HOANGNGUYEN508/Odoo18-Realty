@@ -20,11 +20,13 @@ class IrFilters(models.Model):
         user_id = self.env.uid
         # If we’re marking this default, clear old defaults
         if is_default:
-            old_defaults = self.search([
-                ("model_id", "=", model_id),
-                ("user_id", "=", user_id),
-                ("is_default", "=", True)
-            ])
+            old_defaults = self.search(
+                [
+                    ("model_id", "=", model_id),
+                    ("user_id", "=", user_id),
+                    ("is_default", "=", True),
+                ]
+            )
             old_defaults.write({"is_default": False})
         # Find or create
         existing = self.search(

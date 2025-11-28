@@ -1,0 +1,22 @@
+<odoo>
+	<record id="view_hr_employee_terminate_wizard_form" model="ir.ui.view">
+		<field name="name">Terminate Employee Wizard Form</field>
+		<field name="model">hr_employee_wizard</field>
+		<field name="arch" type="xml">
+			<form>
+				<sheet>
+					<group>
+						<field name="user_id" readonly="1" widget="many2one_avatar_user"/>
+						<div class="alert alert-danger" role="alert">
+              <strong>Warning!</strong> This action will terminate the employee and archive their user account. This action cannot be easily undone.
+            </div>
+					</group>
+				</sheet>
+				<footer>
+					<button name="action_confirm" string="Confirm" type="object" class="btn-danger"/>
+					<button string="Cancel" class="btn-secondary" special="cancel"/>
+				</footer>
+			</form>
+		</field>
+	</record>
+</odoo>

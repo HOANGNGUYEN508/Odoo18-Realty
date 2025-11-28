@@ -9,5 +9,10 @@
 			<field name="key">realty_bds.editcount</field>
 			<field name="value">3</field>
 		</record>
+
+		<record id="default_job_title_param" model="ir.config_parameter">
+			<field name="key">realty_bds.default_job_title_id_1</field>
+			<field name="value"></field>
+		</record>
 	</data>
 </odoo>

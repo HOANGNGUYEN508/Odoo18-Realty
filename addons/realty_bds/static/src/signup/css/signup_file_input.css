@@ -1,0 +1,233 @@
+.file-upload-area {
+	cursor: pointer;
+	transition: all 0.3s;
+	background: #f9f9f9;
+}
+
+.file-upload-area:hover:not(.disabled) {
+	background: #e9ecef;
+	border-color: #667eea !important;
+}
+
+.file-upload-area.drag-over {
+	background: #e7f3ff;
+	border-color: #667eea !important;
+	border-style: dashed !important;
+}
+
+.file-upload-area.disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+	background: #f0f0f0;
+}
+
+.file-item {
+	display: flex;
+	align-items: center;
+	padding: 12px;
+	border: 1px solid #ddd;
+	border-radius: 6px;
+	margin-bottom: 8px;
+	background: white;
+	transition: all 0.2s;
+}
+
+.file-item:hover {
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.file-preview {
+	width: 60px;
+	height: 60px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-right: 12px;
+	border-radius: 4px;
+	overflow: hidden;
+	background: #f8f9fa;
+}
+
+.file-preview img {
+	max-width: 100%;
+	max-height: 100%;
+	object-fit: cover;
+}
+
+.file-info {
+	flex: 1;
+	min-width: 0;
+}
+
+.file-name {
+	font-weight: 500;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	margin-bottom: 4px;
+}
+
+.file-size {
+	font-size: 0.875rem;
+	color: #6c757d;
+}
+
+.file-actions {
+	display: flex;
+	gap: 8px;
+}
+
+/* Lightbox styles */
+.lightbox-backdrop {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(0, 0, 0, 0.85);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 9999;
+}
+
+/* Lightbox sizing: one source-of-truth width so header/body/footer match */
+.lightbox-content {
+	/* choose a responsive width clamped to viewport */
+	--lightbox-width: min(80vw, 1100px);
+	width: var(--lightbox-width);
+	max-width: 100%;
+	border-radius: 8px;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	background: white;
+	box-sizing: border-box;
+}
+
+/* Header uses same width (already inside .lightbox-content) - height auto to wrap icons */
+.lightbox-header {
+	padding: 10px 16px;
+	background: #667eea;
+	color: white;
+	align-items: center;
+	gap: 12px;
+	box-sizing: border-box;
+}
+
+.lightbox-filename {
+	font-weight: 600;
+	font-size: 1.1rem;
+	flex: 1;
+}
+
+.lightbox-controls {
+	display: flex;
+	gap: 12px;
+	align-items: center;
+}
+
+.lightbox-close,
+.lightbox-delete {
+	background: transparent;
+	border: none;
+	padding: 4px 8px;
+	cursor: pointer;
+	transition: opacity 0.2s;
+}
+
+.lightbox-close:hover,
+.lightbox-delete:hover {
+	opacity: 0.8;
+}
+
+/* Body fixed to 16:9 — fills the width of .lightbox-content */
+.lightbox-body {
+	width: 100%;
+	aspect-ratio: 16/9; /* modern, clean way to keep 16:9 */
+	min-height: 200px;
+	max-height: 65vh; /* still keep overall viewport limit */
+	position: relative; /* so .lightbox-nav (absolute) positions relative to body */
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0; /* no extra padding so image can use full 16:9 box */
+	overflow: hidden;
+}
+
+/* Inner content container keeps things centered and constrained */
+.lightbox-inner-content {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+}
+
+/* Image fills the 16:9 area but is contained (no distortion) */
+.lightbox-image {
+	width: 100%;
+	height: 100%;
+	object-fit: contain; /* maintain aspect & fit inside the box */
+	display: block;
+	margin: 0 auto;
+}
+
+.lightbox-file-preview {
+	text-align: center;
+	padding: 40px;
+}
+
+/* Nav buttons are absolutely placed inside the body and visible */
+.lightbox-nav {
+	position: absolute;
+	top: 50%;
+	transform: translateY(-5%);
+	background: rgba(0, 0, 0, 0.35);
+	color: white;
+	border: none;
+	padding: 10px 14px;
+	cursor: pointer;
+	border-radius: 6px;
+}
+
+.lightbox-nav:hover {
+	background: rgba(0, 0, 0, 0.7);
+	transform: scale(1.1);
+}
+
+.lightbox-prev {
+	left: 12px;
+}
+.lightbox-next {
+	right: 12px;
+}
+
+/* small style niceties */
+.lightbox-footer {
+	padding: 10px 16px;
+	background: #f8f9fa;
+	border-top: 1px solid #dee2e6;
+}
+
+.lightbox-counter {
+	font-weight: 500;
+	color: #495057;
+	font-size: 0.95rem;
+}
+
+/* Make the trash button red and high-contrast */
+.lightbox-delete {
+	color: #fff !important;
+	background: #e53e3e !important; /* red */
+	border-radius: 6px;
+	padding: 6px 8px;
+	border: none !important;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+.lightbox-delete i {
+	margin: 0;
+}
